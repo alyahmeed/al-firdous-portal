@@ -290,9 +290,15 @@
 
         <!-- Footer Stats Banner inside table view -->
         <div class="mt-4 p-4 bg-white rounded-2xl border border-gray-200 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-gray-600 no-print">
-            <div class="flex items-center gap-2">
-                <span class="inline-block w-2.5 h-2.5 rounded-full bg-green-500"></span>
-                <span>الحفظ المحلي مفعل: يتم حفظ جميع التعديلات والإضافات تلقائياً في متصفحك.</span>
+            <div class="flex flex-col sm:flex-row sm:items-center gap-3">
+                <div class="flex items-center gap-2">
+                    <span id="syncDot" class="inline-block w-2.5 h-2.5 rounded-full bg-gray-400"></span>
+                    <span id="syncStatusText">الحفظ المحلي مفعّل: التعديلات تُحفظ في متصفحك فقط.</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <button id="syncNowBtn" onclick="refreshFromRemote(function(ok){ if(ok) showToast('تم تحديث البيانات من الشيت','success'); })" class="hidden px-3 py-1 rounded-lg bg-gray-100 hover:bg-gray-200 font-bold text-gray-700">تحديث من الشيت</button>
+                    <button id="seedSheetBtn" onclick="seedSheetToRemote()" class="hidden px-3 py-1 rounded-lg bg-firdous-teal text-white hover:opacity-90 font-bold">رفع البيانات الحالية للشيت</button>
+                </div>
             </div>
             <div class="flex items-center gap-4 font-bold text-gray-800">
                 <span>مجموع رواتب القائمة الحالية: <span id="currentTableSalariesSum" class="text-firdous-teal font-black text-sm">0</span> ج.م</span>
@@ -754,9 +760,115 @@
             return issues;
         }
 
+        // ---------------- Google Sheets Sync (اختياري) ----------------
+        const LS_KEY = 'al_firdous_staff_records';
+        // ⚠️ بعد نشر Apps Script: الصق رابط الـ Web app هنا، وضع نفس SECRET
+        const REMOTE = { url: '', secret: '' };
+        function remoteEnabled() { return REMOTE.url && REMOTE.url.indexOf('http') === 0; }
+
+        let _jsonpSeq = 0;
+        function jsonpGet(params, cb) {
+            const cbName = 'firdousJsonp_' + (++_jsonpSeq) + '_' + Date.now();
+            const s = document.createElement('script');
+            const q = Object.assign({ callback: cbName, secret: REMOTE.secret, _t: Date.now() }, params || {});
+            s.src = REMOTE.url + (REMOTE.url.indexOf('?') === -1 ? '?' : '&') +
+                Object.keys(q).map(k => encodeURIComponent(k) + '=' + encodeURIComponent(q[k])).join('&');
+            let done = false;
+            const cleanup = () => { try { delete window[cbName]; } catch (e) { window[cbName] = undefined; } if (s.parentNode) s.parentNode.removeChild(s); };
+            window[cbName] = function (res) { done = true; cleanup(); cb(res); };
+            s.onerror = function () { if (!done) { cleanup(); cb({ ok: false, error: 'network' }); } };
+            document.body.appendChild(s);
+            setTimeout(function () { if (!done) { cleanup(); cb({ ok: false, error: 'timeout' }); } }, 15000);
+        }
+
+        function apiWrite(payload) {
+            if (!remoteEnabled()) return;
+            payload = Object.assign({ secret: REMOTE.secret }, payload);
+            fetch(REMOTE.url, {
+                method: 'POST', mode: 'no-cors',
+                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                body: JSON.stringify(payload)
+            }).catch(function () {});
+        }
+
+        function setSyncBadge(state, msg) {
+            const dot = document.getElementById('syncDot');
+            const txt = document.getElementById('syncStatusText');
+            if (dot && txt) {
+                const map = {
+                    local: ['bg-gray-400', 'الحفظ المحلي مفعّل: التعديلات تُحفظ في متصفحك فقط.'],
+                    loading: ['bg-amber-400', 'جارٍ الاتصال بقاعدة بيانات Google Sheets...'],
+                    online: ['bg-green-500', 'متصل بـ Google Sheets — التعديلات تظهر للجميع.'],
+                    error: ['bg-red-500', 'تعذّر الاتصال بـ Google Sheets — تم الرجوع للحفظ المحلي.']
+                };
+                const v = map[state] || map.local;
+                dot.className = 'inline-block w-2.5 h-2.5 rounded-full ' + v[0];
+                txt.textContent = msg || v[1];
+            }
+            const seed = document.getElementById('seedSheetBtn');
+            const now = document.getElementById('syncNowBtn');
+            if (seed) seed.classList.toggle('hidden', !remoteEnabled());
+            if (now) now.classList.toggle('hidden', !remoteEnabled());
+        }
+
+        function normalizeRecord(r) {
+            return {
+                id: Number(r.id) || 0,
+                name: (r.name || '').toString().trim(),
+                job: (r.job || '').toString().trim(),
+                category: (r.category || '').toString().trim() || 'معلمين',
+                period: (r.period || '').toString().trim() || 'evening',
+                branch: (r.branch || '').toString().trim(),
+                salary: Number(r.salary) || 0,
+                phone: toWestern((r.phone || '').toString().trim()),
+                nationalId: toWestern((r.nationalId || '').toString().trim())
+            };
+        }
+
+        function refreshFromRemote(cb) {
+            setSyncBadge('loading');
+            jsonpGet({}, function (res) {
+                if (res && res.ok && Array.isArray(res.data)) {
+                    staffList = res.data.map(normalizeRecord);
+                    saveToLocalStorage();
+                    updateKPIs();
+                    applyFilters();
+                    setSyncBadge('online');
+                    if (cb) cb(true);
+                } else {
+                    setSyncBadge('error', 'تعذّر الاتصال بالشيت' + (res && res.error ? ' (' + res.error + ')' : '') + ' — تم استخدام الحفظ المحلي.');
+                    if (cb) cb(false);
+                }
+            });
+        }
+
+        function seedSheetToRemote() {
+            if (!remoteEnabled()) { showToast('لم يتم ضبط رابط Google Sheets بعد', 'error'); return; }
+            if (!confirm('سيتم استبدال بيانات الشيت بالبيانات الحالية (' + staffList.length + ' سجل). متابعة؟')) return;
+            apiWrite({ action: 'replace', data: staffList });
+            showToast('جارٍ رفع البيانات إلى Google Sheets...', 'info');
+            setTimeout(function () { refreshFromRemote(function () { showToast('تمت مزامنة الشيت بنجاح', 'success'); }); }, 2500);
+        }
+
         // Initialize Data from localStorage or Default
         function initApp() {
-            const saved = localStorage.getItem('al_firdous_staff_records');
+            document.getElementById('printDate').textContent = new Date().toLocaleDateString('ar-EG', {
+                year: 'numeric', month: 'long', day: 'numeric'
+            });
+
+            document.addEventListener('keydown', function (e) {
+                if (e.key === 'Escape') { closeModal(); closeDeleteModal(); }
+            });
+
+            if (remoteEnabled()) {
+                refreshFromRemote(function (ok) { if (!ok) loadLocalData(); });
+            } else {
+                loadLocalData();
+            }
+        }
+
+        function loadLocalData() {
+            const saved = localStorage.getItem(LS_KEY);
             if (saved) {
                 try {
                     staffList = JSON.parse(saved);
@@ -767,17 +879,9 @@
                 staffList = [...initialStaffData];
                 saveToLocalStorage();
             }
-
-            document.getElementById('printDate').textContent = new Date().toLocaleDateString('ar-EG', {
-                year: 'numeric', month: 'long', day: 'numeric'
-            });
-
-            document.addEventListener('keydown', function (e) {
-                if (e.key === 'Escape') { closeModal(); closeDeleteModal(); }
-            });
-
             updateKPIs();
             applyFilters();
+            setSyncBadge('local');
         }
 
         function saveToLocalStorage() {
@@ -785,6 +889,12 @@
         }
 
         function resetData() {
+            if (remoteEnabled()) {
+                if (confirm("هل تريد إعادة تحميل البيانات من Google Sheets؟")) {
+                    refreshFromRemote(function (ok) { if (ok) showToast('تم تحديث البيانات من الشيت', 'success'); });
+                }
+                return;
+            }
             if (confirm("هل تريد استعادة البيانات الأصلية لمؤسسة الفردوس وإلغاء أي تعديلات محلية؟")) {
                 staffList = [...initialStaffData];
                 saveToLocalStorage();
@@ -1097,16 +1207,19 @@
             }
 
             let added = false;
+            let savedRecord = null;
             if (staffId) {
                 // Edit existing
                 const index = staffList.findIndex(s => s.id === Number(staffId));
                 if (index !== -1) {
                     staffList[index] = { ...staffList[index], ...staffObj };
+                    savedRecord = staffList[index];
                 }
             } else {
                 // Create new
                 const newId = staffList.length > 0 ? Math.max(...staffList.map(s => Number(s.id) || 0)) + 1 : 1;
-                staffList.unshift({ id: newId, ...staffObj });
+                savedRecord = { id: newId, ...staffObj };
+                staffList.unshift(savedRecord);
                 added = true;
             }
 
@@ -1115,6 +1228,11 @@
             applyFilters();
             closeModal();
             showToast(added ? 'تمت إضافة الموظف بنجاح' : 'تم حفظ التعديلات بنجاح', 'success');
+
+            if (remoteEnabled() && savedRecord) {
+                apiWrite({ action: added ? 'add' : 'update', record: savedRecord });
+                setTimeout(function () { refreshFromRemote(); }, 1500);
+            }
         }
 
         // -------------------------------------------------------------
@@ -1135,11 +1253,16 @@
 
         function confirmDelete() {
             if (staffToDeleteId) {
-                staffList = staffList.filter(s => s.id !== staffToDeleteId);
+                const delId = staffToDeleteId;
+                staffList = staffList.filter(s => s.id !== delId);
                 saveToLocalStorage();
                 updateKPIs();
                 applyFilters();
                 closeDeleteModal();
+                if (remoteEnabled()) {
+                    apiWrite({ action: 'delete', id: delId });
+                    setTimeout(function () { refreshFromRemote(); }, 1500);
+                }
             }
         }
 
