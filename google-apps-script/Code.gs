@@ -30,6 +30,11 @@
 // اسم ورقة العمل داخل الجدول
 var SHEET_NAME = 'staff';
 
+// (اختياري) إذا استخدمت السكربت المستقل (Standalone) من script.google.com
+// ضع هنا معرّف الجدول (الجزء الطويل في رابط الشيت بين /d/ و /edit).
+// إذا أنشأت السكربت من داخل الجدول (Extensions > Apps Script) اتركه فارغاً.
+var SHEET_ID = '';
+
 // كلمة سر مشتركة (غيّرها، وضع نفس القيمة في index.html)
 var SECRET = 'CHANGE_ME_123';
 
@@ -72,9 +77,15 @@ function doPost(e) {
   }
 }
 
+/** يرجع الجدول: من SHEET_ID إن وُجد، وإلا الجدول المرتبط بالسكربت. */
+function getSpreadsheet() {
+  if (SHEET_ID && SHEET_ID.length > 10) return SpreadsheetApp.openById(SHEET_ID);
+  return SpreadsheetApp.getActiveSpreadsheet();
+}
+
 /** يفتح/ينشئ ورقة العمل ويضمن وجود صف العناوين. */
 function sheet() {
-  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var ss = getSpreadsheet();
   var sh = ss.getSheetByName(SHEET_NAME);
   if (!sh) sh = ss.insertSheet(SHEET_NAME);
   if (sh.getLastRow() === 0) {
