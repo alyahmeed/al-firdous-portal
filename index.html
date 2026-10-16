@@ -1,0 +1,870 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>منظومة العاملين والرواتب - مؤسسة الفردوس الإسلامية</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts Cairo -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;800;900&display=swap" rel="stylesheet">
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        firdous: {
+                            teal: '#1b7a6d',
+                            'teal-dark': '#135c52',
+                            'teal-light': '#e8f4f2',
+                            gold: '#df9055',
+                            'gold-dark': '#c5783f',
+                            'gold-light': '#faeee4',
+                            bg: '#f8faf9',
+                        }
+                    },
+                    fontFamily: {
+                        cairo: ['Cairo', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            font-family: 'Cairo', sans-serif;
+            background-color: #f4f7f6;
+        }
+        @media print {
+            .no-print { display: none !important; }
+            .print-only { display: block !important; }
+            body { background: white; font-size: 11pt; }
+            .shadow-sm, .shadow-md, .shadow-lg { box-shadow: none !important; }
+            table { width: 100% !important; border-collapse: collapse !important; }
+            th, td { border: 1px solid #999 !important; padding: 4px 6px !important; }
+        }
+        .print-only { display: none; }
+    </style>
+</head>
+<body class="text-gray-800 antialiased min-h-screen flex flex-col">
+
+    <!-- Top Header with Institution Identity -->
+    <header class="bg-gradient-to-l from-firdous-teal-dark via-firdous-teal to-[#166b5e] text-white shadow-lg no-print">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+            <div class="flex flex-col md:flex-row items-center justify-between gap-4">
+                
+                <!-- Logo & Brand Title -->
+                <div class="flex items-center gap-4 text-center md:text-right">
+                    <div class="w-16 h-16 bg-white rounded-2xl flex items-center justify-center p-1.5 shadow-inner border-2 border-firdous-gold overflow-hidden">
+                        <img src="logo.png" alt="شعار الفردوس" class="w-full h-full object-contain" onerror="this.onerror=null; this.parentElement.innerHTML='<span class=\'text-firdous-teal font-black text-xl\'>الفردوس</span>';">
+                    </div>
+                    <div>
+                        <h1 class="text-2xl font-black tracking-wide text-white flex items-center gap-2 justify-center md:justify-start">
+                            مؤسسة الفردوس الإسلامية
+                            <span class="text-xs bg-firdous-gold text-white font-bold px-2 py-0.5 rounded-full shadow">أسوان</span>
+                        </h1>
+                        <p class="text-xs text-teal-100 font-medium mt-0.5">
+                            منظومة رواتب وبيانات العاملين • الحضانة (صباحي) والكُتّاب لتحفيظ القرآن (مسائي)
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Global Action Buttons -->
+                <div class="flex flex-wrap items-center justify-center gap-2">
+                    <button onclick="openModal('add')" class="bg-firdous-gold hover:bg-firdous-gold-dark text-white px-4 py-2 rounded-xl text-sm font-bold shadow transition flex items-center gap-2">
+                        <i class="fa-solid fa-user-plus"></i> إضافة موظف جديد
+                    </button>
+                    <button onclick="exportToCSV()" class="bg-white/10 hover:bg-white/20 text-white px-3 py-2 rounded-xl text-sm font-semibold border border-white/20 transition flex items-center gap-1.5" title="تصدير إلى إكسيل">
+                        <i class="fa-solid fa-file-excel text-green-300"></i> تصدير Excel
+                    </button>
+                    <button onclick="window.print()" class="bg-white/10 hover:bg-white/20 text-white px-3 py-2 rounded-xl text-sm font-semibold border border-white/20 transition flex items-center gap-1.5" title="طباعة الكشف">
+                        <i class="fa-solid fa-print text-teal-200"></i> طباعة
+                    </button>
+                    <button onclick="resetData()" class="bg-red-500/80 hover:bg-red-600 text-white px-3 py-2 rounded-xl text-xs font-semibold transition" title="استعادة البيانات الأصلية">
+                        <i class="fa-solid fa-rotate-left"></i> استعادة الأصل
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Printable Header for Reports -->
+    <div class="print-only p-4 border-b-2 border-firdous-teal mb-4 text-center">
+        <h2 class="text-xl font-bold">مؤسسة الفردوس الإسلامية - كشف رواتب وبيانات العاملين</h2>
+        <p class="text-sm text-gray-600" id="printReportSubtitle">كشف مفصل بجميع الكوادر والعاملين بالفترة الصباحية والمسائية</p>
+        <p class="text-xs text-gray-500 mt-1">تاريخ الطباعة: <span id="printDate"></span></p>
+    </div>
+
+    <!-- Main Content Container -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex-1 w-full">
+
+        <!-- KPI Summary Cards -->
+        <div class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-5 gap-3 mb-6 no-print">
+            <!-- Total Staff -->
+            <div class="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 flex items-center gap-3">
+                <div class="w-12 h-12 rounded-xl bg-teal-50 flex items-center justify-center text-firdous-teal text-xl">
+                    <i class="fa-solid fa-users"></i>
+                </div>
+                <div>
+                    <span class="text-xs text-gray-500 font-semibold block">إجمالي العاملين</span>
+                    <span class="text-2xl font-black text-gray-800" id="kpiTotalStaff">0</span>
+                    <span class="text-[10px] text-teal-600 block">موظف / موظفة</span>
+                </div>
+            </div>
+
+            <!-- Total Salaries -->
+            <div class="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 flex items-center gap-3">
+                <div class="w-12 h-12 rounded-xl bg-amber-50 flex items-center justify-center text-firdous-gold text-xl">
+                    <i class="fa-solid fa-money-bill-wave"></i>
+                </div>
+                <div>
+                    <span class="text-xs text-gray-500 font-semibold block">إجمالي الرواتب</span>
+                    <span class="text-2xl font-black text-firdous-teal-dark" id="kpiTotalSalaries">0</span>
+                    <span class="text-[10px] text-gray-500 block">جنيه مصري</span>
+                </div>
+            </div>
+
+            <!-- Morning Shift (Nursery) -->
+            <div class="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 flex items-center gap-3 cursor-pointer hover:border-firdous-teal transition" onclick="setShiftFilter('morning')">
+                <div class="w-12 h-12 rounded-xl bg-amber-100/60 flex items-center justify-center text-amber-600 text-xl">
+                    <i class="fa-solid fa-sun"></i>
+                </div>
+                <div>
+                    <span class="text-xs text-gray-500 font-semibold block">الحضانة (صباحي)</span>
+                    <span class="text-xl font-bold text-gray-800" id="kpiMorningCount">0</span>
+                    <span class="text-[10px] text-amber-700 block" id="kpiMorningSum">0 ج.م</span>
+                </div>
+            </div>
+
+            <!-- Evening Shift (Kuttab) -->
+            <div class="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 flex items-center gap-3 cursor-pointer hover:border-firdous-teal transition" onclick="setShiftFilter('evening')">
+                <div class="w-12 h-12 rounded-xl bg-teal-100/60 flex items-center justify-center text-firdous-teal-dark text-xl">
+                    <i class="fa-solid fa-moon"></i>
+                </div>
+                <div>
+                    <span class="text-xs text-gray-500 font-semibold block">الكُتّاب (مسائي)</span>
+                    <span class="text-xl font-bold text-gray-800" id="kpiEveningCount">0</span>
+                    <span class="text-[10px] text-teal-700 block" id="kpiEveningSum">0 ج.م</span>
+                </div>
+            </div>
+
+            <!-- Active Branches -->
+            <div class="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 flex items-center gap-3">
+                <div class="w-12 h-12 rounded-xl bg-indigo-50 flex items-center justify-center text-indigo-600 text-xl">
+                    <i class="fa-solid fa-code-branch"></i>
+                </div>
+                <div>
+                    <span class="text-xs text-gray-500 font-semibold block">الفروع المغطاة</span>
+                    <span class="text-2xl font-black text-gray-800" id="kpiBranchCount">7</span>
+                    <span class="text-[10px] text-indigo-600 block">فروع بأسوان</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filter & Search Controls Bar -->
+        <div class="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 mb-6 no-print space-y-4">
+            
+            <!-- Shift Selector Tabs -->
+            <div class="flex flex-wrap items-center justify-between gap-3 border-b border-gray-100 pb-3">
+                <div class="flex flex-wrap gap-2 text-sm font-bold">
+                    <button id="tabAll" onclick="setShiftFilter('all')" class="px-4 py-2 rounded-xl transition bg-firdous-teal text-white shadow">
+                        <i class="fa-solid fa-layer-group ml-1"></i> كافة الفترات (الكل)
+                    </button>
+                    <button id="tabMorning" onclick="setShiftFilter('morning')" class="px-4 py-2 rounded-xl transition bg-gray-100 text-gray-600 hover:bg-gray-200">
+                        <i class="fa-solid fa-sun text-amber-500 ml-1"></i> الفترة الصباحية (الحضانة)
+                    </button>
+                    <button id="tabEvening" onclick="setShiftFilter('evening')" class="px-4 py-2 rounded-xl transition bg-gray-100 text-gray-600 hover:bg-gray-200">
+                        <i class="fa-solid fa-moon text-teal-600 ml-1"></i> الفترة المسائية (تحفيظ القرآن)
+                    </button>
+                </div>
+                
+                <div class="text-xs text-gray-500">
+                    عدد النتائج المعروضة: <span id="filteredCount" class="font-bold text-firdous-teal">0</span>
+                </div>
+            </div>
+
+            <!-- Dropdown Filters & Search Input -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                <!-- Search Box -->
+                <div class="relative">
+                    <i class="fa-solid fa-magnifying-glass absolute right-3.5 top-3.5 text-gray-400 text-sm"></i>
+                    <input type="text" id="searchInput" oninput="applyFilters()" placeholder="ابحث بالاسم، الهاتف، الرقم القومي..." 
+                        class="w-full pr-10 pl-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-firdous-teal focus:bg-white transition">
+                </div>
+
+                <!-- Branch Filter -->
+                <div>
+                    <select id="branchFilter" onchange="applyFilters()" class="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm font-medium focus:outline-none focus:ring-2 focus:ring-firdous-teal focus:bg-white transition">
+                        <option value="all">📍 جميع الفروع</option>
+                        <option value="الفرع الرئيسي">الفرع الرئيسي</option>
+                        <option value="فرع ابوشوك">فرع أبو شوك</option>
+                        <option value="فرع المهندسين">فرع المهندسين</option>
+                        <option value="فرع الكوبانية">فرع الكوبانية</option>
+                        <option value="فرع غرب اسوان">فرع غرب أسوان</option>
+                        <option value="فرع العقاد">فرع العقاد</option>
+                        <option value="فرع المسله">فرع المسلة</option>
+                        <option value="الثلاثة افرع">الثلاثة أفرع / إشراف عام</option>
+                    </select>
+                </div>
+
+                <!-- Category Filter -->
+                <div>
+                    <select id="categoryFilter" onchange="applyFilters()" class="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm font-medium focus:outline-none focus:ring-2 focus:ring-firdous-teal focus:bg-white transition">
+                        <option value="all">👥 جميع التخصصات</option>
+                        <option value="مشرفين">مشرفين ومشرفات (إشراف)</option>
+                        <option value="معلمين">معلمين ومعلمات (تدريس)</option>
+                        <option value="إداريين">إداريين وتقنيين (كمبيوتر / إدارة)</option>
+                        <option value="عمال">عمال وعاملات (خدمات معاونة)</option>
+                    </select>
+                </div>
+
+                <!-- Sort Order -->
+                <div>
+                    <select id="sortFilter" onchange="applyFilters()" class="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm font-medium focus:outline-none focus:ring-2 focus:ring-firdous-teal focus:bg-white transition">
+                        <option value="id_asc">ترتيب: الترتيب الأصلي</option>
+                        <option value="name_asc">الاسم (أبجدياً أ - ي)</option>
+                        <option value="salary_desc">الراتب (من الأعلى للأقل)</option>
+                        <option value="salary_asc">الراتب (من الأقل للأعلى)</option>
+                        <option value="branch">حسب الفرع</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- Staff Records Table Card -->
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="w-full text-right border-collapse" id="staffTable">
+                    <thead>
+                        <tr class="bg-gray-50/90 text-gray-700 text-xs font-bold uppercase tracking-wider border-b border-gray-200">
+                            <th class="py-3.5 px-3 text-center w-12">#</th>
+                            <th class="py-3.5 px-4">الاسم الرباعي</th>
+                            <th class="py-3.5 px-4">الوظيفة</th>
+                            <th class="py-3.5 px-3 text-center">التصنيف</th>
+                            <th class="py-3.5 px-3 text-center">الفترة</th>
+                            <th class="py-3.5 px-3">الفرع</th>
+                            <th class="py-3.5 px-4 text-center">الراتب</th>
+                            <th class="py-3.5 px-4">رقم الهاتف</th>
+                            <th class="py-3.5 px-4">الرقم القومي</th>
+                            <th class="py-3.5 px-3 text-center no-print">إجراءات</th>
+                        </tr>
+                    </thead>
+                    <tbody id="staffTableBody" class="divide-y divide-gray-100 text-sm">
+                        <!-- Dynamic Records Injected Here -->
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Empty State -->
+            <div id="emptyState" class="hidden p-12 text-center">
+                <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3 text-gray-400 text-2xl">
+                    <i class="fa-solid fa-folder-open"></i>
+                </div>
+                <h3 class="text-base font-bold text-gray-700">لا توجد بيانات مطابقة للبحث أو التصفية</h3>
+                <p class="text-xs text-gray-500 mt-1">جرّب تغيير خيارات البحث أو مسح الفلاتر</p>
+                <button onclick="clearAllFilters()" class="mt-4 px-4 py-2 bg-firdous-teal text-white rounded-xl text-xs font-bold shadow hover:bg-firdous-teal-dark transition">
+                    إعادة ضبط الفلاتر
+                </button>
+            </div>
+        </div>
+
+        <!-- Footer Stats Banner inside table view -->
+        <div class="mt-4 p-4 bg-white rounded-2xl border border-gray-200 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-gray-600 no-print">
+            <div class="flex items-center gap-2">
+                <span class="inline-block w-2.5 h-2.5 rounded-full bg-green-500"></span>
+                <span>الحفظ المحلي مفعل: يتم حفظ جميع التعديلات والإضافات تلقائياً في متصفحك.</span>
+            </div>
+            <div class="flex items-center gap-4 font-bold text-gray-800">
+                <span>مجموع رواتب القائمة الحالية: <span id="currentTableSalariesSum" class="text-firdous-teal font-black text-sm">0</span> ج.م</span>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Modal for Adding / Editing Staff Member -->
+    <div id="staffModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl max-w-xl w-full shadow-2xl overflow-hidden border border-gray-100 animate-in fade-in zoom-in duration-150">
+            
+            <!-- Modal Header -->
+            <div class="bg-gradient-to-l from-firdous-teal-dark to-firdous-teal p-5 text-white flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center text-firdous-gold text-lg">
+                        <i id="modalIcon" class="fa-solid fa-user-pen"></i>
+                    </div>
+                    <div>
+                        <h3 id="modalTitle" class="text-lg font-bold">تعديل بيانات الموظف</h3>
+                        <p class="text-xs text-teal-100">يرجى ملء وتدقيق البيانات المطلوبة</p>
+                    </div>
+                </div>
+                <button onclick="closeModal()" class="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <!-- Modal Form -->
+            <form id="staffForm" onsubmit="saveStaff(event)" class="p-6 space-y-4">
+                <input type="hidden" id="formStaffId">
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <!-- Name -->
+                    <div class="sm:col-span-2">
+                        <label class="block text-xs font-bold text-gray-700 mb-1">اسم الموظف / المعلم *</label>
+                        <input type="text" id="formName" required placeholder="الاسم ثلاثي أو رباعي..."
+                            class="w-full px-3 py-2 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-firdous-teal focus:border-firdous-teal">
+                    </div>
+
+                    <!-- Shift -->
+                    <div>
+                        <label class="block text-xs font-bold text-gray-700 mb-1">الفترة *</label>
+                        <select id="formPeriod" required class="w-full px-3 py-2 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-firdous-teal">
+                            <option value="morning">الفترة الصباحية (الحضانة)</option>
+                            <option value="evening">الفترة المسائية (الكُتّاب)</option>
+                        </select>
+                    </div>
+
+                    <!-- Category -->
+                    <div>
+                        <label class="block text-xs font-bold text-gray-700 mb-1">التصنيف الوظيفي *</label>
+                        <select id="formCategory" required class="w-full px-3 py-2 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-firdous-teal">
+                            <option value="مشرفين">مشرفين ومشرفات (إشراف)</option>
+                            <option value="معلمين">معلمين ومعلمات (تدريس)</option>
+                            <option value="إداريين">إداريين وتقنيين</option>
+                            <option value="عمال">عمال وعاملات</option>
+                        </select>
+                    </div>
+
+                    <!-- Job Title -->
+                    <div>
+                        <label class="block text-xs font-bold text-gray-700 mb-1">المسمى الوظيفي المحدد *</label>
+                        <input type="text" id="formJob" required placeholder="مثال: معلمة نور بيان، إدارية..."
+                            class="w-full px-3 py-2 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-firdous-teal">
+                    </div>
+
+                    <!-- Branch -->
+                    <div>
+                        <label class="block text-xs font-bold text-gray-700 mb-1">الفرع *</label>
+                        <select id="formBranch" required class="w-full px-3 py-2 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-firdous-teal">
+                            <option value="الفرع الرئيسي">الفرع الرئيسي</option>
+                            <option value="فرع ابوشوك">فرع أبو شوك</option>
+                            <option value="فرع المهندسين">فرع المهندسين</option>
+                            <option value="فرع الكوبانية">فرع الكوبانية</option>
+                            <option value="فرع غرب اسوان">فرع غرب أسوان</option>
+                            <option value="فرع العقاد">فرع العقاد</option>
+                            <option value="فرع المسله">فرع المسلة</option>
+                            <option value="الثلاثة افرع">الثلاثة أفرع / عام</option>
+                        </select>
+                    </div>
+
+                    <!-- Salary -->
+                    <div>
+                        <label class="block text-xs font-bold text-gray-700 mb-1">الراتب الشهري (ج.م) *</label>
+                        <input type="number" id="formSalary" required min="0" step="5" placeholder="مثال: 2500"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-xl text-sm font-bold text-firdous-teal focus:ring-2 focus:ring-firdous-teal">
+                    </div>
+
+                    <!-- Phone -->
+                    <div>
+                        <label class="block text-xs font-bold text-gray-700 mb-1">رقم الهاتف</label>
+                        <input type="text" id="formPhone" placeholder="01xxxxxxxxx"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-firdous-teal">
+                    </div>
+
+                    <!-- National ID -->
+                    <div class="sm:col-span-2">
+                        <label class="block text-xs font-bold text-gray-700 mb-1">الرقم القومي (14 رقم)</label>
+                        <input type="text" id="formNationalId" placeholder="الرقم القومي..."
+                            class="w-full px-3 py-2 border border-gray-300 rounded-xl text-sm tracking-wider focus:ring-2 focus:ring-firdous-teal">
+                    </div>
+                </div>
+
+                <!-- Modal Actions -->
+                <div class="flex items-center justify-end gap-3 pt-4 border-t border-gray-100">
+                    <button type="button" onclick="closeModal()" class="px-4 py-2 border border-gray-300 text-gray-600 rounded-xl text-sm font-semibold hover:bg-gray-50 transition">
+                        إلغاء
+                    </button>
+                    <button type="submit" class="px-6 py-2 bg-firdous-teal hover:bg-firdous-teal-dark text-white rounded-xl text-sm font-bold shadow-md transition">
+                        حفظ البيانات
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div id="deleteModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl max-w-sm w-full p-6 text-center shadow-2xl border border-gray-100">
+            <div class="w-14 h-14 bg-red-50 text-red-500 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+            </div>
+            <h3 class="text-base font-bold text-gray-800 mb-2">تأكيد حذف الموظف</h3>
+            <p class="text-xs text-gray-500 mb-6" id="deleteStaffPrompt">هل أنت متأكد من رغبتك في حذف هذا الموظف نهائياً؟</p>
+            <div class="flex gap-2 justify-center">
+                <button onclick="closeDeleteModal()" class="px-4 py-2 border border-gray-200 text-gray-600 rounded-xl text-xs font-bold hover:bg-gray-50">
+                    إلغاء
+                </button>
+                <button onclick="confirmDelete()" class="px-5 py-2 bg-red-600 text-white rounded-xl text-xs font-bold hover:bg-red-700 shadow">
+                    نعم، حذف
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Application Core Script with Complete Dataset Preloaded -->
+    <script>
+        const initialStaffData = [
+            // ========== حضانة الفردوس الإسلامية (الفترة الصباحية) ==========
+            { id: 1, name: "أسماء سلطان احمد", salary: 3800, job: "مشرفة عام", branch: "الفرع الرئيسي", period: "morning", category: "مشرفين", nationalId: "28006212800523", phone: "01119827167" },
+            { id: 2, name: "ماجدة حسن عبدالله", salary: 3150, job: "مشرفة", branch: "الفرع الرئيسي", period: "morning", category: "مشرفين", nationalId: "27505142701843", phone: "01112899184" },
+            { id: 3, name: "إيمان سلطان احمد", salary: 3150, job: "مشرفة", branch: "فرع ابوشوك", period: "morning", category: "مشرفين", nationalId: "28609132800545", phone: "01153311545" },
+            { id: 4, name: "إسراء زكريا محمد", salary: 3150, job: "مشرفة", branch: "فرع المهندسين", period: "morning", category: "مشرفين", nationalId: "30112122800927", phone: "01144789983" },
+            { id: 5, name: "فاطمة عبدالله محمد", salary: 2750, job: "مشرفة الاداريات", branch: "الثلاثة افرع", period: "morning", category: "مشرفين", nationalId: "30312242800105", phone: "01157558980" },
+            { id: 6, name: "إسراء توفيق الفار", salary: 1850, job: "ادارية", branch: "فرع ابوشوك", period: "morning", category: "إداريين", nationalId: "30206132800423", phone: "01297009535" },
+            { id: 7, name: "سهيلة عبدالناصر عبدالستار", salary: 1850, job: "ادارية", branch: "فرع المهندسين", period: "morning", category: "إداريين", nationalId: "30307112800185", phone: "01068769660" },
+            { id: 8, name: "دينا خالد محمد", salary: 2500, job: "كمبيوتر", branch: "الفرع الرئيسي", period: "morning", category: "إداريين", nationalId: "30209102800347", phone: "01147420224" },
+            { id: 9, name: "خلود محمد عبدالباسط", salary: 1650, job: "معلمة قران", branch: "الفرع الرئيسي", period: "morning", category: "معلمين", nationalId: "30610182800063", phone: "01115524338" },
+            { id: 10, name: "خديجة صالح سنوسى", salary: 1600, job: "معلمة قران", branch: "فرع ابوشوك", period: "morning", category: "معلمين", nationalId: "30106092800188", phone: "01156098896" },
+            { id: 11, name: "صفاء محمد راشد", salary: 1600, job: "معلمة قران", branch: "فرع ابوشوك", period: "morning", category: "معلمين", nationalId: "28801092703566", phone: "01154117953" },
+            { id: 12, name: "اسراء حمدى عبدالمجيد", salary: 1600, job: "معلمة قران", branch: "فرع المهندسين", period: "morning", category: "معلمين", nationalId: "30208012804061", phone: "01145932978" },
+            { id: 13, name: "ايمان محمداحمد", salary: 1600, job: "معلمة قران", branch: "فرع المهندسين", period: "morning", category: "معلمين", nationalId: "30709092800184", phone: "01271022583" },
+            { id: 14, name: "قمر عبدالفتاح محمد", salary: 1600, job: "معلمة قران", branch: "الفرع الرئيسي", period: "morning", category: "معلمين", nationalId: "30810012803741", phone: "01114279752" },
+            { id: 15, name: "مرفت عبدالصبور عبدالنعيم", salary: 2340, job: "معلمة نور بيان", branch: "الفرع الرئيسي", period: "morning", category: "معلمين", nationalId: "28309152801129", phone: "011449879175" },
+            { id: 16, name: "أسماء مصطفى شيبه", salary: 2020, job: "معلمة نور بيان", branch: "الفرع الرئيسي", period: "morning", category: "معلمين", nationalId: "27905082800527", phone: "011118263995" },
+            { id: 17, name: "إيمان ابوزيد حسن", salary: 1800, job: "معلمة نور بيان", branch: "الفرع الرئيسي", period: "morning", category: "معلمين", nationalId: "28607132800607", phone: "01553668898" },
+            { id: 18, name: "أسماء طلعت عبدالباسط", salary: 1600, job: "معلمة قران", branch: "الفرع الرئيسي", period: "morning", category: "معلمين", nationalId: "30504252800207", phone: "01040609585" },
+            { id: 19, name: "سعدية السيد احمد", salary: 1750, job: "معلمة نور بيان", branch: "الفرع الرئيسي", period: "morning", category: "معلمين", nationalId: "30605312800105", phone: "01118552868" },
+            { id: 20, name: "ريهام محمد احمد", salary: 1600, job: "معلمة نور بيان", branch: "الفرع الرئيسي", period: "morning", category: "معلمين", nationalId: "29501162600468", phone: "01124411691" },
+            { id: 21, name: "نوره محمد مرتضى", salary: 1600, job: "معلمة نور بيان", branch: "الفرع الرئيسي", period: "morning", category: "معلمين", nationalId: "29310012801228", phone: "01154416334" },
+            { id: 22, name: "مرفت رزق صابر", salary: 1800, job: "معلمة نور بيان", branch: "فرع المهندسين", period: "morning", category: "معلمين", nationalId: "2843212702024", phone: "01553653275" },
+            { id: 23, name: "منى هانى نعيم", salary: 1800, job: "معلمة نور بيان", branch: "فرع المهندسين", period: "morning", category: "معلمين", nationalId: "30611012801509", phone: "01221136151" },
+            { id: 24, name: "علياء محمد متولى", salary: 1600, job: "معلمة نور بيان", branch: "فرع المهندسين", period: "morning", category: "معلمين", nationalId: "28408072800707", phone: "01153498685" },
+            { id: 25, name: "شروق حسنى شعبان", salary: 1600, job: "معلمة نور بيان", branch: "فرع المهندسين", period: "morning", category: "معلمين", nationalId: "31001022802202", phone: "01105623992" },
+            { id: 26, name: "ياسمين عاطف عبدالرحمن", salary: 1850, job: "معلمة نور بيان", branch: "فرع المهندسين", period: "morning", category: "معلمين", nationalId: "28310162801028", phone: "0102548633" },
+            { id: 27, name: "فاطمة شعبان رجب", salary: 1865, job: "معلمة نوربيان", branch: "فرع ابوشوك", period: "morning", category: "معلمين", nationalId: "30208012803723", phone: "01115991276" },
+            { id: 28, name: "نهى عادل عبده", salary: 1750, job: "معلمة نوربيان", branch: "فرع ابوشوك", period: "morning", category: "معلمين", nationalId: "29106042800521", phone: "01116675592" },
+            { id: 29, name: "منى سعد محمد", salary: 2000, job: "معلمة نوربيان", branch: "فرع ابوشوك", period: "morning", category: "معلمين", nationalId: "28809262703168", phone: "01122306881" },
+            { id: 30, name: "هند عمرمدنى", salary: 2050, job: "معلمة نوربيان", branch: "فرع ابوشوك", period: "morning", category: "معلمين", nationalId: "28803082800906", phone: "01117710904" },
+            { id: 31, name: "هناء محمد جلال", salary: 1800, job: "معلمة نوربيان", branch: "فرع ابوشوك", period: "morning", category: "معلمين", nationalId: "28701202801246", phone: "0112378819" },
+            { id: 32, name: "فاطمة حسن يوسف", salary: 1600, job: "معلمة نوربيان", branch: "فرع ابوشوك", period: "morning", category: "معلمين", nationalId: "29803052800646", phone: "01126820660" },
+            { id: 33, name: "فاطمة يوسف محمد", salary: 1600, job: "معلمة نوربيان", branch: "فرع ابوشوك", period: "morning", category: "معلمين", nationalId: "29207052801365", phone: "01156249429" },
+            { id: 34, name: "رقية احمد محمد", salary: 1850, job: "معلمة لغة انجليزية", branch: "الفرع الرئيسي", period: "morning", category: "معلمين", nationalId: "29408072703187", phone: "01147412168" },
+            { id: 35, name: "رضى مصطفى محمد", salary: 2250, job: "معلمة لغة انجليزية", branch: "فرع ابوشوك", period: "morning", category: "معلمين", nationalId: "30001302700061", phone: "01156249429" },
+            { id: 36, name: "الاء على احمد محمد", salary: 1600, job: "معلمة لغة انجليزية", branch: "الفرع الرئيسي", period: "morning", category: "معلمين", nationalId: "29401252800828", phone: "01159724429" },
+            { id: 37, name: "ابتسام سميح ابراهيم", salary: 2500, job: "معلمة لغة انجليزية", branch: "فرع المهندسين", period: "morning", category: "معلمين", nationalId: "30407231702102", phone: "01220708034" },
+            { id: 38, name: "شيماء جامع احمد", salary: 1600, job: "معلمة لغة انجليزية", branch: "فرع المهندسين", period: "morning", category: "معلمين", nationalId: "29805192800762", phone: "01103138683" },
+            { id: 39, name: "فرحة بومدين محمد", salary: 1800, job: "معلمة لغة انجليزية", branch: "فرع ابوشوك", period: "morning", category: "معلمين", nationalId: "30402092800186", phone: "01225740277" },
+            { id: 40, name: "شهد شريف محمود", salary: 1600, job: "معلمة ماث", branch: "فرع المهندسين", period: "morning", category: "معلمين", nationalId: "30405312800106", phone: "01121573494" },
+            { id: 41, name: "حفصة حجاج عبدالهادى", salary: 1850, job: "معلمة نشاط", branch: "الفرع الرئيسي", period: "morning", category: "معلمين", nationalId: "31009282800301", phone: "01112369540" },
+            { id: 42, name: "دعاء محمداحمد", salary: 1600, job: "معلمة نشاط", branch: "فرع المهندسين", period: "morning", category: "معلمين", nationalId: "31002272800104", phone: "01271873207" },
+            { id: 43, name: "سارة محمد عبدالعال", salary: 1600, job: "معلمة احتياطى", branch: "الفرع الرئيسي", period: "morning", category: "معلمين", nationalId: "28907172801201", phone: "01125829817" },
+            { id: 44, name: "رحاب عبدالموجود صالح", salary: 1750, job: "معلمة احتياطى", branch: "فرع ابوشوك", period: "morning", category: "معلمين", nationalId: "30001302700061", phone: "01128828905" },
+            { id: 45, name: "فاطمة عبدالدايم عبدالعزيز", salary: 1600, job: "معلمة احتياطى", branch: "فرع ابوشوك", period: "morning", category: "معلمين", nationalId: "27908042702246", phone: "01149519949" },
+            { id: 46, name: "جهاد عزالدين عبدالله", salary: 1600, job: "معلمة احتياطى", branch: "فرع المهندسين", period: "morning", category: "معلمين", nationalId: "292910805280106", phone: "01024383126" },
+            { id: 47, name: "نجات احمد محمد", salary: 2700, job: "مشرفة العاملات", branch: "الفرع الرئيسي", period: "morning", category: "مشرفين", nationalId: "27609162700061", phone: "01111534175" },
+            { id: 48, name: "عبير السيد احمد", salary: 1650, job: "عاملة", branch: "الفرع الرئيسي", period: "morning", category: "عمال", nationalId: "28804082800261", phone: "01128486942" },
+            { id: 49, name: "فيزة امين سامح", salary: 1650, job: "عاملة", branch: "الفرع الرئيسي", period: "morning", category: "عمال", nationalId: "28208112601088", phone: "01117318305" },
+            { id: 50, name: "امال رشدى محمد", salary: 1400, job: "عاملة", branch: "الفرع الرئيسي", period: "morning", category: "عمال", nationalId: "2961207280129", phone: "01118793729" },
+            { id: 51, name: "أيه سعد احمد", salary: 1400, job: "عاملة", branch: "الفرع الرئيسي", period: "morning", category: "عمال", nationalId: "30108072800125", phone: "01184476819" },
+            { id: 52, name: "ولاء اشرف محمد", salary: 1200, job: "عاملة", branch: "الفرع الرئيسي", period: "morning", category: "عمال", nationalId: "29910202800748", phone: "01120474984" },
+            { id: 53, name: "صابرين عبدالعاطى", salary: 1505, job: "عاملة", branch: "فرع ابوشوك", period: "morning", category: "عمال", nationalId: "28903062800068", phone: "01147922594" },
+            { id: 54, name: "مروة طلعت عبدالباسط", salary: 1400, job: "عاملة", branch: "فرع ابوشوك", period: "morning", category: "عمال", nationalId: "29512232800305", phone: "01147922594" },
+            { id: 55, name: "فاطمة احمدمحمد", salary: 1400, job: "عاملة", branch: "فرع ابوشوك", period: "morning", category: "عمال", nationalId: "27209212700507", phone: "01156249429" },
+            { id: 56, name: "رضا شعبان محمد", salary: 1400, job: "عاملة", branch: "فرع ابوشوك", period: "morning", category: "عمال", nationalId: "29511062800121", phone: "01220319056" },
+            { id: 57, name: "نبوية الحسن حامد", salary: 1400, job: "عاملة", branch: "فرع المهندسين", period: "morning", category: "عمال", nationalId: "28209102800569", phone: "011243663728" },
+            { id: 58, name: "فاطمة زين العابدين عبدالاله", salary: 1200, job: "عاملة", branch: "فرع المهندسين", period: "morning", category: "عمال", nationalId: "28307142800725", phone: "01127876192" },
+
+            // ========== مركز الفردوس لتحفيظ القرآن الكريم (الفترة المسائية) ==========
+            { id: 101, name: "محمد حمدي عبدالمجيد", salary: 3500, job: "مشرف عام / مدير المركز", branch: "الفرع الرئيسي", period: "evening", category: "مشرفين", nationalId: "28404012802999", phone: "01149029496" },
+            { id: 102, name: "محمود حسنين عبدالغفار", salary: 3000, job: "مشرف", branch: "الفرع الرئيسي", period: "evening", category: "مشرفين", nationalId: "28906142800394", phone: "01121189929" },
+            { id: 103, name: "إسراء زكريا محمد", salary: 1500, job: "مشرفة", branch: "الفرع الرئيسي", period: "evening", category: "مشرفين", nationalId: "30002242800327", phone: "01144789983" },
+            { id: 104, name: "فاطمة عبد الله محمد", salary: 1500, job: "مشرفة", branch: "الفرع الرئيسي", period: "evening", category: "مشرفين", nationalId: "30112122800927", phone: "01149709819" },
+            { id: 105, name: "أماني سميح ابراهيم", salary: 1200, job: "مشرفة", branch: "الفرع الرئيسي", period: "evening", category: "مشرفين", nationalId: "30112011705901", phone: "01021650625" },
+            { id: 106, name: "ابتسام سميح ابراهيم", salary: 1200, job: "مشرفة", branch: "الفرع الرئيسي", period: "evening", category: "مشرفين", nationalId: "30407231702102", phone: "01220708034" },
+            { id: 107, name: "مشيرة إسماعيل عبده", salary: 800, job: "مشرفة", branch: "فرع العقاد", period: "evening", category: "مشرفين", nationalId: "28304252800381", phone: "01142200764" },
+            { id: 108, name: "سهام عبد الحميد موسي", salary: 1500, job: "مشرفة", branch: "فرع المهندسين", period: "evening", category: "مشرفين", nationalId: "29912202800481", phone: "01110486215" },
+            { id: 109, name: "ياسمين عاطف عبدالحميد", salary: 1500, job: "مشرفة", branch: "فرع ابوشوك", period: "evening", category: "مشرفين", nationalId: "28310162801028", phone: "01012548633" },
+            { id: 110, name: "زينب يونس علي", salary: 1700, job: "مشرفة نساء", branch: "الفرع الرئيسي", period: "evening", category: "مشرفين", nationalId: "27611252800302", phone: "01121693693" },
+            { id: 111, name: "إيمان محمد توفيق", salary: 800, job: "مشرفة نساء", branch: "فرع المهندسين", period: "evening", category: "مشرفين", nationalId: "28707098801405", phone: "01144762777" },
+            { id: 112, name: "احمد عبد العليم عبد النبي", salary: 2500, job: "مشرف فرع", branch: "فرع الكوبانية", period: "evening", category: "مشرفين", nationalId: "27904042800617", phone: "01115025330" },
+            { id: 113, name: "عبد السلام محمد خير محمد", salary: 2000, job: "مشرف", branch: "فرع الكوبانية", period: "evening", category: "مشرفين", nationalId: "27511172800056", phone: "01123525284" },
+            { id: 114, name: "أسماء احمد ابازيد", salary: 1000, job: "مشرفة", branch: "فرع غرب اسوان", period: "evening", category: "مشرفين", nationalId: "28607152800182", phone: "—" },
+            { id: 115, name: "امنة عبدالرحيم غالب", salary: 1000, job: "مشرفة", branch: "فرع غرب اسوان", period: "evening", category: "مشرفين", nationalId: "28008182800968", phone: "—" },
+            { id: 116, name: "فاطمة محمد بشير", salary: 1000, job: "مشرفة", branch: "فرع غرب اسوان", period: "evening", category: "مشرفين", nationalId: "29501012809480", phone: "—" },
+            { id: 120, name: "هاني نعيم علي", salary: 2000, job: "إداري", branch: "الفرع الرئيسي", period: "evening", category: "إداريين", nationalId: "28307312800555", phone: "01124438355" },
+            { id: 121, name: "الاء محمود حسن", salary: 3000, job: "إدارية", branch: "الفرع الرئيسي", period: "evening", category: "إداريين", nationalId: "30309282800689", phone: "01145929773" },
+            { id: 122, name: "زينب شريف عبد المنعم", salary: 600, job: "إدارية", branch: "الفرع الرئيسي", period: "evening", category: "إداريين", nationalId: "30809160100646", phone: "01148194939" },
+            { id: 123, name: "الاء محمود سليم", salary: 1500, job: "إدارية", branch: "الفرع الرئيسي", period: "evening", category: "إداريين", nationalId: "29105012800369", phone: "01128822417" },
+            { id: 124, name: "مريم يحيى عبد الحافظ", salary: 1000, job: "إدارية", branch: "الفرع الرئيسي", period: "evening", category: "إداريين", nationalId: "30905212800683", phone: "01158897312" },
+            { id: 125, name: "حسناء عبد الناصر", salary: 500, job: "إدارية", branch: "الفرع الرئيسي", period: "evening", category: "إداريين", nationalId: "31002152800224", phone: "01157721127" },
+            { id: 126, name: "هدير شريف عبد المنعم", salary: 600, job: "إدارية نساء", branch: "الفرع الرئيسي", period: "evening", category: "إداريين", nationalId: "30609100102101", phone: "01149067580" },
+            { id: 127, name: "إسراء توفيق الفار", salary: 1000, job: "إدارية", branch: "فرع ابوشوك", period: "evening", category: "إداريين", nationalId: "30206132800423", phone: "01207009525" },
+            { id: 128, name: "دينا خالد محمد", salary: 2500, job: "مسؤولة كمبيوتر", branch: "الفرع الرئيسي", period: "evening", category: "إداريين", nationalId: "30209102800347", phone: "01147420224" },
+            { id: 129, name: "نورهان أسامة محمد", salary: 1000, job: "إدارية", branch: "فرع المهندسين", period: "evening", category: "إداريين", nationalId: "30302252800302", phone: "01152717462" },
+            { id: 130, name: "يسرا عبدالهادى احمد", salary: 1000, job: "إدارية نساء", branch: "فرع المهندسين", period: "evening", category: "إداريين", nationalId: "29201282800262", phone: "01111980947" },
+            { id: 131, name: "حنين ثابت احمد", salary: 700, job: "إداري", branch: "الفرع الرئيسي", period: "evening", category: "إداريين", nationalId: "30207182800129", phone: "01143636161" },
+            { id: 132, name: "محمد ايمن محمد سمير", salary: 3000, job: "كمبيوتر", branch: "الفرع الرئيسي", period: "evening", category: "إداريين", nationalId: "30105312400953", phone: "01153509012" },
+            { id: 133, name: "علي احمد عاطف", salary: 3000, job: "كمبيوتر", branch: "الفرع الرئيسي", period: "evening", category: "إداريين", nationalId: "30509042602196", phone: "01153349092" },
+            { id: 134, name: "يحيى مصطفى", salary: 3000, job: "كمبيوتر", branch: "الفرع الرئيسي", period: "evening", category: "إداريين", nationalId: "30509042602196", phone: "01122056189" },
+            { id: 135, name: "محمد عبدالحميد عبدالحفيظ", salary: 800, job: "كمبيوتر", branch: "الفرع الرئيسي", period: "evening", category: "إداريين", nationalId: "31010102802199", phone: "01224319192" },
+            { id: 136, name: "سهيلة سليمان ابراهيم احمد", salary: 800, job: "إدارية", branch: "فرع الكوبانية", period: "evening", category: "إداريين", nationalId: "30207232800281", phone: "01146635732" },
+            { id: 137, name: "جهاد خالد محمود حسن", salary: 800, job: "إدارية", branch: "فرع الكوبانية", period: "evening", category: "إداريين", nationalId: "30206222800082", phone: "01127059721" },
+            { id: 140, name: "حنان رمضان عبد السميع", salary: 800, job: "معلمة قرآن", branch: "الفرع الرئيسي", period: "evening", category: "معلمين", nationalId: "29508242800209", phone: "01153248017" },
+            { id: 141, name: "هدى محمد عبد الحميد", salary: 700, job: "معلمة قرآن", branch: "الفرع الرئيسي", period: "evening", category: "معلمين", nationalId: "28601022700587", phone: "01127790117" },
+            { id: 142, name: "قمر عبد الفتاح محمد", salary: 500, job: "معلمة قرآن", branch: "الفرع الرئيسي", period: "evening", category: "معلمين", nationalId: "30810012803741", phone: "01114279752" },
+            { id: 143, name: "الاء أيمن إبراهيم", salary: 600, job: "معلمة قرآن", branch: "الفرع الرئيسي", period: "evening", category: "معلمين", nationalId: "30811162800089", phone: "01101917706" },
+            { id: 144, name: "إيمان محمد احمد", salary: 700, job: "معلمة قرآن", branch: "الفرع الرئيسي", period: "evening", category: "معلمين", nationalId: "30709092800184", phone: "01144762777" },
+            { id: 145, name: "سهيلة عبد الناصر عبد الستار", salary: 600, job: "معلمة قرآن", branch: "الفرع الرئيسي", period: "evening", category: "معلمين", nationalId: "30307112800185", phone: "01552206675" },
+            { id: 146, name: "فاطمه عبد الدايم عبد العزيز", salary: 700, job: "معلمة قرآن", branch: "الفرع الرئيسي", period: "evening", category: "معلمين", nationalId: "27908042702246", phone: "01095812959" },
+            { id: 147, name: "رحمة منصور حسن", salary: 700, job: "معلمة قرآن", branch: "الفرع الرئيسي", period: "evening", category: "معلمين", nationalId: "30902202800309", phone: "01148295310" },
+            { id: 148, name: "سعدية السيد احمد", salary: 600, job: "معلمة قرآن", branch: "الفرع الرئيسي", period: "evening", category: "معلمين", nationalId: "30605312800105", phone: "01116615460" },
+            { id: 149, name: "إسراء خالد عبد العظيم", salary: 1000, job: "معلمة قرآن", branch: "الفرع الرئيسي", period: "evening", category: "معلمين", nationalId: "30810292800106", phone: "01229528294" },
+            { id: 150, name: "أحمد ثروت عكاشة", salary: 2500, job: "معلم قرآن", branch: "الفرع الرئيسي", period: "evening", category: "معلمين", nationalId: "30201012802331", phone: "01103161389" },
+            { id: 151, name: "عبدالله محمد اسماعيل", salary: 3500, job: "معلم قرآن", branch: "الفرع الرئيسي", period: "evening", category: "معلمين", nationalId: "30107302800131", phone: "01114624604" },
+            { id: 152, name: "شاذلي برشاوي بغدادى", salary: 2500, job: "معلم قرآن", branch: "فرع المهندسين", period: "evening", category: "معلمين", nationalId: "28805012801151", phone: "01010785342" },
+            { id: 153, name: "عبد الرحمن إسماعيل", salary: 2500, job: "معلم قرآن", branch: "فرع المهندسين", period: "evening", category: "معلمين", nationalId: "29709102800953", phone: "01070402669" },
+            { id: 154, name: "د. حسين محمد مصطفى", salary: 2000, job: "معلم قرآن", branch: "فرع المسله", period: "evening", category: "معلمين", nationalId: "82310102800316", phone: "01119975383" },
+            { id: 155, name: "كمال حسين احمد", salary: 2000, job: "معلم قرآن", branch: "الفرع الرئيسي", period: "evening", category: "معلمين", nationalId: "26304142701259", phone: "01143020705" },
+            { id: 156, name: "طارق عبد الحي جامع", salary: 2000, job: "معلم قرآن", branch: "فرع الكوبانية", period: "evening", category: "معلمين", nationalId: "25000828650682", phone: "01159324608" },
+            { id: 157, name: "حسني سيد محمد ابراهيم", salary: 1800, job: "معلم قرآن", branch: "فرع الكوبانية", period: "evening", category: "معلمين", nationalId: "28606212800237", phone: "01152586307" },
+            { id: 158, name: "محمد زكريا علي حسن", salary: 1700, job: "معلم قرآن", branch: "فرع الكوبانية", period: "evening", category: "معلمين", nationalId: "28207122800058", phone: "01148227319" },
+            { id: 159, name: "اروى عبدالملك احمد", salary: 1000, job: "معلمة قرآن", branch: "فرع غرب اسوان", period: "evening", category: "معلمين", nationalId: "30901122800085", phone: "—" },
+            { id: 160, name: "فاطمة محمد جمعة", salary: 1000, job: "معلمة قرآن", branch: "فرع غرب اسوان", period: "evening", category: "معلمين", nationalId: "30103102800042", phone: "—" },
+            { id: 161, name: "خديجة رمضان حامد", salary: 1000, job: "معلمة قرآن", branch: "فرع غرب اسوان", period: "evening", category: "معلمين", nationalId: "30506092800224", phone: "—" },
+            { id: 162, name: "فاطمة ربيع عكاشة", salary: 1000, job: "معلمة قرآن", branch: "فرع غرب اسوان", period: "evening", category: "معلمين", nationalId: "28809012800206", phone: "—" },
+            { id: 163, name: "غادة عبدالعظيم حسن", salary: 1000, job: "معلمة قرآن", branch: "فرع غرب اسوان", period: "evening", category: "معلمين", nationalId: "28911152800086", phone: "—" },
+            { id: 164, name: "اسراء عادل محمد", salary: 1000, job: "معلمة قرآن", branch: "فرع العقاد", period: "evening", category: "معلمين", nationalId: "30211242800228", phone: "01151110365" },
+            { id: 180, name: "نجاه أحمد محمد", salary: 1500, job: "عاملة", branch: "الفرع الرئيسي", period: "evening", category: "عمال", nationalId: "27609162700061", phone: "01111534175" },
+            { id: 181, name: "عبير السيد احمد", salary: 1000, job: "عاملة", branch: "الفرع الرئيسي", period: "evening", category: "عمال", nationalId: "28804082800260", phone: "01128486942" },
+            { id: 182, name: "فايزة أمين سامح", salary: 1000, job: "عاملة", branch: "الفرع الرئيسي", period: "evening", category: "عمال", nationalId: "28208112601088", phone: "01117372305" },
+            { id: 183, name: "نجوى الفولى حمام", salary: 1440, job: "عاملة", branch: "فرع ابوشوك", period: "evening", category: "عمال", nationalId: "28610232800788", phone: "01118549081" },
+            { id: 184, name: "صابرين عبد العاطى احمد", salary: 600, job: "عاملة", branch: "فرع ابوشوك", period: "evening", category: "عمال", nationalId: "28903062800068", phone: "01142537483" },
+            { id: 185, name: "وفاء عكاشة خلف", salary: 1115, job: "عاملة", branch: "فرع العقاد", period: "evening", category: "عمال", nationalId: "28203182800787", phone: "01278365476" },
+            { id: 186, name: "خديجة محمد مصطفى", salary: 915, job: "عاملة", branch: "فرع المهندسين", period: "evening", category: "عمال", nationalId: "29209212800444", phone: "01113936775" },
+            { id: 187, name: "راندا صلاح انور", salary: 600, job: "عاملة", branch: "فرع المهندسين", period: "evening", category: "عمال", nationalId: "29104302800561", phone: "01140716054" },
+            { id: 188, name: "نبا عبد الحفيظ عبد العاطي", salary: 500, job: "عاملة", branch: "فرع الكوبانية", period: "evening", category: "عمال", nationalId: "28000823180182", phone: "01152763549" },
+            { id: 189, name: "سحر محمد عبده", salary: 500, job: "عاملة", branch: "فرع الكوبانية", period: "evening", category: "عمال", nationalId: "28905092800049", phone: "01120783396" }
+        ];
+
+        let staffList = [];
+        let currentShift = 'all';
+        let staffToDeleteId = null;
+
+        function initApp() {
+            const saved = localStorage.getItem('al_firdous_staff_records');
+            if (saved) {
+                try {
+                    staffList = JSON.parse(saved);
+                } catch (e) {
+                    staffList = [...initialStaffData];
+                }
+            } else {
+                staffList = [...initialStaffData];
+                saveToLocalStorage();
+            }
+
+            document.getElementById('printDate').textContent = new Date().toLocaleDateString('ar-EG', {
+                year: 'numeric', month: 'long', day: 'numeric'
+            });
+
+            updateKPIs();
+            applyFilters();
+        }
+
+        function saveToLocalStorage() {
+            localStorage.setItem('al_firdous_staff_records', JSON.stringify(staffList));
+        }
+
+        function resetData() {
+            if (confirm("هل تريد استعادة البيانات الأصلية لمؤسسة الفردوس وإلغاء أي تعديلات محلية؟")) {
+                staffList = [...initialStaffData];
+                saveToLocalStorage();
+                updateKPIs();
+                applyFilters();
+            }
+        }
+
+        function setShiftFilter(shift) {
+            currentShift = shift;
+            const tabs = {
+                all: document.getElementById('tabAll'),
+                morning: document.getElementById('tabMorning'),
+                evening: document.getElementById('tabEvening')
+            };
+
+            Object.keys(tabs).forEach(key => {
+                if (key === shift) {
+                    tabs[key].className = "px-4 py-2 rounded-xl transition bg-firdous-teal text-white shadow font-bold";
+                } else {
+                    tabs[key].className = "px-4 py-2 rounded-xl transition bg-gray-100 text-gray-600 hover:bg-gray-200 font-bold";
+                }
+            });
+
+            applyFilters();
+        }
+
+        function clearAllFilters() {
+            document.getElementById('searchInput').value = '';
+            document.getElementById('branchFilter').value = 'all';
+            document.getElementById('categoryFilter').value = 'all';
+            document.getElementById('sortFilter').value = 'id_asc';
+            setShiftFilter('all');
+        }
+
+        function applyFilters() {
+            const searchQuery = document.getElementById('searchInput').value.trim().toLowerCase();
+            const branch = document.getElementById('branchFilter').value;
+            const category = document.getElementById('categoryFilter').value;
+            const sort = document.getElementById('sortFilter').value;
+
+            let filtered = staffList.filter(item => {
+                if (currentShift !== 'all' && item.period !== currentShift) return false;
+                if (branch !== 'all' && !item.branch.includes(branch) && branch !== item.branch) return false;
+                if (category !== 'all' && item.category !== category) return false;
+
+                if (searchQuery) {
+                    const matchName = item.name && item.name.toLowerCase().includes(searchQuery);
+                    const matchPhone = item.phone && item.phone.includes(searchQuery);
+                    const matchNId = item.nationalId && item.nationalId.includes(searchQuery);
+                    const matchJob = item.job && item.job.toLowerCase().includes(searchQuery);
+                    const matchBranch = item.branch && item.branch.toLowerCase().includes(searchQuery);
+                    if (!matchName && !matchPhone && !matchNId && !matchJob && !matchBranch) return false;
+                }
+
+                return true;
+            });
+
+            filtered.sort((a, b) => {
+                if (sort === 'name_asc') return a.name.localeCompare(b.name, 'ar');
+                if (sort === 'salary_desc') return b.salary - a.salary;
+                if (sort === 'salary_asc') return a.salary - b.salary;
+                if (sort === 'branch') return a.branch.localeCompare(b.branch, 'ar');
+                return a.id - b.id;
+            });
+
+            renderTable(filtered);
+        }
+
+        function renderTable(data) {
+            const tbody = document.getElementById('staffTableBody');
+            const emptyState = document.getElementById('emptyState');
+            const countSpan = document.getElementById('filteredCount');
+            const sumSpan = document.getElementById('currentTableSalariesSum');
+
+            countSpan.textContent = data.length;
+            const totalSum = data.reduce((acc, curr) => acc + (Number(curr.salary) || 0), 0);
+            sumSpan.textContent = totalSum.toLocaleString('ar-EG');
+
+            if (data.length === 0) {
+                tbody.innerHTML = '';
+                emptyState.classList.remove('hidden');
+                return;
+            } else {
+                emptyState.classList.add('hidden');
+            }
+
+            let html = '';
+            data.forEach((item, index) => {
+                const isMorning = item.period === 'morning';
+                const periodBadge = isMorning 
+                    ? `<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-50 text-amber-700 border border-amber-200"><i class="fa-solid fa-sun text-[10px]"></i> حضانة (صباحي)</span>`
+                    : `<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-teal-50 text-firdous-teal-dark border border-teal-200"><i class="fa-solid fa-moon text-[10px]"></i> كُتّاب (مسائي)</span>`;
+
+                let catBadge = '';
+                if (item.category === 'مشرفين') {
+                    catBadge = `<span class="px-2 py-0.5 rounded-lg text-xs font-bold bg-purple-50 text-purple-700 border border-purple-200">إشراف</span>`;
+                } else if (item.category === 'معلمين') {
+                    catBadge = `<span class="px-2 py-0.5 rounded-lg text-xs font-bold bg-blue-50 text-blue-700 border border-blue-200">تدريس</span>`;
+                } else if (item.category === 'إداريين') {
+                    catBadge = `<span class="px-2 py-0.5 rounded-lg text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">إدارة / IT</span>`;
+                } else {
+                    catBadge = `<span class="px-2 py-0.5 rounded-lg text-xs font-bold bg-gray-100 text-gray-700 border border-gray-200">عمالة</span>`;
+                }
+
+                const cleanPhone = (item.phone || '').replace(/[^0-9]/g, '');
+                const phoneHtml = cleanPhone && cleanPhone.length >= 10
+                    ? `<div class="flex items-center gap-1.5 font-mono text-xs">
+                         <span>${item.phone}</span>
+                         <a href="https://wa.me/20${cleanPhone.startsWith('0') ? cleanPhone.substring(1) : cleanPhone}" target="_blank" class="text-green-600 hover:text-green-700 no-print" title="مراسلة عبر واتساب">
+                            <i class="fa-brands fa-whatsapp text-sm"></i>
+                         </a>
+                         <a href="tel:${cleanPhone}" class="text-blue-500 hover:text-blue-600 no-print" title="اتصال">
+                            <i class="fa-solid fa-phone text-xs"></i>
+                         </a>
+                       </div>`
+                    : `<span class="text-gray-400 font-mono text-xs">${item.phone || '—'}</span>`;
+
+                html += `
+                <tr class="hover:bg-teal-50/40 transition border-b border-gray-100">
+                    <td class="py-3 px-3 text-center text-xs text-gray-400 font-mono">${index + 1}</td>
+                    <td class="py-3 px-4 font-bold text-gray-900">${item.name}</td>
+                    <td class="py-3 px-4 text-gray-700 text-xs font-semibold">${item.job}</td>
+                    <td class="py-3 px-3 text-center">${catBadge}</td>
+                    <td class="py-3 px-3 text-center">${periodBadge}</td>
+                    <td class="py-3 px-3 text-xs font-medium text-gray-600">
+                        <span class="inline-block px-2 py-0.5 bg-gray-50 rounded border border-gray-200">${item.branch}</span>
+                    </td>
+                    <td class="py-3 px-4 text-center font-bold text-firdous-teal text-sm">
+                        ${Number(item.salary).toLocaleString('ar-EG')} <span class="text-[10px] text-gray-400 font-normal">ج.م</span>
+                    </td>
+                    <td class="py-3 px-4">${phoneHtml}</td>
+                    <td class="py-3 px-4 font-mono text-xs text-gray-500 tracking-wider">${item.nationalId || '—'}</td>
+                    <td class="py-3 px-3 text-center no-print">
+                        <div class="flex items-center justify-center gap-1.5">
+                            <button onclick="openModal('edit', ${item.id})" class="w-8 h-8 rounded-lg bg-teal-50 text-firdous-teal hover:bg-firdous-teal hover:text-white transition flex items-center justify-center text-xs shadow-sm" title="تعديل">
+                                <i class="fa-solid fa-pen"></i>
+                            </button>
+                            <button onclick="promptDelete(${item.id}, '${item.name.replace(/'/g, "\\'")}')" class="w-8 h-8 rounded-lg bg-red-50 text-red-500 hover:bg-red-500 hover:text-white transition flex items-center justify-center text-xs shadow-sm" title="حذف">
+                                <i class="fa-solid fa-trash-can"></i>
+                            </button>
+                        </div>
+                    </td>
+                </tr>`;
+            });
+
+            tbody.innerHTML = html;
+        }
+
+        function updateKPIs() {
+            const totalCount = staffList.length;
+            const totalSalary = staffList.reduce((acc, curr) => acc + (Number(curr.salary) || 0), 0);
+
+            const morningStaff = staffList.filter(s => s.period === 'morning');
+            const morningCount = morningStaff.length;
+            const morningSum = morningStaff.reduce((acc, curr) => acc + (Number(curr.salary) || 0), 0);
+
+            const eveningStaff = staffList.filter(s => s.period === 'evening');
+            const eveningCount = eveningStaff.length;
+            const eveningSum = eveningStaff.reduce((acc, curr) => acc + (Number(curr.salary) || 0), 0);
+
+            document.getElementById('kpiTotalStaff').textContent = totalCount;
+            document.getElementById('kpiTotalSalaries').textContent = totalSalary.toLocaleString('ar-EG');
+            document.getElementById('kpiMorningCount').textContent = morningCount + " موظف";
+            document.getElementById('kpiMorningSum').textContent = morningSum.toLocaleString('ar-EG') + " ج.م";
+            document.getElementById('kpiEveningCount').textContent = eveningCount + " موظف";
+            document.getElementById('kpiEveningSum').textContent = eveningSum.toLocaleString('ar-EG') + " ج.م";
+        }
+
+        function openModal(mode, staffId = null) {
+            const modal = document.getElementById('staffModal');
+            const title = document.getElementById('modalTitle');
+            const icon = document.getElementById('modalIcon');
+            const form = document.getElementById('staffForm');
+
+            form.reset();
+
+            if (mode === 'add') {
+                document.getElementById('formStaffId').value = '';
+                title.textContent = 'إضافة موظف جديد لمؤسسة الفردوس';
+                icon.className = 'fa-solid fa-user-plus';
+                document.getElementById('formPeriod').value = currentShift !== 'all' ? currentShift : 'morning';
+            } else {
+                const staff = staffList.find(s => s.id === staffId);
+                if (!staff) return;
+
+                document.getElementById('formStaffId').value = staff.id;
+                document.getElementById('formName').value = staff.name;
+                document.getElementById('formPeriod').value = staff.period;
+                document.getElementById('formCategory').value = staff.category;
+                document.getElementById('formJob').value = staff.job;
+                document.getElementById('formBranch').value = staff.branch;
+                document.getElementById('formSalary').value = staff.salary;
+                document.getElementById('formPhone').value = staff.phone || '';
+                document.getElementById('formNationalId').value = staff.nationalId || '';
+
+                title.textContent = `تعديل بيانات: ${staff.name}`;
+                icon.className = 'fa-solid fa-user-pen';
+            }
+
+            modal.classList.remove('hidden');
+        }
+
+        function closeModal() {
+            document.getElementById('staffModal').classList.add('hidden');
+        }
+
+        function saveStaff(e) {
+            e.preventDefault();
+
+            const staffId = document.getElementById('formStaffId').value;
+            const staffObj = {
+                name: document.getElementById('formName').value.trim(),
+                period: document.getElementById('formPeriod').value,
+                category: document.getElementById('formCategory').value,
+                job: document.getElementById('formJob').value.trim(),
+                branch: document.getElementById('formBranch').value,
+                salary: Number(document.getElementById('formSalary').value) || 0,
+                phone: document.getElementById('formPhone').value.trim(),
+                nationalId: document.getElementById('formNationalId').value.trim()
+            };
+
+            if (staffId) {
+                const index = staffList.findIndex(s => s.id === Number(staffId));
+                if (index !== -1) {
+                    staffList[index] = { ...staffList[index], ...staffObj };
+                }
+            } else {
+                const newId = staffList.length > 0 ? Math.max(...staffList.map(s => s.id)) + 1 : 1;
+                staffList.unshift({ id: newId, ...staffObj });
+            }
+
+            saveToLocalStorage();
+            updateKPIs();
+            applyFilters();
+            closeModal();
+        }
+
+        function promptDelete(id, name) {
+            staffToDeleteId = id;
+            document.getElementById('deleteStaffPrompt').textContent = `هل أنت متأكد من رغبتك في حذف "${name}" نهائياً من الكشوفات؟`;
+            document.getElementById('deleteModal').classList.remove('hidden');
+        }
+
+        function closeDeleteModal() {
+            staffToDeleteId = null;
+            document.getElementById('deleteModal').classList.add('hidden');
+        }
+
+        function confirmDelete() {
+            if (staffToDeleteId) {
+                staffList = staffList.filter(s => s.id !== staffToDeleteId);
+                saveToLocalStorage();
+                updateKPIs();
+                applyFilters();
+                closeDeleteModal();
+            }
+        }
+
+        function exportToCSV() {
+            const headers = ["م", "الاسم", "الوظيفة", "التصنيف", "الفترة", "الفرع", "الراتب", "رقم الهاتف", "الرقم القومي"];
+            const rows = staffList.map((item, index) => [
+                index + 1,
+                `"${item.name.replace(/"/g, '""')}"`,
+                `"${item.job.replace(/"/g, '""')}"`,
+                `"${item.category}"`,
+                item.period === 'morning' ? 'صباحي (حضانة)' : 'مسائي (كتاب)',
+                `"${item.branch}"`,
+                item.salary,
+                `"${item.phone || ''}"`,
+                `"${item.nationalId || ''}"`
+            ]);
+
+            const csvContent = "\uFEFF" + [headers.join(","), ...rows.map(e => e.join(","))].join("\r\n");
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement("a");
+            const url = URL.createObjectURL(blob);
+            link.setAttribute("href", url);
+            link.setAttribute("download", `رواتب_مؤسسة_الفردوس_الإسلامية_${new Date().toISOString().slice(0, 10)}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        window.onload = initApp;
+    </script>
+</body>
+</html>
