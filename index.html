@@ -763,7 +763,7 @@
         // ---------------- Google Sheets Sync (اختياري) ----------------
         const LS_KEY = 'al_firdous_staff_records';
         // ⚠️ بعد نشر Apps Script: الصق رابط الـ Web app هنا، وضع نفس SECRET
-        const REMOTE = { url: 'https://script.google.com/macros/s/AKfycbxJQEwJODWgXlvx1MYoXHWxluL4B01orZqV_5jNLI_nkJLzLxlEhBhkpfbpEuvSGepCWg/exec', secret: '23558001' };
+        const REMOTE = { url: 'https://script.google.com/macros/s/AKfycbxJQEwJODWgXlvx1MYoXHWxluL4B01orZqV_5jNLI_nkJLzLxlEhBhkpfbpEuvSGepCWg/exec', secret: 'CHANGE_ME_123' };
         function remoteEnabled() { return REMOTE.url && REMOTE.url.indexOf('http') === 0; }
 
         let _jsonpSeq = 0;
@@ -896,8 +896,10 @@
 
         function resetData() {
             if (remoteEnabled()) {
-                if (confirm("هل تريد إعادة تحميل البيانات من Google Sheets؟")) {
-                    refreshFromRemote(function (ok) { if (ok) showToast('تم تحديث البيانات من الشيت', 'success'); });
+                if (confirm("إعادة تعيين البيانات: سيتم رفع النسخة الأصلية (" + initialStaffData.length + " سجل) إلى Google Sheets واستبدال البيانات الحالية. متابعة؟")) {
+                    apiWrite({ action: 'replace', data: initialStaffData });
+                    showToast('جارٍ إعادة التعيين من النسخة الأصلية...', 'info');
+                    setTimeout(function () { refreshFromRemote(function () { showToast('تمت إعادة التعيين بنجاح', 'success'); }); }, 3000);
                 }
                 return;
             }
