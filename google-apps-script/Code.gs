@@ -92,7 +92,14 @@ function sheet() {
     sh.appendRow(HEADERS);
     sh.setFrozenRows(1);
   }
+  // أعمدة الهاتف (H) والرقم القومي (I) كنص للحفاظ على الصفر الأول
+  sh.getRange('H:I').setNumberFormat('@');
   return sh;
+}
+
+/** يضبط تنسيق أعمدة النص لصفوف محددة قبل الكتابة. */
+function setTextFormat(sh, startRow, numRows) {
+  if (numRows > 0) sh.getRange(startRow, 8, numRows, 2).setNumberFormat('@');
 }
 
 /** قراءة كل السجلات ككائنات. */
@@ -141,21 +148,26 @@ function toRow(rec, id) {
     rec.period || '',
     rec.branch || '',
     Number(rec.salary) || 0,
-    rec.phone || '',
-    rec.nationalId || ''
+    rec.phone == null ? '' : String(rec.phone),
+    rec.nationalId == null ? '' : String(rec.nationalId)
   ];
 }
 
 function addRow(rec) {
   if (!rec) return;
-  sheet().appendRow(toRow(rec, nextId()));
+  var sh = sheet();
+  var rowIndex = sh.getLastRow() + 1;
+  setTextFormat(sh, rowIndex, 1);
+  sh.getRange(rowIndex, 1, 1, HEADERS.length).setValues([toRow(rec, nextId())]);
 }
 
 function updateRow(rec) {
   if (!rec) return;
   var rowIndex = findRowIndexById(rec.id);
   if (rowIndex === -1) { addRow(rec); return; }
-  sheet().getRange(rowIndex, 1, 1, HEADERS.length).setValues([toRow(rec)]);
+  var sh = sheet();
+  setTextFormat(sh, rowIndex, 1);
+  sh.getRange(rowIndex, 1, 1, HEADERS.length).setValues([toRow(rec)]);
 }
 
 function deleteRow(id) {
@@ -170,6 +182,7 @@ function replaceAll(data) {
   }
   if (data.length === 0) return;
   var rows = data.map(function (r) { return toRow(r, r.id); });
+  setTextFormat(sh, 2, rows.length);
   sh.getRange(2, 1, rows.length, HEADERS.length).setValues(rows);
 }
 
