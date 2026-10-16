@@ -829,6 +829,12 @@
             setSyncBadge('loading');
             jsonpGet({}, function (res) {
                 if (res && res.ok && Array.isArray(res.data)) {
+                    if (res.data.length === 0) {
+                        loadLocalData();
+                        setSyncBadge('online', 'الشيت متصل لكنه فارغ — اضغط «رفع البيانات الحالية للشيت» لرفع ' + staffList.length + ' سجل.');
+                        if (cb) cb(true);
+                        return;
+                    }
                     staffList = res.data.map(normalizeRecord);
                     saveToLocalStorage();
                     updateKPIs();
