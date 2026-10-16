@@ -62,7 +62,7 @@
                 <!-- Logo & Brand Title -->
                 <div class="flex items-center gap-4 text-center md:text-right">
                     <div class="w-16 h-16 bg-white rounded-2xl flex items-center justify-center p-1.5 shadow-inner border-2 border-firdous-gold overflow-hidden">
-                        <img src="logo.png" alt="شعار الفردوس" class="w-full h-full object-contain" onerror="this.onerror=null; this.parentElement.innerHTML='<span class=\'text-firdous-teal font-black text-xl\'>الفردوس</span>';">
+                        <img src="logo.png" alt="شعار مؤسسة الفردوس الإسلامية" class="w-full h-full object-contain" onerror="this.onerror=null; this.parentElement.innerHTML='<span class=\'text-firdous-teal font-black text-xl\'>الفردوس</span>';">
                     </div>
                     <div>
                         <h1 class="text-2xl font-black tracking-wide text-white flex items-center gap-2 justify-center md:justify-start">
@@ -83,6 +83,13 @@
                     <button onclick="exportToCSV()" class="bg-white/10 hover:bg-white/20 text-white px-3 py-2 rounded-xl text-sm font-semibold border border-white/20 transition flex items-center gap-1.5" title="تصدير إلى إكسيل">
                         <i class="fa-solid fa-file-excel text-green-300"></i> تصدير Excel
                     </button>
+                    <button onclick="backupJSON()" class="bg-white/10 hover:bg-white/20 text-white px-3 py-2 rounded-xl text-sm font-semibold border border-white/20 transition flex items-center gap-1.5" title="حفظ نسخة احتياطية من البيانات">
+                        <i class="fa-solid fa-download text-teal-200"></i> نسخة احتياطية
+                    </button>
+                    <button onclick="document.getElementById('restoreFileInput').click()" class="bg-white/10 hover:bg-white/20 text-white px-3 py-2 rounded-xl text-sm font-semibold border border-white/20 transition flex items-center gap-1.5" title="استعادة نسخة احتياطية">
+                        <i class="fa-solid fa-upload text-amber-200"></i> استعادة نسخة
+                    </button>
+                    <input type="file" id="restoreFileInput" accept="application/json,.json" class="hidden" onchange="restoreJSON(event)">
                     <button onclick="window.print()" class="bg-white/10 hover:bg-white/20 text-white px-3 py-2 rounded-xl text-sm font-semibold border border-white/20 transition flex items-center gap-1.5" title="طباعة الكشف">
                         <i class="fa-solid fa-print text-teal-200"></i> طباعة
                     </button>
@@ -161,7 +168,7 @@
                 </div>
                 <div>
                     <span class="text-xs text-gray-500 font-semibold block">الفروع المغطاة</span>
-                    <span class="text-2xl font-black text-gray-800" id="kpiBranchCount">7</span>
+                    <span class="text-2xl font-black text-gray-800" id="kpiBranchCount">0</span>
                     <span class="text-[10px] text-indigo-600 block">فروع بأسوان</span>
                 </div>
             </div>
@@ -229,6 +236,7 @@
                     <select id="sortFilter" onchange="applyFilters()" class="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm font-medium focus:outline-none focus:ring-2 focus:ring-firdous-teal focus:bg-white transition">
                         <option value="id_asc">ترتيب: الترتيب الأصلي</option>
                         <option value="name_asc">الاسم (أبجدياً أ - ي)</option>
+                        <option value="name_desc">الاسم (أبجدياً ي - أ)</option>
                         <option value="salary_desc">الراتب (من الأعلى للأقل)</option>
                         <option value="salary_asc">الراتب (من الأقل للأعلى)</option>
                         <option value="branch">حسب الفرع</option>
@@ -239,17 +247,17 @@
 
         <!-- Staff Records Table Card -->
         <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
-            <div class="overflow-x-auto">
+            <div class="overflow-x-auto hidden md:block">
                 <table class="w-full text-right border-collapse" id="staffTable">
                     <thead>
                         <tr class="bg-gray-50/90 text-gray-700 text-xs font-bold uppercase tracking-wider border-b border-gray-200">
                             <th class="py-3.5 px-3 text-center w-12">#</th>
-                            <th class="py-3.5 px-4">الاسم الرباعي</th>
-                            <th class="py-3.5 px-4">الوظيفة</th>
+                            <th onclick="sortBy('name')" class="py-3.5 px-4 cursor-pointer hover:text-firdous-teal select-none">الاسم الرباعي <i class="fa-solid fa-sort text-gray-300 ml-1"></i></th>
+                            <th onclick="sortBy('job')" class="py-3.5 px-4 cursor-pointer hover:text-firdous-teal select-none">الوظيفة <i class="fa-solid fa-sort text-gray-300 ml-1"></i></th>
                             <th class="py-3.5 px-3 text-center">التصنيف</th>
                             <th class="py-3.5 px-3 text-center">الفترة</th>
-                            <th class="py-3.5 px-3">الفرع</th>
-                            <th class="py-3.5 px-4 text-center">الراتب</th>
+                            <th onclick="sortBy('branch')" class="py-3.5 px-3 cursor-pointer hover:text-firdous-teal select-none">الفرع <i class="fa-solid fa-sort text-gray-300 ml-1"></i></th>
+                            <th onclick="sortBy('salary')" class="py-3.5 px-4 text-center cursor-pointer hover:text-firdous-teal select-none">الراتب <i class="fa-solid fa-sort text-gray-300 ml-1"></i></th>
                             <th class="py-3.5 px-4">رقم الهاتف</th>
                             <th class="py-3.5 px-4">الرقم القومي</th>
                             <th class="py-3.5 px-3 text-center no-print">إجراءات</th>
@@ -258,8 +266,14 @@
                     <tbody id="staffTableBody" class="divide-y divide-gray-100 text-sm">
                         <!-- Dynamic Records Injected Here -->
                     </tbody>
+                    <tfoot id="staffTableFoot" class="bg-teal-50/70 font-bold text-gray-800 border-t-2 border-firdous-teal text-sm">
+                        <!-- Totals Injected Here -->
+                    </tfoot>
                 </table>
             </div>
+
+            <!-- Mobile Card View -->
+            <div id="staffCards" class="md:hidden divide-y divide-gray-100"></div>
 
             <!-- Empty State -->
             <div id="emptyState" class="hidden p-12 text-center">
@@ -415,10 +429,16 @@
         </div>
     </div>
 
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed bottom-5 left-1/2 -translate-x-1/2 z-[60] text-white px-5 py-3 rounded-xl shadow-2xl text-sm font-bold transition-all duration-300 opacity-0 pointer-events-none bg-firdous-teal"></div>
+
     <!-- Application Core Script with Complete Dataset Preloaded -->
     <script>
+        // -------------------------------------------------------------
+        // 1. Initial Dataset (Extracted exactly from provided PDFs)
+        // -------------------------------------------------------------
         const initialStaffData = [
-            // ========== حضانة الفردوس الإسلامية (الفترة الصباحية) ==========
+// ========== حضانة الفردوس الإسلامية (الفترة الصباحية) ==========
             { id: 1, name: "أسماء سلطان احمد", salary: 3800, job: "مشرفة عام", branch: "الفرع الرئيسي", period: "morning", category: "مشرفين", nationalId: "28006212800523", phone: "01119827167" },
             { id: 2, name: "ماجدة حسن عبدالله", salary: 3150, job: "مشرفة", branch: "الفرع الرئيسي", period: "morning", category: "مشرفين", nationalId: "27505142701843", phone: "01112899184" },
             { id: 3, name: "إيمان سلطان احمد", salary: 3150, job: "مشرفة", branch: "فرع ابوشوك", period: "morning", category: "مشرفين", nationalId: "28609132800545", phone: "01153311545" },
@@ -479,81 +499,262 @@
             { id: 58, name: "فاطمة زين العابدين عبدالاله", salary: 1200, job: "عاملة", branch: "فرع المهندسين", period: "morning", category: "عمال", nationalId: "28307142800725", phone: "01127876192" },
 
             // ========== مركز الفردوس لتحفيظ القرآن الكريم (الفترة المسائية) ==========
-            { id: 101, name: "محمد حمدي عبدالمجيد", salary: 3500, job: "مشرف عام / مدير المركز", branch: "الفرع الرئيسي", period: "evening", category: "مشرفين", nationalId: "28404012802999", phone: "01149029496" },
-            { id: 102, name: "محمود حسنين عبدالغفار", salary: 3000, job: "مشرف", branch: "الفرع الرئيسي", period: "evening", category: "مشرفين", nationalId: "28906142800394", phone: "01121189929" },
-            { id: 103, name: "إسراء زكريا محمد", salary: 1500, job: "مشرفة", branch: "الفرع الرئيسي", period: "evening", category: "مشرفين", nationalId: "30002242800327", phone: "01144789983" },
-            { id: 104, name: "فاطمة عبد الله محمد", salary: 1500, job: "مشرفة", branch: "الفرع الرئيسي", period: "evening", category: "مشرفين", nationalId: "30112122800927", phone: "01149709819" },
-            { id: 105, name: "أماني سميح ابراهيم", salary: 1200, job: "مشرفة", branch: "الفرع الرئيسي", period: "evening", category: "مشرفين", nationalId: "30112011705901", phone: "01021650625" },
-            { id: 106, name: "ابتسام سميح ابراهيم", salary: 1200, job: "مشرفة", branch: "الفرع الرئيسي", period: "evening", category: "مشرفين", nationalId: "30407231702102", phone: "01220708034" },
-            { id: 107, name: "مشيرة إسماعيل عبده", salary: 800, job: "مشرفة", branch: "فرع العقاد", period: "evening", category: "مشرفين", nationalId: "28304252800381", phone: "01142200764" },
-            { id: 108, name: "سهام عبد الحميد موسي", salary: 1500, job: "مشرفة", branch: "فرع المهندسين", period: "evening", category: "مشرفين", nationalId: "29912202800481", phone: "01110486215" },
-            { id: 109, name: "ياسمين عاطف عبدالحميد", salary: 1500, job: "مشرفة", branch: "فرع ابوشوك", period: "evening", category: "مشرفين", nationalId: "28310162801028", phone: "01012548633" },
-            { id: 110, name: "زينب يونس علي", salary: 1700, job: "مشرفة نساء", branch: "الفرع الرئيسي", period: "evening", category: "مشرفين", nationalId: "27611252800302", phone: "01121693693" },
-            { id: 111, name: "إيمان محمد توفيق", salary: 800, job: "مشرفة نساء", branch: "فرع المهندسين", period: "evening", category: "مشرفين", nationalId: "28707098801405", phone: "01144762777" },
-            { id: 112, name: "احمد عبد العليم عبد النبي", salary: 2500, job: "مشرف فرع", branch: "فرع الكوبانية", period: "evening", category: "مشرفين", nationalId: "27904042800617", phone: "01115025330" },
-            { id: 113, name: "عبد السلام محمد خير محمد", salary: 2000, job: "مشرف", branch: "فرع الكوبانية", period: "evening", category: "مشرفين", nationalId: "27511172800056", phone: "01123525284" },
-            { id: 114, name: "أسماء احمد ابازيد", salary: 1000, job: "مشرفة", branch: "فرع غرب اسوان", period: "evening", category: "مشرفين", nationalId: "28607152800182", phone: "—" },
-            { id: 115, name: "امنة عبدالرحيم غالب", salary: 1000, job: "مشرفة", branch: "فرع غرب اسوان", period: "evening", category: "مشرفين", nationalId: "28008182800968", phone: "—" },
-            { id: 116, name: "فاطمة محمد بشير", salary: 1000, job: "مشرفة", branch: "فرع غرب اسوان", period: "evening", category: "مشرفين", nationalId: "29501012809480", phone: "—" },
-            { id: 120, name: "هاني نعيم علي", salary: 2000, job: "إداري", branch: "الفرع الرئيسي", period: "evening", category: "إداريين", nationalId: "28307312800555", phone: "01124438355" },
-            { id: 121, name: "الاء محمود حسن", salary: 3000, job: "إدارية", branch: "الفرع الرئيسي", period: "evening", category: "إداريين", nationalId: "30309282800689", phone: "01145929773" },
-            { id: 122, name: "زينب شريف عبد المنعم", salary: 600, job: "إدارية", branch: "الفرع الرئيسي", period: "evening", category: "إداريين", nationalId: "30809160100646", phone: "01148194939" },
-            { id: 123, name: "الاء محمود سليم", salary: 1500, job: "إدارية", branch: "الفرع الرئيسي", period: "evening", category: "إداريين", nationalId: "29105012800369", phone: "01128822417" },
-            { id: 124, name: "مريم يحيى عبد الحافظ", salary: 1000, job: "إدارية", branch: "الفرع الرئيسي", period: "evening", category: "إداريين", nationalId: "30905212800683", phone: "01158897312" },
-            { id: 125, name: "حسناء عبد الناصر", salary: 500, job: "إدارية", branch: "الفرع الرئيسي", period: "evening", category: "إداريين", nationalId: "31002152800224", phone: "01157721127" },
-            { id: 126, name: "هدير شريف عبد المنعم", salary: 600, job: "إدارية نساء", branch: "الفرع الرئيسي", period: "evening", category: "إداريين", nationalId: "30609100102101", phone: "01149067580" },
-            { id: 127, name: "إسراء توفيق الفار", salary: 1000, job: "إدارية", branch: "فرع ابوشوك", period: "evening", category: "إداريين", nationalId: "30206132800423", phone: "01207009525" },
-            { id: 128, name: "دينا خالد محمد", salary: 2500, job: "مسؤولة كمبيوتر", branch: "الفرع الرئيسي", period: "evening", category: "إداريين", nationalId: "30209102800347", phone: "01147420224" },
-            { id: 129, name: "نورهان أسامة محمد", salary: 1000, job: "إدارية", branch: "فرع المهندسين", period: "evening", category: "إداريين", nationalId: "30302252800302", phone: "01152717462" },
-            { id: 130, name: "يسرا عبدالهادى احمد", salary: 1000, job: "إدارية نساء", branch: "فرع المهندسين", period: "evening", category: "إداريين", nationalId: "29201282800262", phone: "01111980947" },
-            { id: 131, name: "حنين ثابت احمد", salary: 700, job: "إداري", branch: "الفرع الرئيسي", period: "evening", category: "إداريين", nationalId: "30207182800129", phone: "01143636161" },
-            { id: 132, name: "محمد ايمن محمد سمير", salary: 3000, job: "كمبيوتر", branch: "الفرع الرئيسي", period: "evening", category: "إداريين", nationalId: "30105312400953", phone: "01153509012" },
-            { id: 133, name: "علي احمد عاطف", salary: 3000, job: "كمبيوتر", branch: "الفرع الرئيسي", period: "evening", category: "إداريين", nationalId: "30509042602196", phone: "01153349092" },
-            { id: 134, name: "يحيى مصطفى", salary: 3000, job: "كمبيوتر", branch: "الفرع الرئيسي", period: "evening", category: "إداريين", nationalId: "30509042602196", phone: "01122056189" },
-            { id: 135, name: "محمد عبدالحميد عبدالحفيظ", salary: 800, job: "كمبيوتر", branch: "الفرع الرئيسي", period: "evening", category: "إداريين", nationalId: "31010102802199", phone: "01224319192" },
-            { id: 136, name: "سهيلة سليمان ابراهيم احمد", salary: 800, job: "إدارية", branch: "فرع الكوبانية", period: "evening", category: "إداريين", nationalId: "30207232800281", phone: "01146635732" },
-            { id: 137, name: "جهاد خالد محمود حسن", salary: 800, job: "إدارية", branch: "فرع الكوبانية", period: "evening", category: "إداريين", nationalId: "30206222800082", phone: "01127059721" },
-            { id: 140, name: "حنان رمضان عبد السميع", salary: 800, job: "معلمة قرآن", branch: "الفرع الرئيسي", period: "evening", category: "معلمين", nationalId: "29508242800209", phone: "01153248017" },
-            { id: 141, name: "هدى محمد عبد الحميد", salary: 700, job: "معلمة قرآن", branch: "الفرع الرئيسي", period: "evening", category: "معلمين", nationalId: "28601022700587", phone: "01127790117" },
-            { id: 142, name: "قمر عبد الفتاح محمد", salary: 500, job: "معلمة قرآن", branch: "الفرع الرئيسي", period: "evening", category: "معلمين", nationalId: "30810012803741", phone: "01114279752" },
-            { id: 143, name: "الاء أيمن إبراهيم", salary: 600, job: "معلمة قرآن", branch: "الفرع الرئيسي", period: "evening", category: "معلمين", nationalId: "30811162800089", phone: "01101917706" },
-            { id: 144, name: "إيمان محمد احمد", salary: 700, job: "معلمة قرآن", branch: "الفرع الرئيسي", period: "evening", category: "معلمين", nationalId: "30709092800184", phone: "01144762777" },
-            { id: 145, name: "سهيلة عبد الناصر عبد الستار", salary: 600, job: "معلمة قرآن", branch: "الفرع الرئيسي", period: "evening", category: "معلمين", nationalId: "30307112800185", phone: "01552206675" },
-            { id: 146, name: "فاطمه عبد الدايم عبد العزيز", salary: 700, job: "معلمة قرآن", branch: "الفرع الرئيسي", period: "evening", category: "معلمين", nationalId: "27908042702246", phone: "01095812959" },
-            { id: 147, name: "رحمة منصور حسن", salary: 700, job: "معلمة قرآن", branch: "الفرع الرئيسي", period: "evening", category: "معلمين", nationalId: "30902202800309", phone: "01148295310" },
-            { id: 148, name: "سعدية السيد احمد", salary: 600, job: "معلمة قرآن", branch: "الفرع الرئيسي", period: "evening", category: "معلمين", nationalId: "30605312800105", phone: "01116615460" },
-            { id: 149, name: "إسراء خالد عبد العظيم", salary: 1000, job: "معلمة قرآن", branch: "الفرع الرئيسي", period: "evening", category: "معلمين", nationalId: "30810292800106", phone: "01229528294" },
-            { id: 150, name: "أحمد ثروت عكاشة", salary: 2500, job: "معلم قرآن", branch: "الفرع الرئيسي", period: "evening", category: "معلمين", nationalId: "30201012802331", phone: "01103161389" },
-            { id: 151, name: "عبدالله محمد اسماعيل", salary: 3500, job: "معلم قرآن", branch: "الفرع الرئيسي", period: "evening", category: "معلمين", nationalId: "30107302800131", phone: "01114624604" },
-            { id: 152, name: "شاذلي برشاوي بغدادى", salary: 2500, job: "معلم قرآن", branch: "فرع المهندسين", period: "evening", category: "معلمين", nationalId: "28805012801151", phone: "01010785342" },
-            { id: 153, name: "عبد الرحمن إسماعيل", salary: 2500, job: "معلم قرآن", branch: "فرع المهندسين", period: "evening", category: "معلمين", nationalId: "29709102800953", phone: "01070402669" },
-            { id: 154, name: "د. حسين محمد مصطفى", salary: 2000, job: "معلم قرآن", branch: "فرع المسله", period: "evening", category: "معلمين", nationalId: "82310102800316", phone: "01119975383" },
-            { id: 155, name: "كمال حسين احمد", salary: 2000, job: "معلم قرآن", branch: "الفرع الرئيسي", period: "evening", category: "معلمين", nationalId: "26304142701259", phone: "01143020705" },
-            { id: 156, name: "طارق عبد الحي جامع", salary: 2000, job: "معلم قرآن", branch: "فرع الكوبانية", period: "evening", category: "معلمين", nationalId: "25000828650682", phone: "01159324608" },
-            { id: 157, name: "حسني سيد محمد ابراهيم", salary: 1800, job: "معلم قرآن", branch: "فرع الكوبانية", period: "evening", category: "معلمين", nationalId: "28606212800237", phone: "01152586307" },
-            { id: 158, name: "محمد زكريا علي حسن", salary: 1700, job: "معلم قرآن", branch: "فرع الكوبانية", period: "evening", category: "معلمين", nationalId: "28207122800058", phone: "01148227319" },
-            { id: 159, name: "اروى عبدالملك احمد", salary: 1000, job: "معلمة قرآن", branch: "فرع غرب اسوان", period: "evening", category: "معلمين", nationalId: "30901122800085", phone: "—" },
-            { id: 160, name: "فاطمة محمد جمعة", salary: 1000, job: "معلمة قرآن", branch: "فرع غرب اسوان", period: "evening", category: "معلمين", nationalId: "30103102800042", phone: "—" },
-            { id: 161, name: "خديجة رمضان حامد", salary: 1000, job: "معلمة قرآن", branch: "فرع غرب اسوان", period: "evening", category: "معلمين", nationalId: "30506092800224", phone: "—" },
-            { id: 162, name: "فاطمة ربيع عكاشة", salary: 1000, job: "معلمة قرآن", branch: "فرع غرب اسوان", period: "evening", category: "معلمين", nationalId: "28809012800206", phone: "—" },
-            { id: 163, name: "غادة عبدالعظيم حسن", salary: 1000, job: "معلمة قرآن", branch: "فرع غرب اسوان", period: "evening", category: "معلمين", nationalId: "28911152800086", phone: "—" },
-            { id: 164, name: "اسراء عادل محمد", salary: 1000, job: "معلمة قرآن", branch: "فرع العقاد", period: "evening", category: "معلمين", nationalId: "30211242800228", phone: "01151110365" },
-            { id: 180, name: "نجاه أحمد محمد", salary: 1500, job: "عاملة", branch: "الفرع الرئيسي", period: "evening", category: "عمال", nationalId: "27609162700061", phone: "01111534175" },
-            { id: 181, name: "عبير السيد احمد", salary: 1000, job: "عاملة", branch: "الفرع الرئيسي", period: "evening", category: "عمال", nationalId: "28804082800260", phone: "01128486942" },
-            { id: 182, name: "فايزة أمين سامح", salary: 1000, job: "عاملة", branch: "الفرع الرئيسي", period: "evening", category: "عمال", nationalId: "28208112601088", phone: "01117372305" },
-            { id: 183, name: "نجوى الفولى حمام", salary: 1440, job: "عاملة", branch: "فرع ابوشوك", period: "evening", category: "عمال", nationalId: "28610232800788", phone: "01118549081" },
-            { id: 184, name: "صابرين عبد العاطى احمد", salary: 600, job: "عاملة", branch: "فرع ابوشوك", period: "evening", category: "عمال", nationalId: "28903062800068", phone: "01142537483" },
-            { id: 185, name: "وفاء عكاشة خلف", salary: 1115, job: "عاملة", branch: "فرع العقاد", period: "evening", category: "عمال", nationalId: "28203182800787", phone: "01278365476" },
-            { id: 186, name: "خديجة محمد مصطفى", salary: 915, job: "عاملة", branch: "فرع المهندسين", period: "evening", category: "عمال", nationalId: "29209212800444", phone: "01113936775" },
-            { id: 187, name: "راندا صلاح انور", salary: 600, job: "عاملة", branch: "فرع المهندسين", period: "evening", category: "عمال", nationalId: "29104302800561", phone: "01140716054" },
-            { id: 188, name: "نبا عبد الحفيظ عبد العاطي", salary: 500, job: "عاملة", branch: "فرع الكوبانية", period: "evening", category: "عمال", nationalId: "28000823180182", phone: "01152763549" },
-            { id: 189, name: "سحر محمد عبده", salary: 500, job: "عاملة", branch: "فرع الكوبانية", period: "evening", category: "عمال", nationalId: "28905092800049", phone: "01120783396" }
+
+            // المشرفين والمشرفات
+            { id: 101, name: "إسراء زكريا محمد", salary: 1500, job: "مشرفة", branch: "الفرع الرئيسي", period: "evening", category: "مشرفين", nationalId: "30002242800327", phone: "01144789983" },
+            { id: 102, name: "فاطمة عبد الله محمد", salary: 1500, job: "مشرفة", branch: "الفرع الرئيسي", period: "evening", category: "مشرفين", nationalId: "30112122800927", phone: "01149709819" },
+            { id: 103, name: "أماني سميح ابراهيم", salary: 1200, job: "مشرفة", branch: "الفرع الرئيسي", period: "evening", category: "مشرفين", nationalId: "30112011705901", phone: "01021650625" },
+            { id: 104, name: "ابتسام سميح ابراهيم", salary: 1200, job: "مشرفة", branch: "الفرع الرئيسي", period: "evening", category: "مشرفين", nationalId: "30407231702102", phone: "01220708034" },
+            { id: 105, name: "مشيرة إسماعيل عبده", salary: 800, job: "مشرفة", branch: "فرع العقاد", period: "evening", category: "مشرفين", nationalId: "28304252800381", phone: "01142200764" },
+            { id: 106, name: "سهام عبد الحميد موسى", salary: 1500, job: "مشرفة", branch: "فرع المهندسين", period: "evening", category: "مشرفين", nationalId: "29912202800481", phone: "01110486215" },
+            { id: 107, name: "ياسمين عاطف عبدالحميد", salary: 1500, job: "مشرفة", branch: "فرع ابوشوك", period: "evening", category: "مشرفين", nationalId: "28310162801028", phone: "01012548633" },
+            { id: 108, name: "زينب يونس علي", salary: 1700, job: "مشرفة", branch: "الفرع الرئيسي", period: "evening", category: "مشرفين", nationalId: "27611252800302", phone: "01121693693" },
+            { id: 109, name: "إيمان محمد توفيق", salary: 800, job: "مشرفة", branch: "فرع المهندسين", period: "evening", category: "مشرفين", nationalId: "28707098801405", phone: "01144762777" },
+            { id: 110, name: "احمد عبد العليم عبد النبي", salary: 2500, job: "مشرف", branch: "فرع الكوبانية", period: "evening", category: "مشرفين", nationalId: "27904042800617", phone: "01115025330" },
+            { id: 111, name: "عبد السلام محمد خير محمد", salary: 2000, job: "مشرف", branch: "فرع الكوبانية", period: "evening", category: "مشرفين", nationalId: "27511172800056", phone: "01123525284" },
+            { id: 112, name: "أسماء احمد ابازيد", salary: 1000, job: "مشرفة", branch: "فرع غرب اسوان", period: "evening", category: "مشرفين", nationalId: "28607152800182", phone: "" },
+            { id: 113, name: "امنة عبدالرحيم غالب", salary: 1000, job: "مشرفة", branch: "فرع غرب اسوان", period: "evening", category: "مشرفين", nationalId: "28008182800968", phone: "" },
+            { id: 114, name: "فاطمة محمد بشير", salary: 1000, job: "مشرفة", branch: "فرع غرب اسوان", period: "evening", category: "مشرفين", nationalId: "29501012809480", phone: "" },
+
+            // الإداريون والتقنيون (كمبيوتر / إدارة)
+            { id: 115, name: "زينب شريف عبد المنعم", salary: 600, job: "إدارية", branch: "الفرع الرئيسي", period: "evening", category: "إداريين", nationalId: "30809160100646", phone: "01148194939" },
+            { id: 116, name: "الاء محمود سليم", salary: 1500, job: "إدارية", branch: "الفرع الرئيسي", period: "evening", category: "إداريين", nationalId: "29105012800369", phone: "01128822417" },
+            { id: 117, name: "مريم يحيى عبد الحافظ", salary: 1000, job: "إدارية", branch: "الفرع الرئيسي", period: "evening", category: "إداريين", nationalId: "30905212800683", phone: "01158897312" },
+            { id: 118, name: "حسناء عبد الناصر", salary: 500, job: "إدارية", branch: "الفرع الرئيسي", period: "evening", category: "إداريين", nationalId: "31002152800224", phone: "01157721127" },
+            { id: 119, name: "هدير شريف عبد المنعم", salary: 600, job: "إدارية", branch: "الفرع الرئيسي", period: "evening", category: "إداريين", nationalId: "30609100102101", phone: "01149067580" },
+            { id: 120, name: "إسراء توفيق الفار", salary: 1000, job: "إدارية", branch: "فرع ابوشوك", period: "evening", category: "إداريين", nationalId: "30206132800423", phone: "01207009525" },
+            { id: 121, name: "دينا خالد محمد", salary: 2500, job: "كمبيوتر", branch: "الفرع الرئيسي", period: "evening", category: "إداريين", nationalId: "30209102800347", phone: "01147420224" },
+            { id: 122, name: "نورهان أسامة محمد", salary: 1000, job: "إدارية", branch: "فرع المهندسين", period: "evening", category: "إداريين", nationalId: "30302252800302", phone: "01152717462" },
+            { id: 123, name: "يسرا عبدالهادى احمد", salary: 1000, job: "إدارية", branch: "فرع المهندسين", period: "evening", category: "إداريين", nationalId: "29201282800262", phone: "01111980947" },
+            { id: 124, name: "محمد ايمن محمد سمير", salary: 3000, job: "كمبيوتر", branch: "الفرع الرئيسي", period: "evening", category: "إداريين", nationalId: "30105312400953", phone: "01153509012" },
+            { id: 125, name: "علي احمد عاطف", salary: 3000, job: "كمبيوتر", branch: "الفرع الرئيسي", period: "evening", category: "إداريين", nationalId: "30509042602196", phone: "01153349092" },
+            { id: 126, name: "يحيى مصطفى", salary: 3000, job: "كمبيوتر", branch: "الفرع الرئيسي", period: "evening", category: "إداريين", nationalId: "30509042602196", phone: "01122056189" },
+            { id: 127, name: "محمد عبدالحميد عبدالحفيظ", salary: 800, job: "كمبيوتر", branch: "الفرع الرئيسي", period: "evening", category: "إداريين", nationalId: "31010102802199", phone: "01224319192" },
+            { id: 128, name: "الاء محمود حسن", salary: 3000, job: "ادارى", branch: "الفرع الرئيسي", period: "evening", category: "إداريين", nationalId: "30309282800689", phone: "01145929773" },
+            { id: 129, name: "حنين ثابت احمد", salary: 700, job: "إداري", branch: "الفرع الرئيسي", period: "evening", category: "إداريين", nationalId: "30207182800129", phone: "01143636161" },
+            { id: 130, name: "سهيلة سليمان ابراهيم احمد", salary: 800, job: "إدارية", branch: "فرع الكوبانية", period: "evening", category: "إداريين", nationalId: "30207232800281", phone: "01146635732" },
+            { id: 131, name: "جهاد خالد محمود حسن", salary: 800, job: "إدارية", branch: "فرع الكوبانية", period: "evening", category: "إداريين", nationalId: "30206222800082", phone: "01127059721" },
+
+            // المعلمون والمعلمات (تحفيظ القرآن / أقسام)
+            { id: 132, name: "حنان رمضان عبد السميع", salary: 800, job: "معلمة", branch: "الفرع الرئيسي", period: "evening", category: "معلمين", nationalId: "29508242800209", phone: "01153248017" },
+            { id: 133, name: "هدى محمد عبد الحميد", salary: 700, job: "معلمة", branch: "الفرع الرئيسي", period: "evening", category: "معلمين", nationalId: "28601022700587", phone: "01127790117" },
+            { id: 134, name: "قمر عبد الفتاح محمد", salary: 500, job: "معلمة", branch: "الفرع الرئيسي", period: "evening", category: "معلمين", nationalId: "30810012803741", phone: "01114279752" },
+            { id: 135, name: "الاء أيمن إبراهيم", salary: 600, job: "معلمة", branch: "الفرع الرئيسي", period: "evening", category: "معلمين", nationalId: "30811162800089", phone: "01101917706" },
+            { id: 136, name: "إيمان محمد احمد", salary: 700, job: "معلمة", branch: "الفرع الرئيسي", period: "evening", category: "معلمين", nationalId: "30709092800184", phone: "01144762777" },
+            { id: 137, name: "سهيلة عبد الناصر عبد الستار", salary: 600, job: "معلمة", branch: "الفرع الرئيسي", period: "evening", category: "معلمين", nationalId: "30307112800185", phone: "01552206675" },
+            { id: 138, name: "فاطمة عبد الدايم عبد العزيز", salary: 700, job: "معلمة", branch: "الفرع الرئيسي", period: "evening", category: "معلمين", nationalId: "27908042702246", phone: "01095812959" },
+            { id: 139, name: "رحمة منصور حسن", salary: 700, job: "معلمة", branch: "الفرع الرئيسي", period: "evening", category: "معلمين", nationalId: "30902202800309", phone: "01148295310" },
+            { id: 140, name: "سعدية السيد احمد", salary: 600, job: "معلمة", branch: "الفرع الرئيسي", period: "evening", category: "معلمين", nationalId: "30605312800105", phone: "01116615460" },
+            { id: 141, name: "فاطمة أشرف نجار", salary: 600, job: "معلمة", branch: "الفرع الرئيسي", period: "evening", category: "معلمين", nationalId: "30508142800347", phone: "01155166425" },
+            { id: 142, name: "إسراء خالد عبد العظيم", salary: 1000, job: "معلمة", branch: "الفرع الرئيسي", period: "evening", category: "معلمين", nationalId: "30810292800106", phone: "01229528294" },
+            { id: 143, name: "سارة السيد ضيفى", salary: 500, job: "معلمة", branch: "الفرع الرئيسي", period: "evening", category: "معلمين", nationalId: "30012032800281", phone: "01554525665" },
+            { id: 144, name: "هناء سيد جاد المولى", salary: 700, job: "معلمة", branch: "الفرع الرئيسي", period: "evening", category: "معلمين", nationalId: "31209242800189", phone: "01128948781" },
+            { id: 145, name: "بسمة احمد محمد", salary: 700, job: "معلمة", branch: "الفرع الرئيسي", period: "evening", category: "معلمين", nationalId: "28603302800504", phone: "01128967087" },
+            { id: 146, name: "فاطمة شعبان رجب", salary: 700, job: "معلمة", branch: "الفرع الرئيسي", period: "evening", category: "معلمين", nationalId: "30208012803723", phone: "01115991276" },
+            { id: 147, name: "شروق حسنى شعبان", salary: 600, job: "معلمة", branch: "الفرع الرئيسي", period: "evening", category: "معلمين", nationalId: "31001022802202", phone: "01105623992" },
+            { id: 148, name: "رقية محمد إمبارك", salary: 400, job: "معلمة", branch: "الفرع الرئيسي", period: "evening", category: "معلمين", nationalId: "31209242800189", phone: "01152996115" },
+            { id: 149, name: "بسنت عبد الحميد احمد", salary: 500, job: "معلمة", branch: "الفرع الرئيسي", period: "evening", category: "معلمين", nationalId: "30512022800103", phone: "01126158056" },
+            { id: 150, name: "رقية صابر نجار", salary: 700, job: "معلمة", branch: "الفرع الرئيسي", period: "evening", category: "معلمين", nationalId: "30107012801282", phone: "0112633697" },
+            { id: 151, name: "هند عمرمدنى", salary: 1300, job: "معلمة", branch: "الفرع الرئيسي", period: "evening", category: "معلمين", nationalId: "28803082800906", phone: "01117710904" },
+            { id: 152, name: "مريم عبد الوهاب طه", salary: 800, job: "معلمة", branch: "الفرع الرئيسي", period: "evening", category: "معلمين", nationalId: "31204042901361", phone: "01551477506" },
+            { id: 153, name: "اسم غير معروف (صف 41)", salary: 800, job: "معلمة", branch: "الفرع الرئيسي", period: "evening", category: "معلمين", nationalId: "30801292800247", phone: "01126456441" },
+            { id: 154, name: "أسماء رمضان عبد السميع", salary: 600, job: "معلمة", branch: "الفرع الرئيسي", period: "evening", category: "معلمين", nationalId: "30009272800164", phone: "01113792368" },
+            { id: 155, name: "علياء عبد الوهاب طه", salary: 800, job: "معلمة", branch: "الفرع الرئيسي", period: "evening", category: "معلمين", nationalId: "31001302800264", phone: "01551477506" },
+            { id: 156, name: "شروق طاهر حمادة", salary: 500, job: "معلمة", branch: "الفرع الرئيسي", period: "evening", category: "معلمين", nationalId: "30512022800443", phone: "01146249836" },
+            { id: 157, name: "اسراء حمدي عبد المجيد", salary: 1000, job: "معلمة", branch: "الفرع الرئيسي", period: "evening", category: "معلمين", nationalId: "30208012804061", phone: "01145932978" },
+            { id: 158, name: "دعاء محمد احمد", salary: 400, job: "معلمة", branch: "الفرع الرئيسي", period: "evening", category: "معلمين", nationalId: "31002272800104", phone: "01271873207" },
+            { id: 159, name: "تقوى علي عبد الله", salary: 400, job: "معلمة", branch: "الفرع الرئيسي", period: "evening", category: "معلمين", nationalId: "31003182800144", phone: "01108897328" },
+            { id: 160, name: "منى هاني نعيم", salary: 800, job: "معلمة", branch: "فرع ابوشوك", period: "evening", category: "معلمين", nationalId: "30611012801509", phone: "01221136151" },
+            { id: 161, name: "اية المعلا حسين", salary: 820, job: "معلمة", branch: "فرع ابوشوك", period: "evening", category: "معلمين", nationalId: "29708202800868", phone: "01110176480" },
+            { id: 162, name: "غادة مصطفى محمد", salary: 1000, job: "معلمة", branch: "فرع ابوشوك", period: "evening", category: "معلمين", nationalId: "28312172800481", phone: "01061773208" },
+            { id: 163, name: "ياسمين سعيد محمد", salary: 1000, job: "معلمة", branch: "فرع ابوشوك", period: "evening", category: "معلمين", nationalId: "28906232800148", phone: "01113084527" },
+            { id: 164, name: "الاء عبد الصبور حسن", salary: 1000, job: "معلمة", branch: "فرع ابوشوك", period: "evening", category: "معلمين", nationalId: "29607092800149", phone: "01123590800" },
+            { id: 165, name: "هاجر عادل محمد", salary: 1000, job: "معلمة", branch: "فرع ابوشوك", period: "evening", category: "معلمين", nationalId: "29907172800321", phone: "01119989897" },
+            { id: 166, name: "زينب محمد حسن", salary: 1060, job: "معلمة", branch: "فرع ابوشوك", period: "evening", category: "معلمين", nationalId: "30601062800184", phone: "01113150880" },
+            { id: 167, name: "جيهان أبو الحمد حفنى", salary: 1000, job: "معلمة", branch: "فرع ابوشوك", period: "evening", category: "معلمين", nationalId: "28003202800984", phone: "01103643825" },
+            { id: 168, name: "فاتن محمد على", salary: 700, job: "معلمة", branch: "فرع ابوشوك", period: "evening", category: "معلمين", nationalId: "26711152800306", phone: "01149233381" },
+            { id: 169, name: "انصاف رمضان حسن", salary: 1000, job: "معلمة", branch: "فرع ابوشوك", period: "evening", category: "معلمين", nationalId: "27712072800488", phone: "01115738788" },
+            { id: 170, name: "هبة الله حمدي السعدي", salary: 1315, job: "معلمة", branch: "فرع ابوشوك", period: "evening", category: "معلمين", nationalId: "30410252800423", phone: "01098534534" },
+            { id: 171, name: "حبيبة أنور ارباب", salary: 1000, job: "معلمة", branch: "فرع ابوشوك", period: "evening", category: "معلمين", nationalId: "2980932800203", phone: "01119854793" },
+            { id: 172, name: "اسراء محمد حسن", salary: 1000, job: "معلمة", branch: "فرع ابوشوك", period: "evening", category: "معلمين", nationalId: "31007192800725", phone: "01155367588" },
+            { id: 173, name: "مرفت عبد الصبور عبد النعيم", salary: 850, job: "معلمة", branch: "فرع ابوشوك", period: "evening", category: "معلمين", nationalId: "28309152801129", phone: "01144979175" },
+            { id: 174, name: "مروة عبدالقوى على", salary: 1315, job: "معلمة", branch: "فرع ابوشوك", period: "evening", category: "معلمين", nationalId: "28401302801045", phone: "01154523600" },
+            { id: 175, name: "سندس عبدالوهاب محمد", salary: 1450, job: "معلمة", branch: "فرع ابوشوك", period: "evening", category: "معلمين", nationalId: "30709032801289", phone: "01103804429" },
+            { id: 176, name: "اسراء عادل محمد", salary: 1000, job: "معلمة", branch: "فرع العقاد", period: "evening", category: "معلمين", nationalId: "30211242800228", phone: "01151110365" },
+            { id: 177, name: "سناء فنجري حمزه", salary: 400, job: "معلمة", branch: "فرع المهندسين", period: "evening", category: "معلمين", nationalId: "27704082700462", phone: "01140858748" },
+            { id: 178, name: "سهير عبد الموجود دسوقي", salary: 800, job: "معلمة", branch: "فرع المهندسين", period: "evening", category: "معلمين", nationalId: "29507022800449", phone: "01140562335" },
+            { id: 179, name: "حبيبة عبد الجليل عبد الرازق", salary: 800, job: "معلمة", branch: "فرع المهندسين", period: "evening", category: "معلمين", nationalId: "30401222800047", phone: "01153727963" },
+            { id: 180, name: "شيماء جامع احمد", salary: 700, job: "معلمة", branch: "فرع المهندسين", period: "evening", category: "معلمين", nationalId: "29805192800762", phone: "01103138683" },
+            { id: 181, name: "إسراء أسامة محمد", salary: 500, job: "معلمة", branch: "فرع المهندسين", period: "evening", category: "معلمين", nationalId: "30808152800683", phone: "01149674761" },
+            { id: 182, name: "شيماء مصطفى عبدالحارث", salary: 500, job: "معلمة", branch: "فرع المهندسين", period: "evening", category: "معلمين", nationalId: "30806102801422", phone: "01117252923" },
+            { id: 183, name: "الاشواق السيد ابراهيم", salary: 1500, job: "معلمة نساء", branch: "الفرع الرئيسي", period: "evening", category: "معلمين", nationalId: "27904091201605", phone: "01128390657" },
+            { id: 184, name: "علياء احمد حسن", salary: 1625, job: "معلمة نساء", branch: "الفرع الرئيسي", period: "evening", category: "معلمين", nationalId: "30309282800689", phone: "01145929773" },
+            { id: 185, name: "سمر محمد أحمد", salary: 1400, job: "معلمة نساء", branch: "الفرع الرئيسي", period: "evening", category: "معلمين", nationalId: "28603182800321", phone: "01113778161" },
+            { id: 186, name: "فاطمة أحمد عبد الرحيم", salary: 1200, job: "معلمة نساء", branch: "الفرع الرئيسي", period: "evening", category: "معلمين", nationalId: "29707112800323", phone: "01147759352" },
+            { id: 187, name: "شيماء عبد المنعم محمد", salary: 1100, job: "معلمة نساء", branch: "الفرع الرئيسي", period: "evening", category: "معلمين", nationalId: "27704282800488", phone: "01140934300" },
+            { id: 188, name: "امل عبد الشافي محمد", salary: 600, job: "معلمة نساء", branch: "الفرع الرئيسي", period: "evening", category: "معلمين", nationalId: "29908132800287", phone: "01102306126" },
+            { id: 189, name: "فاطمة محمد رمضان", salary: 1400, job: "معلمة نساء", branch: "الفرع الرئيسي", period: "evening", category: "معلمين", nationalId: "29007142702588", phone: "01117558332" },
+            { id: 190, name: "وفاء احمد مكى", salary: 1500, job: "معلمة نساء", branch: "الفرع الرئيسي", period: "evening", category: "معلمين", nationalId: "27709172801201", phone: "01119884006" },
+            { id: 191, name: "صابره محمد محمدين", salary: 700, job: "معلمة نساء", branch: "الفرع الرئيسي", period: "evening", category: "معلمين", nationalId: "26010082800488", phone: "01120990084" },
+            { id: 192, name: "صفاء فايز فاوي", salary: 1700, job: "معلمة نساء", branch: "الفرع الرئيسي", period: "evening", category: "معلمين", nationalId: "28703222801121", phone: "01123226441" },
+            { id: 193, name: "سمية جابر على", salary: 1000, job: "معلمة نساء", branch: "فرع ابوشوك", period: "evening", category: "معلمين", nationalId: "29009022800945", phone: "01115341526" },
+            { id: 194, name: "فاطمة احمد محمد", salary: 600, job: "معلمة نساء", branch: "فرع المهندسين", period: "evening", category: "معلمين", nationalId: "27712072800461", phone: "01159285677" },
+            { id: 195, name: "محمد حمدي عبد المجيد", salary: 3500, job: "معلم", branch: "الفرع الرئيسي", period: "evening", category: "معلمين", nationalId: "28408012802999", phone: "01149029496" },
+            { id: 196, name: "هاني نعيم على", salary: 2000, job: "معلم", branch: "الفرع الرئيسي", period: "evening", category: "معلمين", nationalId: "28307312800555", phone: "01124438355" },
+            { id: 197, name: "شاذلي برشاوي بغدادى", salary: 2500, job: "معلم", branch: "فرع المهندسين", period: "evening", category: "معلمين", nationalId: "28805012801151", phone: "01010785342" },
+            { id: 198, name: "محمود حسنين عبد الغفار", salary: 3000, job: "معلم", branch: "الفرع الرئيسي", period: "evening", category: "معلمين", nationalId: "28906142800394", phone: "01004997415" },
+            { id: 199, name: "كمال حسين احمد", salary: 2000, job: "معلم", branch: "الفرع الرئيسي", period: "evening", category: "معلمين", nationalId: "26304142701259", phone: "01143020705" },
+            { id: 200, name: "أحمد ثروت عكاشة", salary: 2500, job: "معلم", branch: "الفرع الرئيسي", period: "evening", category: "معلمين", nationalId: "30201012802331", phone: "01103161389" },
+            { id: 201, name: "عبدالله محمد اسماعيل", salary: 3500, job: "معلم", branch: "الفرع الرئيسي", period: "evening", category: "معلمين", nationalId: "30107302800131", phone: "01114624604" },
+            { id: 202, name: "محمد سيد اسماعيل", salary: 1500, job: "معلم", branch: "الفرع الرئيسي", period: "evening", category: "معلمين", nationalId: "30001012813814", phone: "01159025315" },
+            { id: 203, name: "صادق احمد عثمان", salary: 2000, job: "معلم", branch: "الفرع الرئيسي", period: "evening", category: "معلمين", nationalId: "28501192700498", phone: "01122857869" },
+            { id: 204, name: "سليم إسماعيل عبد المجيد", salary: 2000, job: "معلم", branch: "الفرع الرئيسي", period: "evening", category: "معلمين", nationalId: "28411072800139", phone: "01100512817" },
+            { id: 205, name: "محمد احمد عبد الرحيم", salary: 2000, job: "معلم", branch: "الفرع الرئيسي", period: "evening", category: "معلمين", nationalId: "28909252800976", phone: "01128928714" },
+            { id: 206, name: "محمود عبد الحميد على", salary: 2300, job: "معلم", branch: "الفرع الرئيسي", period: "evening", category: "معلمين", nationalId: "29712012802136", phone: "01123709460" },
+            { id: 207, name: "رضا جمال الدين احمد", salary: 3000, job: "معلم", branch: "الفرع الرئيسي", period: "evening", category: "معلمين", nationalId: "30205078800211", phone: "01103670836" },
+            { id: 208, name: "عبد الرحمن إسماعيل", salary: 2500, job: "معلم", branch: "فرع المهندسين", period: "evening", category: "معلمين", nationalId: "29709102800953", phone: "01070402669" },
+            { id: 209, name: "د. حسين محمد مصطفى", salary: 2000, job: "معلم", branch: "فرع المسله", period: "evening", category: "معلمين", nationalId: "82310102800316", phone: "01119975383" },
+            { id: 210, name: "مصعب محمود مصطفى", salary: 1500, job: "معلم", branch: "الفرع الرئيسي", period: "evening", category: "معلمين", nationalId: "30612162800094", phone: "01115988680" },
+            { id: 211, name: "عمر حسن محمد", salary: 500, job: "معلم", branch: "الفرع الرئيسي", period: "evening", category: "معلمين", nationalId: "30901242800194", phone: "01110361336" },
+            { id: 212, name: "زياد عمر سيد", salary: 500, job: "معلم", branch: "الفرع الرئيسي", period: "evening", category: "معلمين", nationalId: "30805162800135", phone: "01118678432" },
+            { id: 213, name: "المقداد تيسير امير", salary: 500, job: "معلم", branch: "الفرع الرئيسي", period: "evening", category: "معلمين", nationalId: "30911242800416", phone: "01103167802" },
+            { id: 214, name: "عمر نصر الله محمد", salary: 500, job: "معلم", branch: "الفرع الرئيسي", period: "evening", category: "معلمين", nationalId: "31209272800256", phone: "01124963369" },
+            { id: 215, name: "محمد ايمن سعد فنجري", salary: 500, job: "معلم", branch: "الفرع الرئيسي", period: "evening", category: "معلمين", nationalId: "31005162800833", phone: "01149729714" },
+            { id: 216, name: "خالد محمد خالد", salary: 1500, job: "معلم", branch: "الفرع الرئيسي", period: "evening", category: "معلمين", nationalId: "30003252800097", phone: "01144181080" },
+            { id: 217, name: "رانيا عبدالشافي محمد", salary: 600, job: "معلمة", branch: "الفرع الرئيسي", period: "evening", category: "معلمين", nationalId: "30207182800161", phone: "01102306126" },
+            { id: 218, name: "مودة عمر محمد", salary: 500, job: "معلمة", branch: "الفرع الرئيسي", period: "evening", category: "معلمين", nationalId: "30905012802622", phone: "01118570774" },
+            { id: 219, name: "نادية محمد عبدالرسول", salary: 900, job: "معلمة", branch: "الفرع الرئيسي", period: "evening", category: "معلمين", nationalId: "27206061411449", phone: "01150172545" },
+            { id: 220, name: "بسملة احمد عبدالحفيظ", salary: 800, job: "معلمة", branch: "الفرع الرئيسي", period: "evening", category: "معلمين", nationalId: "30658092800043", phone: "01156047290" },
+            { id: 221, name: "زينب عبدالجليل عبدالرازق", salary: 800, job: "معلمة", branch: "الفرع الرئيسي", period: "evening", category: "معلمين", nationalId: "30104092800444", phone: "01127000362" },
+            { id: 222, name: "زينب شرف الدين زايد", salary: 750, job: "معلمة", branch: "الفرع الرئيسي", period: "evening", category: "معلمين", nationalId: "30106012801944", phone: "01152100751" },
+            { id: 223, name: "فاطمة احمد عبدالستار", salary: 800, job: "معلمة", branch: "الفرع الرئيسي", period: "evening", category: "معلمين", nationalId: "30612092800501", phone: "01222940332" },
+            { id: 224, name: "طارق عبد الحي جامع", salary: 2000, job: "معلم", branch: "فرع الكوبانية", period: "evening", category: "معلمين", nationalId: "25000828650682", phone: "01159324608" },
+            { id: 225, name: "حسني سيد محمد ابراهيم", salary: 1800, job: "معلم", branch: "فرع الكوبانية", period: "evening", category: "معلمين", nationalId: "28606212800237", phone: "01152586307" },
+            { id: 226, name: "محمد زكريا علي حسن", salary: 1700, job: "معلم", branch: "فرع الكوبانية", period: "evening", category: "معلمين", nationalId: "28207122800058", phone: "01148227319" },
+            { id: 227, name: "يوسف عبد السلام محمد", salary: 2000, job: "معلم", branch: "فرع الكوبانية", period: "evening", category: "معلمين", nationalId: "91400823080603", phone: "01152241217" },
+            { id: 228, name: "خالد محمود حسن جمعه", salary: 2000, job: "معلم", branch: "فرع الكوبانية", period: "evening", category: "معلمين", nationalId: "27108262800056", phone: "01156024616" },
+            { id: 229, name: "حسن حامد عبده ابراهيم", salary: 2000, job: "معلم", branch: "فرع الكوبانية", period: "evening", category: "معلمين", nationalId: "27403162800093", phone: "01147656622" },
+            { id: 230, name: "فاطمه عبدالحافظ احمد", salary: 700, job: "معلمة", branch: "فرع الكوبانية", period: "evening", category: "معلمين", nationalId: "28304112800101", phone: "01003527095" },
+            { id: 231, name: "فاطمة صالح يس احمد", salary: 700, job: "معلمة", branch: "فرع الكوبانية", period: "evening", category: "معلمين", nationalId: "29211162800043", phone: "01150053955" },
+            { id: 232, name: "سناء محمد محمود", salary: 900, job: "معلمة", branch: "فرع الكوبانية", period: "evening", category: "معلمين", nationalId: "30111012800267", phone: "01157923341" },
+            { id: 233, name: "اية احمد خميس", salary: 700, job: "معلمة", branch: "فرع الكوبانية", period: "evening", category: "معلمين", nationalId: "27805082800107", phone: "01125198566" },
+            { id: 234, name: "سهير حامد عبدة ابراهيم", salary: 700, job: "معلمة", branch: "فرع الكوبانية", period: "evening", category: "معلمين", nationalId: "27909102801164", phone: "01154314222" },
+            { id: 235, name: "اسراء وصفي محمد احمد", salary: 900, job: "معلمة", branch: "فرع الكوبانية", period: "evening", category: "معلمين", nationalId: "29606042800583", phone: "01122249096" },
+            { id: 236, name: "شيماء مصطفى أبو الوفا", salary: 900, job: "معلمة", branch: "فرع الكوبانية", period: "evening", category: "معلمين", nationalId: "28509082800064", phone: "01121632187" },
+            { id: 237, name: "ياسمين عبد الحميد حسن", salary: 700, job: "معلمة", branch: "فرع الكوبانية", period: "evening", category: "معلمين", nationalId: "29106252800061", phone: "01128005791" },
+            { id: 238, name: "زينب عوض الله عثمان", salary: 800, job: "معلمة", branch: "فرع الكوبانية", period: "evening", category: "معلمين", nationalId: "28402062800107", phone: "01112640978" },
+            { id: 239, name: "مني حسن جمعة حسن", salary: 600, job: "معلمة", branch: "فرع الكوبانية", period: "evening", category: "معلمين", nationalId: "28701052800122", phone: "01119847089" },
+            { id: 240, name: "ايمان حسن محمد حسن", salary: 800, job: "معلمة", branch: "فرع الكوبانية", period: "evening", category: "معلمين", nationalId: "28207042800081", phone: "01128007862" },
+            { id: 241, name: "عبير صابر محمد ضاحي", salary: 600, job: "معلمة", branch: "فرع الكوبانية", period: "evening", category: "معلمين", nationalId: "27402132800068", phone: "01113879519" },
+            { id: 242, name: "اسماء زكريا عثمان محمد", salary: 700, job: "معلمة", branch: "فرع الكوبانية", period: "evening", category: "معلمين", nationalId: "28505132800065", phone: "01147247113" },
+            { id: 243, name: "عنود عبد السلام محمد خير", salary: 500, job: "معلمة", branch: "فرع الكوبانية", period: "evening", category: "معلمين", nationalId: "30903212800249", phone: "01128895035" },
+            { id: 244, name: "دعاء ابراهيم عثمان محمد", salary: 700, job: "معلمة", branch: "فرع الكوبانية", period: "evening", category: "معلمين", nationalId: "28505132800049", phone: "01152081354" },
+            { id: 245, name: "نجاح محمد احمد ابراهيم", salary: 500, job: "معلمة", branch: "فرع الكوبانية", period: "evening", category: "معلمين", nationalId: "27710242800041", phone: "01140338407" },
+            { id: 246, name: "اسماء عبد الشافي عبدة علي", salary: 800, job: "معلمة", branch: "فرع الكوبانية", period: "evening", category: "معلمين", nationalId: "29306212800067", phone: "01114137430" },
+            { id: 247, name: "أمل رأفت حسين", salary: 800, job: "معلمة", branch: "فرع الكوبانية", period: "evening", category: "معلمين", nationalId: "66000821290403", phone: "01114137430" },
+            { id: 248, name: "اروى عبدالملك احمد", salary: 1000, job: "معلمة", branch: "فرع غرب اسوان", period: "evening", category: "معلمين", nationalId: "30901122800085", phone: "" },
+            { id: 249, name: "فاطمة محمد جمعة", salary: 1000, job: "معلمة", branch: "فرع غرب اسوان", period: "evening", category: "معلمين", nationalId: "30103102800042", phone: "" },
+            { id: 250, name: "خديجة رمضان حامد", salary: 1000, job: "معلمة", branch: "فرع غرب اسوان", period: "evening", category: "معلمين", nationalId: "30506092800224", phone: "" },
+            { id: 251, name: "اية ناصر حسن", salary: 1000, job: "معلمة", branch: "فرع غرب اسوان", period: "evening", category: "معلمين", nationalId: "30504232800721", phone: "" },
+            { id: 252, name: "أسماء الحسين عبدالرؤف", salary: 1000, job: "معلمة", branch: "فرع غرب اسوان", period: "evening", category: "معلمين", nationalId: "30801118200384", phone: "" },
+            { id: 253, name: "اسراء عبدالرسول مقبولى", salary: 1000, job: "معلمة", branch: "فرع غرب اسوان", period: "evening", category: "معلمين", nationalId: "30001012807709", phone: "" },
+            { id: 254, name: "مديحة حسين بحلر", salary: 1000, job: "معلمة", branch: "فرع غرب اسوان", period: "evening", category: "معلمين", nationalId: "27203112800042", phone: "" },
+            { id: 255, name: "بسملة إسماعيل حسن", salary: 1000, job: "معلمة", branch: "فرع غرب اسوان", period: "evening", category: "معلمين", nationalId: "30711112800121", phone: "" },
+            { id: 256, name: "فاطمة ربيع عكاشة", salary: 1000, job: "معلمة", branch: "فرع غرب اسوان", period: "evening", category: "معلمين", nationalId: "28809012800206", phone: "" },
+            { id: 257, name: "غادة عبدالعظيم حسن", salary: 1000, job: "معلمة", branch: "فرع غرب اسوان", period: "evening", category: "معلمين", nationalId: "28911152800086", phone: "" },
+            { id: 258, name: "فاطمة محسن عبدالفتاح", salary: 1000, job: "معلمة", branch: "فرع غرب اسوان", period: "evening", category: "معلمين", nationalId: "29608112800902", phone: "" },
+            { id: 259, name: "رقية سيد احمد", salary: 1000, job: "معلمة", branch: "فرع غرب اسوان", period: "evening", category: "معلمين", nationalId: "29602212800448", phone: "" },
+            { id: 260, name: "شيماء احمد عبدالمجيد", salary: 1000, job: "معلمة", branch: "فرع غرب اسوان", period: "evening", category: "معلمين", nationalId: "27912172800166", phone: "" },
+            { id: 261, name: "انفال احمد محمد", salary: 1000, job: "معلمة", branch: "فرع غرب اسوان", period: "evening", category: "معلمين", nationalId: "29806032800045", phone: "" },
+            { id: 262, name: "انشراح حسن عبدالله", salary: 1000, job: "معلمة", branch: "فرع غرب اسوان", period: "evening", category: "معلمين", nationalId: "27411042800068", phone: "" },
+            { id: 263, name: "حنان موسى عبده", salary: 1000, job: "معلمة", branch: "فرع غرب اسوان", period: "evening", category: "معلمين", nationalId: "28909172800045", phone: "" },
+            { id: 264, name: "رنيا احمد الياس", salary: 1000, job: "معلمة", branch: "فرع غرب اسوان", period: "evening", category: "معلمين", nationalId: "28408132800582", phone: "" },
+            { id: 265, name: "شيماء صالح عبدالحليم", salary: 1000, job: "معلمة", branch: "فرع غرب اسوان", period: "evening", category: "معلمين", nationalId: "28307202800088", phone: "" },
+            { id: 266, name: "فاطمة مصطفى محمود", salary: 1000, job: "معلمة", branch: "فرع غرب اسوان", period: "evening", category: "معلمين", nationalId: "30903172800747", phone: "" },
+            { id: 267, name: "شيماء محمد صلاح", salary: 1000, job: "معلمة", branch: "فرع غرب اسوان", period: "evening", category: "معلمين", nationalId: "29401112800062", phone: "" },
+            { id: 268, name: "زينب رمضان محمد", salary: 1000, job: "معلمة", branch: "فرع غرب اسوان", period: "evening", category: "معلمين", nationalId: "31003102800823", phone: "" },
+            { id: 269, name: "جنات على حسن", salary: 1000, job: "معلمة", branch: "فرع غرب اسوان", period: "evening", category: "معلمين", nationalId: "28802152800104", phone: "" },
+            { id: 270, name: "انشراح صغير جمعة", salary: 1000, job: "معلمة", branch: "فرع غرب اسوان", period: "evening", category: "معلمين", nationalId: "27909242800044", phone: "" },
+            { id: 271, name: "سمحة صغير جمعة", salary: 1000, job: "معلمة", branch: "فرع غرب اسوان", period: "evening", category: "معلمين", nationalId: "27401312800043", phone: "" },
+            { id: 272, name: "فاطمة إسماعيل محمد", salary: 1000, job: "معلمة", branch: "فرع غرب اسوان", period: "evening", category: "معلمين", nationalId: "30907092800687", phone: "" },
+            { id: 273, name: "منار محمد حامد", salary: 1000, job: "معلمة", branch: "فرع غرب اسوان", period: "evening", category: "معلمين", nationalId: "30510132800262", phone: "" },
+            { id: 274, name: "ساره حسيب حسن", salary: 1000, job: "معلمة", branch: "فرع غرب اسوان", period: "evening", category: "معلمين", nationalId: "29210072800048", phone: "" },
+            { id: 275, name: "عائشة احمد عبدالفتاح", salary: 1000, job: "معلمة", branch: "فرع غرب اسوان", period: "evening", category: "معلمين", nationalId: "29008172800041", phone: "" },
+            { id: 276, name: "سحر جمعة محمد", salary: 1000, job: "معلمة", branch: "فرع غرب اسوان", period: "evening", category: "معلمين", nationalId: "28309212800062", phone: "" },
+            { id: 277, name: "امانى رجب عتيق", salary: 1000, job: "معلمة", branch: "فرع غرب اسوان", period: "evening", category: "معلمين", nationalId: "28909072800048", phone: "" },
+            { id: 278, name: "نورهان اسيد العربى", salary: 1000, job: "معلمة", branch: "فرع غرب اسوان", period: "evening", category: "معلمين", nationalId: "29308052800785", phone: "" },
+            { id: 279, name: "ندى محمد حامد", salary: 1000, job: "معلمة", branch: "فرع غرب اسوان", period: "evening", category: "معلمين", nationalId: "29008198800163", phone: "" },
+            { id: 280, name: "منة عباس محمد", salary: 1000, job: "معلمة", branch: "فرع غرب اسوان", period: "evening", category: "معلمين", nationalId: "30410192800046", phone: "" },
+            { id: 281, name: "منار محرم محمد", salary: 1000, job: "معلمة", branch: "فرع غرب اسوان", period: "evening", category: "معلمين", nationalId: "30704182800769", phone: "" },
+            { id: 282, name: "عائشة إبراهيم عبدالحافظ", salary: 1000, job: "معلمة", branch: "فرع غرب اسوان", period: "evening", category: "معلمين", nationalId: "30505152800109", phone: "" },
+            { id: 283, name: "تسنيم محمد عبدالنعيم", salary: 1000, job: "معلمة", branch: "فرع غرب اسوان", period: "evening", category: "معلمين", nationalId: "30804262800187", phone: "" },
+
+            // الخدمات المعاونة والعمال
+            { id: 284, name: "عهود عبد الفتاح سليمان", salary: 800, job: "مساعدة نساء", branch: "الفرع الرئيسي", period: "evening", category: "عمال", nationalId: "27512082800363", phone: "01117747919" },
+            { id: 285, name: "نجاه محمد أحمد", salary: 1500, job: "عاملة", branch: "الفرع الرئيسي", period: "evening", category: "عمال", nationalId: "27609162700061", phone: "01111534175" },
+            { id: 286, name: "عبير السيد احمد", salary: 1000, job: "عاملة", branch: "الفرع الرئيسي", period: "evening", category: "عمال", nationalId: "28804082800260", phone: "01128486942" },
+            { id: 287, name: "فايزة أمين سامح", salary: 1000, job: "عاملة", branch: "الفرع الرئيسي", period: "evening", category: "عمال", nationalId: "28208112601088", phone: "01117372305" },
+            { id: 288, name: "أسماء محمود محمد", salary: 800, job: "عاملة", branch: "الفرع الرئيسي", period: "evening", category: "عمال", nationalId: "29108052800981", phone: "01275954292" },
+            { id: 289, name: "ولاء اشرف محمد", salary: 600, job: "عاملة", branch: "الفرع الرئيسي", period: "evening", category: "عمال", nationalId: "29910202800748", phone: "01120474984" },
+            { id: 290, name: "منى عباس سلطان", salary: 800, job: "عاملة", branch: "الفرع الرئيسي", period: "evening", category: "عمال", nationalId: "28501182800443", phone: "01140716054" },
+            { id: 291, name: "رجاء ياسين ابراهيم", salary: 600, job: "عاملة", branch: "الفرع الرئيسي", period: "evening", category: "عمال", nationalId: "27512242800403", phone: "01284107221" },
+            { id: 292, name: "نجوى الفولى حمام", salary: 1440, job: "عاملة", branch: "فرع ابوشوك", period: "evening", category: "عمال", nationalId: "28610232800788", phone: "01118549081" },
+            { id: 293, name: "صابرين عبد العاطى احمد", salary: 600, job: "عاملة", branch: "فرع ابوشوك", period: "evening", category: "عمال", nationalId: "28903062800068", phone: "01142537483" },
+            { id: 294, name: "وفاء عكاشة خلف", salary: 1115, job: "عاملة", branch: "فرع العقاد", period: "evening", category: "عمال", nationalId: "28203182800787", phone: "01278365476" },
+            { id: 295, name: "خديجة محمد مصطفى", salary: 915, job: "عاملة", branch: "فرع المهندسين", period: "evening", category: "عمال", nationalId: "29209212800444", phone: "01113936775" },
+            { id: 296, name: "راندا صلاح انور", salary: 600, job: "عاملة", branch: "فرع المهندسين", period: "evening", category: "عمال", nationalId: "29104302800561", phone: "01140716054" },
+            { id: 297, name: "نبا عبد الحفيظ عبد العاطي", salary: 500, job: "عاملة", branch: "فرع الكوبانية", period: "evening", category: "عمال", nationalId: "28000823180182", phone: "01152763549" },
+            { id: 298, name: "سحر محمد عبده", salary: 500, job: "عاملة", branch: "فرع الكوبانية", period: "evening", category: "عمال", nationalId: "28905092800049", phone: "01120783396" }
         ];
 
+        // -------------------------------------------------------------
+        // 2. Application State Management
+        // -------------------------------------------------------------
         let staffList = [];
-        let currentShift = 'all';
+        let currentShift = 'all'; // 'all', 'morning', 'evening'
+        let currentSort = 'id_asc';
+        let lastFiltered = [];
         let staffToDeleteId = null;
 
+        // ---------------- Utilities ----------------
+        function fmt(n) { return (Number(n) || 0).toLocaleString('en-US'); }
+        function escHtml(s) {
+            return String(s == null ? '' : s)
+                .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+        }
+        function toWestern(s) {
+            return String(s == null ? '' : s)
+                .replace(/[\u0660-\u0669]/g, d => d.charCodeAt(0) - 0x0660)
+                .replace(/[\u06F0-\u06F9]/g, d => d.charCodeAt(0) - 0x06F0);
+        }
+        function normAr(s) {
+            return toWestern(String(s == null ? '' : s).toLowerCase())
+                .replace(/[\u064B-\u0652\u0640]/g, '')
+                .replace(/[\u0622\u0623\u0625\u0671]/g, '\u0627')
+                .replace(/\u0629/g, '\u0647').replace(/\u0649/g, '\u064A')
+                .replace(/\u0624/g, '\u0648').replace(/\u0626/g, '\u064A')
+                .replace(/\s+/g, ' ').trim();
+        }
+        function showToast(msg, type) {
+            const t = document.getElementById('toast');
+            if (!t) return;
+            const colors = { success: 'bg-emerald-600', error: 'bg-red-600', info: 'bg-firdous-teal' };
+            t.className = 'fixed bottom-5 left-1/2 -translate-x-1/2 z-[60] text-white px-5 py-3 rounded-xl shadow-2xl text-sm font-bold transition-all duration-300 ' + (colors[type] || colors.info);
+            t.textContent = msg;
+            t.style.opacity = '1';
+            t.style.pointerEvents = 'auto';
+            clearTimeout(showToast._t);
+            showToast._t = setTimeout(function () { t.style.opacity = '0'; t.style.pointerEvents = 'none'; }, 2800);
+        }
+        function rowIssues(it) {
+            const issues = [];
+            if (it.phone && it.phone !== '—' && !/^01\d{9}$/.test(it.phone)) issues.push('رقم هاتف غير صحيح');
+            if (it.nationalId && it.nationalId !== '—' && !/^\d{14}$/.test(it.nationalId)) issues.push('الرقم القومي غير مكتمل');
+            return issues;
+        }
+
+        // Initialize Data from localStorage or Default
         function initApp() {
             const saved = localStorage.getItem('al_firdous_staff_records');
             if (saved) {
@@ -569,6 +770,10 @@
 
             document.getElementById('printDate').textContent = new Date().toLocaleDateString('ar-EG', {
                 year: 'numeric', month: 'long', day: 'numeric'
+            });
+
+            document.addEventListener('keydown', function (e) {
+                if (e.key === 'Escape') { closeModal(); closeDeleteModal(); }
             });
 
             updateKPIs();
@@ -588,8 +793,13 @@
             }
         }
 
+        // -------------------------------------------------------------
+        // 3. UI Filters & Table Rendering
+        // -------------------------------------------------------------
         function setShiftFilter(shift) {
             currentShift = shift;
+
+            // Update Tab active classes
             const tabs = {
                 all: document.getElementById('tabAll'),
                 morning: document.getElementById('tabMorning'),
@@ -612,55 +822,77 @@
             document.getElementById('branchFilter').value = 'all';
             document.getElementById('categoryFilter').value = 'all';
             document.getElementById('sortFilter').value = 'id_asc';
+            currentSort = 'id_asc';
             setShiftFilter('all');
         }
 
+        function sortBy(field) {
+            const map = { name: 'name_asc', salary: 'salary_desc', branch: 'branch', job: 'id_asc' };
+            // toggle direction for salary/name
+            if (field === 'name') currentSort = currentSort === 'name_asc' ? 'name_desc' : 'name_asc';
+            else if (field === 'salary') currentSort = currentSort === 'salary_desc' ? 'salary_asc' : 'salary_desc';
+            else currentSort = map[field] || 'id_asc';
+            const sel = document.getElementById('sortFilter');
+            if ([...sel.options].some(o => o.value === currentSort)) sel.value = currentSort;
+            applyFilters();
+        }
+
         function applyFilters() {
-            const searchQuery = document.getElementById('searchInput').value.trim().toLowerCase();
+            const searchQuery = normAr(document.getElementById('searchInput').value);
             const branch = document.getElementById('branchFilter').value;
             const category = document.getElementById('categoryFilter').value;
             const sort = document.getElementById('sortFilter').value;
+            if (sort !== currentSort && sort !== 'id_asc') currentSort = sort;
 
             let filtered = staffList.filter(item => {
+                // Shift Filter
                 if (currentShift !== 'all' && item.period !== currentShift) return false;
+
+                // Branch Filter
                 if (branch !== 'all' && !item.branch.includes(branch) && branch !== item.branch) return false;
+
+                // Category Filter
                 if (category !== 'all' && item.category !== category) return false;
 
+                // Search Query (Arabic-normalized + digits-aware)
                 if (searchQuery) {
-                    const matchName = item.name && item.name.toLowerCase().includes(searchQuery);
-                    const matchPhone = item.phone && item.phone.includes(searchQuery);
-                    const matchNId = item.nationalId && item.nationalId.includes(searchQuery);
-                    const matchJob = item.job && item.job.toLowerCase().includes(searchQuery);
-                    const matchBranch = item.branch && item.branch.toLowerCase().includes(searchQuery);
-                    if (!matchName && !matchPhone && !matchNId && !matchJob && !matchBranch) return false;
+                    const hay = normAr([item.name, item.job, item.branch, item.phone, item.nationalId].join(' '));
+                    if (hay.indexOf(searchQuery) === -1) return false;
                 }
 
                 return true;
             });
 
+            // Sorting
             filtered.sort((a, b) => {
-                if (sort === 'name_asc') return a.name.localeCompare(b.name, 'ar');
-                if (sort === 'salary_desc') return b.salary - a.salary;
-                if (sort === 'salary_asc') return a.salary - b.salary;
-                if (sort === 'branch') return a.branch.localeCompare(b.branch, 'ar');
-                return a.id - b.id;
+                if (currentSort === 'name_asc') return String(a.name).localeCompare(b.name, 'ar');
+                if (currentSort === 'name_desc') return String(b.name).localeCompare(a.name, 'ar');
+                if (currentSort === 'salary_desc') return (Number(b.salary) || 0) - (Number(a.salary) || 0);
+                if (currentSort === 'salary_asc') return (Number(a.salary) || 0) - (Number(b.salary) || 0);
+                if (currentSort === 'branch') return String(a.branch).localeCompare(b.branch, 'ar');
+                return (Number(a.id) || 0) - (Number(b.id) || 0);
             });
 
+            lastFiltered = filtered;
             renderTable(filtered);
         }
 
         function renderTable(data) {
             const tbody = document.getElementById('staffTableBody');
+            const foot = document.getElementById('staffTableFoot');
+            const cards = document.getElementById('staffCards');
             const emptyState = document.getElementById('emptyState');
             const countSpan = document.getElementById('filteredCount');
             const sumSpan = document.getElementById('currentTableSalariesSum');
 
             countSpan.textContent = data.length;
             const totalSum = data.reduce((acc, curr) => acc + (Number(curr.salary) || 0), 0);
-            sumSpan.textContent = totalSum.toLocaleString('ar-EG');
+            sumSpan.textContent = fmt(totalSum);
 
             if (data.length === 0) {
                 tbody.innerHTML = '';
+                if (foot) foot.innerHTML = '';
+                if (cards) cards.innerHTML = '';
                 emptyState.classList.remove('hidden');
                 return;
             } else {
@@ -668,9 +900,10 @@
             }
 
             let html = '';
+            let cardsHtml = '';
             data.forEach((item, index) => {
                 const isMorning = item.period === 'morning';
-                const periodBadge = isMorning 
+                const periodBadge = isMorning
                     ? `<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-50 text-amber-700 border border-amber-200"><i class="fa-solid fa-sun text-[10px]"></i> حضانة (صباحي)</span>`
                     : `<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-teal-50 text-firdous-teal-dark border border-teal-200"><i class="fa-solid fa-moon text-[10px]"></i> كُتّاب (مسائي)</span>`;
 
@@ -685,50 +918,89 @@
                     catBadge = `<span class="px-2 py-0.5 rounded-lg text-xs font-bold bg-gray-100 text-gray-700 border border-gray-200">عمالة</span>`;
                 }
 
+                // WhatsApp & Call Link
                 const cleanPhone = (item.phone || '').replace(/[^0-9]/g, '');
                 const phoneHtml = cleanPhone && cleanPhone.length >= 10
                     ? `<div class="flex items-center gap-1.5 font-mono text-xs">
-                         <span>${item.phone}</span>
+                         <span>${escHtml(item.phone)}</span>
                          <a href="https://wa.me/20${cleanPhone.startsWith('0') ? cleanPhone.substring(1) : cleanPhone}" target="_blank" class="text-green-600 hover:text-green-700 no-print" title="مراسلة عبر واتساب">
                             <i class="fa-brands fa-whatsapp text-sm"></i>
                          </a>
-                         <a href="tel:${cleanPhone}" class="text-blue-500 hover:text-blue-600 no-print" title="اتصال">
+                         <a href="tel:${escHtml(cleanPhone)}" class="text-blue-500 hover:text-blue-600 no-print" title="اتصال">
                             <i class="fa-solid fa-phone text-xs"></i>
                          </a>
                        </div>`
-                    : `<span class="text-gray-400 font-mono text-xs">${item.phone || '—'}</span>`;
+                    : `<span class="text-gray-400 font-mono text-xs">${escHtml(item.phone) || '—'}</span>`;
+
+                const issues = rowIssues(item);
+                const warnRow = issues.length ? 'bg-red-50/50' : '';
+                const warnIcon = issues.length
+                    ? `<i class="fa-solid fa-triangle-exclamation text-amber-500 mr-1" title="${escHtml(issues.join(' • '))}"></i>`
+                    : '';
+                const nidHtml = `<span class="font-mono text-xs tracking-wider ${issues.some(i => i.includes('القومي')) ? 'text-red-500 font-bold' : 'text-gray-500'}">${escHtml(item.nationalId) || '—'}</span>`;
 
                 html += `
-                <tr class="hover:bg-teal-50/40 transition border-b border-gray-100">
+                <tr class="hover:bg-teal-50/40 transition border-b border-gray-100 ${warnRow}">
                     <td class="py-3 px-3 text-center text-xs text-gray-400 font-mono">${index + 1}</td>
-                    <td class="py-3 px-4 font-bold text-gray-900">${item.name}</td>
-                    <td class="py-3 px-4 text-gray-700 text-xs font-semibold">${item.job}</td>
+                    <td class="py-3 px-4 font-bold text-gray-900">${warnIcon}${escHtml(item.name)}</td>
+                    <td class="py-3 px-4 text-gray-700 text-xs font-semibold">${escHtml(item.job)}</td>
                     <td class="py-3 px-3 text-center">${catBadge}</td>
                     <td class="py-3 px-3 text-center">${periodBadge}</td>
                     <td class="py-3 px-3 text-xs font-medium text-gray-600">
-                        <span class="inline-block px-2 py-0.5 bg-gray-50 rounded border border-gray-200">${item.branch}</span>
+                        <span class="inline-block px-2 py-0.5 bg-gray-50 rounded border border-gray-200">${escHtml(item.branch)}</span>
                     </td>
                     <td class="py-3 px-4 text-center font-bold text-firdous-teal text-sm">
-                        ${Number(item.salary).toLocaleString('ar-EG')} <span class="text-[10px] text-gray-400 font-normal">ج.م</span>
+                        ${fmt(item.salary)} <span class="text-[10px] text-gray-400 font-normal">ج.م</span>
                     </td>
                     <td class="py-3 px-4">${phoneHtml}</td>
-                    <td class="py-3 px-4 font-mono text-xs text-gray-500 tracking-wider">${item.nationalId || '—'}</td>
+                    <td class="py-3 px-4">${nidHtml}</td>
                     <td class="py-3 px-3 text-center no-print">
                         <div class="flex items-center justify-center gap-1.5">
                             <button onclick="openModal('edit', ${item.id})" class="w-8 h-8 rounded-lg bg-teal-50 text-firdous-teal hover:bg-firdous-teal hover:text-white transition flex items-center justify-center text-xs shadow-sm" title="تعديل">
                                 <i class="fa-solid fa-pen"></i>
                             </button>
-                            <button onclick="promptDelete(${item.id}, '${item.name.replace(/'/g, "\\'")}')" class="w-8 h-8 rounded-lg bg-red-50 text-red-500 hover:bg-red-500 hover:text-white transition flex items-center justify-center text-xs shadow-sm" title="حذف">
+                            <button onclick="promptDelete(${item.id})" class="w-8 h-8 rounded-lg bg-red-50 text-red-500 hover:bg-red-500 hover:text-white transition flex items-center justify-center text-xs shadow-sm" title="حذف">
                                 <i class="fa-solid fa-trash-can"></i>
                             </button>
                         </div>
                     </td>
                 </tr>`;
+
+                cardsHtml += `
+                <div class="p-4 ${warnRow}">
+                    <div class="flex items-start justify-between gap-2">
+                        <div class="flex-1">
+                            <div class="font-bold text-gray-900 text-sm">${warnIcon}${escHtml(item.name)}</div>
+                            <div class="text-xs text-gray-600 mt-0.5">${escHtml(item.job)}</div>
+                            <div class="flex flex-wrap items-center gap-1.5 mt-2">${catBadge}${periodBadge}</div>
+                            <div class="text-xs text-gray-500 mt-2"><i class="fa-solid fa-location-dot text-[10px]"></i> ${escHtml(item.branch)}</div>
+                            <div class="text-sm font-bold text-firdous-teal mt-1">${fmt(item.salary)} ج.م</div>
+                            <div class="text-xs mt-1">${phoneHtml}</div>
+                            <div class="text-xs mt-1">${nidHtml}</div>
+                        </div>
+                        <div class="flex flex-col gap-1.5">
+                            <button onclick="openModal('edit', ${item.id})" class="w-9 h-9 rounded-lg bg-teal-50 text-firdous-teal shadow-sm flex items-center justify-center text-xs" title="تعديل"><i class="fa-solid fa-pen"></i></button>
+                            <button onclick="promptDelete(${item.id})" class="w-9 h-9 rounded-lg bg-red-50 text-red-500 shadow-sm flex items-center justify-center text-xs" title="حذف"><i class="fa-solid fa-trash-can"></i></button>
+                        </div>
+                    </div>
+                </div>`;
             });
 
             tbody.innerHTML = html;
+            if (cards) cards.innerHTML = cardsHtml;
+            if (foot) {
+                foot.innerHTML = `
+                    <tr>
+                        <td colspan="6" class="py-3.5 px-4 text-right text-firdous-teal-dark">الإجمالي (${data.length} سجل معروض)</td>
+                        <td class="py-3.5 px-4 text-center text-firdous-teal-dark">${fmt(totalSum)} <span class="text-[10px] font-normal text-gray-500">ج.م</span></td>
+                        <td colspan="3" class="py-3.5 px-4"></td>
+                    </tr>`;
+            }
         }
 
+        // -------------------------------------------------------------
+        // 4. Update Top Dashboard KPIs
+        // -------------------------------------------------------------
         function updateKPIs() {
             const totalCount = staffList.length;
             const totalSalary = staffList.reduce((acc, curr) => acc + (Number(curr.salary) || 0), 0);
@@ -741,14 +1013,20 @@
             const eveningCount = eveningStaff.length;
             const eveningSum = eveningStaff.reduce((acc, curr) => acc + (Number(curr.salary) || 0), 0);
 
+            const branchCount = new Set(staffList.map(s => s.branch).filter(Boolean)).size;
+
             document.getElementById('kpiTotalStaff').textContent = totalCount;
-            document.getElementById('kpiTotalSalaries').textContent = totalSalary.toLocaleString('ar-EG');
+            document.getElementById('kpiTotalSalaries').textContent = fmt(totalSalary);
             document.getElementById('kpiMorningCount').textContent = morningCount + " موظف";
-            document.getElementById('kpiMorningSum').textContent = morningSum.toLocaleString('ar-EG') + " ج.م";
+            document.getElementById('kpiMorningSum').textContent = fmt(morningSum) + " ج.م";
             document.getElementById('kpiEveningCount').textContent = eveningCount + " موظف";
-            document.getElementById('kpiEveningSum').textContent = eveningSum.toLocaleString('ar-EG') + " ج.م";
+            document.getElementById('kpiEveningSum').textContent = fmt(eveningSum) + " ج.م";
+            document.getElementById('kpiBranchCount').textContent = branchCount;
         }
 
+        // -------------------------------------------------------------
+        // 5. Modal Operations (Add / Edit)
+        // -------------------------------------------------------------
         function openModal(mode, staffId = null) {
             const modal = document.getElementById('staffModal');
             const title = document.getElementById('modalTitle');
@@ -798,29 +1076,55 @@
                 job: document.getElementById('formJob').value.trim(),
                 branch: document.getElementById('formBranch').value,
                 salary: Number(document.getElementById('formSalary').value) || 0,
-                phone: document.getElementById('formPhone').value.trim(),
-                nationalId: document.getElementById('formNationalId').value.trim()
+                phone: toWestern(document.getElementById('formPhone').value.trim()),
+                nationalId: toWestern(document.getElementById('formNationalId').value.trim())
             };
 
+            // ---- Validation ----
+            if (staffObj.phone && !/^01\d{9}$/.test(staffObj.phone)) {
+                showToast('رقم الهاتف يجب أن يكون 11 رقماً ويبدأ بـ 01', 'error');
+                return;
+            }
+            if (staffObj.nationalId && !/^\d{14}$/.test(staffObj.nationalId)) {
+                showToast('الرقم القومي يجب أن يكون 14 رقماً', 'error');
+                return;
+            }
+            if (staffObj.nationalId) {
+                const dup = staffList.find(s => s.nationalId === staffObj.nationalId && s.id !== Number(staffId));
+                if (dup && !confirm(`تنبيه: الرقم القومي مستخدم بالفعل للموظف "${dup.name}". هل تريد الحفظ على أي حال؟`)) {
+                    return;
+                }
+            }
+
+            let added = false;
             if (staffId) {
+                // Edit existing
                 const index = staffList.findIndex(s => s.id === Number(staffId));
                 if (index !== -1) {
                     staffList[index] = { ...staffList[index], ...staffObj };
                 }
             } else {
-                const newId = staffList.length > 0 ? Math.max(...staffList.map(s => s.id)) + 1 : 1;
+                // Create new
+                const newId = staffList.length > 0 ? Math.max(...staffList.map(s => Number(s.id) || 0)) + 1 : 1;
                 staffList.unshift({ id: newId, ...staffObj });
+                added = true;
             }
 
             saveToLocalStorage();
             updateKPIs();
             applyFilters();
             closeModal();
+            showToast(added ? 'تمت إضافة الموظف بنجاح' : 'تم حفظ التعديلات بنجاح', 'success');
         }
 
-        function promptDelete(id, name) {
-            staffToDeleteId = id;
-            document.getElementById('deleteStaffPrompt').textContent = `هل أنت متأكد من رغبتك في حذف "${name}" نهائياً من الكشوفات؟`;
+        // -------------------------------------------------------------
+        // 6. Delete Operations
+        // -------------------------------------------------------------
+        function promptDelete(id) {
+            const staff = staffList.find(s => s.id === Number(id));
+            if (!staff) return;
+            staffToDeleteId = Number(id);
+            document.getElementById('deleteStaffPrompt').textContent = `هل أنت متأكد من رغبتك في حذف "${staff.name}" نهائياً من الكشوفات؟`;
             document.getElementById('deleteModal').classList.remove('hidden');
         }
 
@@ -839,12 +1143,16 @@
             }
         }
 
+        // -------------------------------------------------------------
+        // 7. Export to Excel (CSV format supporting Arabic UTF-8 BOM)
+        // -------------------------------------------------------------
         function exportToCSV() {
+            const data = (lastFiltered && lastFiltered.length) ? lastFiltered : staffList;
             const headers = ["م", "الاسم", "الوظيفة", "التصنيف", "الفترة", "الفرع", "الراتب", "رقم الهاتف", "الرقم القومي"];
-            const rows = staffList.map((item, index) => [
+            const rows = data.map((item, index) => [
                 index + 1,
-                `"${item.name.replace(/"/g, '""')}"`,
-                `"${item.job.replace(/"/g, '""')}"`,
+                `"${String(item.name).replace(/"/g, '""')}"`,
+                `"${String(item.job).replace(/"/g, '""')}"`,
                 `"${item.category}"`,
                 item.period === 'morning' ? 'صباحي (حضانة)' : 'مسائي (كتاب)',
                 `"${item.branch}"`,
@@ -858,12 +1166,54 @@
             const link = document.createElement("a");
             const url = URL.createObjectURL(blob);
             link.setAttribute("href", url);
-            link.setAttribute("download", `رواتب_مؤسسة_الفردوس_الإسلامية_${new Date().toISOString().slice(0, 10)}.csv`);
+            link.setAttribute("download", `رواتب_الفردوس_${new Date().toISOString().slice(0, 10)}.csv`);
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
+            showToast(`تم تصدير ${data.length} سجل إلى Excel`, 'success');
         }
 
+        // -------------------------------------------------------------
+        // 8. Backup / Restore (JSON)
+        // -------------------------------------------------------------
+        function backupJSON() {
+            const payload = { app: 'al-firdous', version: 1, exportedAt: new Date().toISOString(), count: staffList.length, data: staffList };
+            const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json;charset=utf-8;' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            link.setAttribute('href', url);
+            link.setAttribute('download', `نسخة_احتياطية_الفردوس_${new Date().toISOString().slice(0, 10)}.json`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            showToast('تم إنشاء النسخة الاحتياطية', 'success');
+        }
+
+        function restoreJSON(event) {
+            const file = event.target.files && event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                try {
+                    const parsed = JSON.parse(e.target.result);
+                    const data = Array.isArray(parsed) ? parsed : parsed.data;
+                    if (!Array.isArray(data) || data.length === 0) throw new Error('empty');
+                    if (!confirm(`سيتم استبدال البيانات الحالية بـ ${data.length} سجل من النسخة الاحتياطية. متابعة؟`)) return;
+                    staffList = data;
+                    saveToLocalStorage();
+                    updateKPIs();
+                    applyFilters();
+                    showToast('تمت استعادة النسخة الاحتياطية', 'success');
+                } catch (err) {
+                    showToast('تعذّر قراءة الملف. تأكد أنه ملف نسخة احتياطية صالح', 'error');
+                } finally {
+                    event.target.value = '';
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        // Initialize when window loads
         window.onload = initApp;
     </script>
 </body>
