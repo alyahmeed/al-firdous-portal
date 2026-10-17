@@ -972,7 +972,12 @@
                         return;
                     }
                     if (staff.length > 0) staffList = staff.map(normalizeRecord);
-                    expenseList = expenses.map(normalizeExpense);
+                    if (expenses.length > 0) {
+                        expenseList = expenses.map(normalizeExpense);
+                    } else {
+                        // ورقة المصروفات لم تُهيّأ بعد — استخدم الافتراضي حتى تُرفع
+                        expenseList = [...initialExpensesData];
+                    }
                     saveToLocalStorage();
                     updateKPIs();
                     applyFilters();
