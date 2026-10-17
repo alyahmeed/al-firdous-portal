@@ -305,6 +305,50 @@
             </div>
         </div>
 
+        <!-- Expenses Section -->
+        <div class="mt-6 bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+            <div class="p-4 border-b border-gray-100 flex flex-wrap items-center justify-between gap-3 bg-amber-50/40">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center text-lg">
+                        <i class="fa-solid fa-receipt"></i>
+                    </div>
+                    <div>
+                        <h2 class="text-base font-black text-gray-800">المصروفات الشهرية</h2>
+                        <p class="text-xs text-gray-500">إجمالي المصروفات: <span id="expenseTotal" class="font-bold text-firdous-teal">0</span> ج.م • <span id="expenseCount">0</span> بند</p>
+                    </div>
+                </div>
+                <button onclick="openExpenseModal('add')" class="bg-firdous-teal hover:bg-firdous-teal-dark text-white px-4 py-2 rounded-xl text-sm font-bold shadow transition flex items-center gap-2">
+                    <i class="fa-solid fa-plus"></i> إضافة بند مصروف
+                </button>
+            </div>
+
+            <div class="overflow-x-auto hidden md:block">
+                <table class="w-full text-right border-collapse">
+                    <thead>
+                        <tr class="bg-gray-50/90 text-gray-700 text-xs font-bold uppercase tracking-wider border-b border-gray-200">
+                            <th class="py-3.5 px-3 text-center w-12">#</th>
+                            <th class="py-3.5 px-4">البند</th>
+                            <th class="py-3.5 px-4 text-center">المبلغ</th>
+                            <th class="py-3.5 px-4">ملاحظات</th>
+                            <th class="py-3.5 px-3 text-center no-print">إجراءات</th>
+                        </tr>
+                    </thead>
+                    <tbody id="expenseTableBody" class="divide-y divide-gray-100 text-sm"></tbody>
+                    <tfoot id="expenseTableFoot" class="bg-amber-50/70 font-bold text-gray-800 border-t-2 border-amber-400 text-sm"></tfoot>
+                </table>
+            </div>
+
+            <div id="expenseCards" class="md:hidden divide-y divide-gray-100"></div>
+
+            <div id="expenseEmptyState" class="hidden p-10 text-center">
+                <div class="w-14 h-14 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3 text-gray-400 text-xl">
+                    <i class="fa-solid fa-receipt"></i>
+                </div>
+                <h3 class="text-sm font-bold text-gray-700">لا توجد بنود مصروفات</h3>
+                <p class="text-xs text-gray-500 mt-1">اضغط «إضافة بند مصروف» لإضافة بند جديد</p>
+            </div>
+        </div>
+
     </main>
 
     <!-- Modal for Adding / Editing Staff Member -->
@@ -437,6 +481,76 @@
 
     <!-- Toast Notification -->
     <div id="toast" class="fixed bottom-5 left-1/2 -translate-x-1/2 z-[60] text-white px-5 py-3 rounded-xl shadow-2xl text-sm font-bold transition-all duration-300 opacity-0 pointer-events-none bg-firdous-teal"></div>
+
+    <!-- Modal for Adding / Editing Expense -->
+    <div id="expenseModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl max-w-lg w-full shadow-2xl overflow-hidden border border-gray-100">
+            <div class="bg-gradient-to-l from-amber-600 to-amber-500 p-5 text-white flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center text-white text-lg">
+                        <i id="expenseModalIcon" class="fa-solid fa-plus"></i>
+                    </div>
+                    <div>
+                        <h3 id="expenseModalTitle" class="text-lg font-bold">إضافة بند مصروف</h3>
+                        <p class="text-xs text-amber-100">أدخل بيانات بند المصروف</p>
+                    </div>
+                </div>
+                <button onclick="closeExpenseModal()" class="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <form id="expenseForm" onsubmit="saveExpense(event)" class="p-6 space-y-4">
+                <input type="hidden" id="formExpenseId">
+
+                <div>
+                    <label class="block text-xs font-bold text-gray-700 mb-1">اسم البند *</label>
+                    <input type="text" id="formExpenseItem" required placeholder="مثال: إيجار، صيانة، كهرباء..."
+                        class="w-full px-3 py-2 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-firdous-teal focus:border-firdous-teal">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-gray-700 mb-1">المبلغ (ج.م) *</label>
+                    <input type="number" id="formExpenseAmount" required min="0" step="1" placeholder="مثال: 30000"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-xl text-sm font-bold text-firdous-teal focus:ring-2 focus:ring-firdous-teal">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-gray-700 mb-1">ملاحظات</label>
+                    <textarea id="formExpenseNotes" rows="2" placeholder="مثال: لجميع الفروع، فرع أبو شوك..."
+                        class="w-full px-3 py-2 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-firdous-teal"></textarea>
+                </div>
+
+                <div class="flex items-center justify-end gap-3 pt-4 border-t border-gray-100">
+                    <button type="button" onclick="closeExpenseModal()" class="px-4 py-2 border border-gray-300 text-gray-600 rounded-xl text-sm font-semibold hover:bg-gray-50 transition">
+                        إلغاء
+                    </button>
+                    <button type="submit" class="px-6 py-2 bg-firdous-teal hover:bg-firdous-teal-dark text-white rounded-xl text-sm font-bold shadow-md transition">
+                        حفظ البند
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Delete Confirmation Modal (Expense) -->
+    <div id="expenseDeleteModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl max-w-sm w-full p-6 text-center shadow-2xl border border-gray-100">
+            <div class="w-14 h-14 bg-red-50 text-red-500 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+            </div>
+            <h3 class="text-base font-bold text-gray-800 mb-2">تأكيد حذف البند</h3>
+            <p class="text-xs text-gray-500 mb-6" id="expenseDeletePrompt">هل أنت متأكد من رغبتك في حذف هذا البند؟</p>
+            <div class="flex gap-2 justify-center">
+                <button onclick="closeExpenseDeleteModal()" class="px-4 py-2 border border-gray-200 text-gray-600 rounded-xl text-xs font-bold hover:bg-gray-50">
+                    إلغاء
+                </button>
+                <button onclick="confirmDeleteExpense()" class="px-5 py-2 bg-red-600 text-white rounded-xl text-xs font-bold hover:bg-red-700 shadow">
+                    نعم، حذف
+                </button>
+            </div>
+        </div>
+    </div>
 
     <!-- Application Core Script with Complete Dataset Preloaded -->
     <script>
@@ -713,6 +827,14 @@
             { id: 298, name: "سحر محمد عبده", salary: 500, job: "عاملة", branch: "فرع الكوبانية", period: "evening", category: "عمال", nationalId: "28905092800049", phone: "01120783396" }
         ];
 
+        // بيانات المصروفات الافتراضية (تُرفع إلى ورقة expenses)
+        const initialExpensesData = [
+            { id: 1, item: "إيجار", amount: 30000, notes: "فرع أبو شوك - فرع المهندسين - فرع العقاد" },
+            { id: 2, item: "أعمال الصيانة والتشغيل الشهرية", amount: 20000, notes: "لجميع الفروع" },
+            { id: 3, item: "فواتير الكهرباء والماء", amount: 4000, notes: "لجميع الفروع" },
+            { id: 4, item: "مكافآت المتميزين", amount: 15000, notes: "في جميع الفروع" }
+        ];
+
         // -------------------------------------------------------------
         // 2. Application State Management
         // -------------------------------------------------------------
@@ -721,6 +843,8 @@
         let currentSort = 'id_asc';
         let lastFiltered = [];
         let staffToDeleteId = null;
+        let expenseList = [];
+        let expenseToDeleteId = null;
 
         // ---------------- Utilities ----------------
         function fmt(n) { return (Number(n) || 0).toLocaleString('en-US'); }
@@ -762,6 +886,7 @@
 
         // ---------------- Google Sheets Sync (اختياري) ----------------
         const LS_KEY = 'al_firdous_staff_records';
+        const LS_KEY_EXP = 'al_firdous_expenses_records';
         // ⚠️ بعد نشر Apps Script: الصق رابط الـ Web app هنا، وضع نفس SECRET
         const REMOTE = { url: 'https://script.google.com/macros/s/AKfycbxJQEwJODWgXlvx1MYoXHWxluL4B01orZqV_5jNLI_nkJLzLxlEhBhkpfbpEuvSGepCWg/exec', secret: 'CHANGE_ME_123' };
         function remoteEnabled() { return REMOTE.url && REMOTE.url.indexOf('http') === 0; }
@@ -825,20 +950,33 @@
             };
         }
 
+        function normalizeExpense(r) {
+            return {
+                id: Number(r.id) || 0,
+                item: (r.item || '').toString().trim(),
+                amount: Number(r.amount) || 0,
+                notes: (r.notes || '').toString().trim()
+            };
+        }
+
         function refreshFromRemote(cb) {
             setSyncBadge('loading');
             jsonpGet({}, function (res) {
-                if (res && res.ok && Array.isArray(res.data)) {
-                    if (res.data.length === 0) {
+                if (res && res.ok) {
+                    var staff = Array.isArray(res.staff) ? res.staff : (Array.isArray(res.data) ? res.data : []);
+                    var expenses = Array.isArray(res.expenses) ? res.expenses : [];
+                    if (staff.length === 0 && expenses.length === 0) {
                         loadLocalData();
-                        setSyncBadge('online', 'الشيت متصل لكنه فارغ — اضغط «رفع البيانات الحالية للشيت» لرفع ' + staffList.length + ' سجل.');
+                        setSyncBadge('online', 'الشيت متصل لكنه فارغ — اضغط «رفع البيانات الحالية للشيت» لرفع ' + staffList.length + ' موظف و' + expenseList.length + ' بند مصروف.');
                         if (cb) cb(true);
                         return;
                     }
-                    staffList = res.data.map(normalizeRecord);
+                    if (staff.length > 0) staffList = staff.map(normalizeRecord);
+                    expenseList = expenses.map(normalizeExpense);
                     saveToLocalStorage();
                     updateKPIs();
                     applyFilters();
+                    renderExpenses();
                     setSyncBadge('online');
                     if (cb) cb(true);
                 } else {
@@ -850,10 +988,11 @@
 
         function seedSheetToRemote() {
             if (!remoteEnabled()) { showToast('لم يتم ضبط رابط Google Sheets بعد', 'error'); return; }
-            if (!confirm('سيتم استبدال بيانات الشيت بالبيانات الحالية (' + staffList.length + ' سجل). متابعة؟')) return;
-            apiWrite({ action: 'replace', data: staffList });
+            if (!confirm('سيتم رفع البيانات الحالية إلى Google Sheets:\n• ' + staffList.length + ' موظف\n• ' + expenseList.length + ' بند مصروف\n(سيتم استبدال بيانات الشيت الحالية). متابعة؟')) return;
+            apiWrite({ action: 'replace', type: 'staff', data: staffList });
+            apiWrite({ action: 'replace', type: 'expenses', data: expenseList });
             showToast('جارٍ رفع البيانات إلى Google Sheets...', 'info');
-            setTimeout(function () { refreshFromRemote(function () { showToast('تمت مزامنة الشيت بنجاح', 'success'); }); }, 2500);
+            setTimeout(function () { refreshFromRemote(function () { showToast('تمت مزامنة الشيت بنجاح', 'success'); }); }, 3000);
         }
 
         // Initialize Data from localStorage or Default
@@ -863,7 +1002,7 @@
             });
 
             document.addEventListener('keydown', function (e) {
-                if (e.key === 'Escape') { closeModal(); closeDeleteModal(); }
+                if (e.key === 'Escape') { closeModal(); closeDeleteModal(); closeExpenseModal(); closeExpenseDeleteModal(); }
             });
 
             if (remoteEnabled()) {
@@ -883,21 +1022,34 @@
                 }
             } else {
                 staffList = [...initialStaffData];
-                saveToLocalStorage();
             }
+            const savedExp = localStorage.getItem(LS_KEY_EXP);
+            if (savedExp) {
+                try {
+                    expenseList = JSON.parse(savedExp);
+                } catch (e) {
+                    expenseList = [...initialExpensesData];
+                }
+            } else {
+                expenseList = [...initialExpensesData];
+            }
+            saveToLocalStorage();
             updateKPIs();
             applyFilters();
+            renderExpenses();
             setSyncBadge('local');
         }
 
         function saveToLocalStorage() {
-            localStorage.setItem('al_firdous_staff_records', JSON.stringify(staffList));
+            localStorage.setItem(LS_KEY, JSON.stringify(staffList));
+            localStorage.setItem(LS_KEY_EXP, JSON.stringify(expenseList));
         }
 
         function resetData() {
             if (remoteEnabled()) {
-                if (confirm("إعادة تعيين البيانات: سيتم رفع النسخة الأصلية (" + initialStaffData.length + " سجل) إلى Google Sheets واستبدال البيانات الحالية. متابعة؟")) {
-                    apiWrite({ action: 'replace', data: initialStaffData });
+                if (confirm("إعادة تعيين البيانات: سيتم رفع النسخة الأصلية (" + initialStaffData.length + " موظف و" + initialExpensesData.length + " بند مصروف) إلى Google Sheets واستبدال البيانات الحالية. متابعة؟")) {
+                    apiWrite({ action: 'replace', type: 'staff', data: initialStaffData });
+                    apiWrite({ action: 'replace', type: 'expenses', data: initialExpensesData });
                     showToast('جارٍ إعادة التعيين من النسخة الأصلية...', 'info');
                     setTimeout(function () { refreshFromRemote(function () { showToast('تمت إعادة التعيين بنجاح', 'success'); }); }, 3000);
                 }
@@ -905,9 +1057,11 @@
             }
             if (confirm("هل تريد استعادة البيانات الأصلية لمؤسسة الفردوس وإلغاء أي تعديلات محلية؟")) {
                 staffList = [...initialStaffData];
+                expenseList = [...initialExpensesData];
                 saveToLocalStorage();
                 updateKPIs();
                 applyFilters();
+                renderExpenses();
             }
         }
 
@@ -1238,7 +1392,7 @@
             showToast(added ? 'تمت إضافة الموظف بنجاح' : 'تم حفظ التعديلات بنجاح', 'success');
 
             if (remoteEnabled() && savedRecord) {
-                apiWrite({ action: added ? 'add' : 'update', record: savedRecord });
+                apiWrite({ action: added ? 'add' : 'update', type: 'staff', record: savedRecord });
                 setTimeout(function () { refreshFromRemote(); }, 1500);
             }
         }
@@ -1268,7 +1422,169 @@
                 applyFilters();
                 closeDeleteModal();
                 if (remoteEnabled()) {
-                    apiWrite({ action: 'delete', id: delId });
+                    apiWrite({ action: 'delete', type: 'staff', id: delId });
+                    setTimeout(function () { refreshFromRemote(); }, 1500);
+                }
+            }
+        }
+
+        // -------------------------------------------------------------
+        // 6b. Expenses Operations
+        // -------------------------------------------------------------
+        function renderExpenses() {
+            const tbody = document.getElementById('expenseTableBody');
+            if (!tbody) return;
+            const foot = document.getElementById('expenseTableFoot');
+            const cards = document.getElementById('expenseCards');
+            const empty = document.getElementById('expenseEmptyState');
+
+            const total = expenseList.reduce((a, c) => a + (Number(c.amount) || 0), 0);
+            const totalEl = document.getElementById('expenseTotal');
+            if (totalEl) totalEl.textContent = fmt(total);
+            const countEl = document.getElementById('expenseCount');
+            if (countEl) countEl.textContent = expenseList.length;
+
+            if (expenseList.length === 0) {
+                tbody.innerHTML = '';
+                if (foot) foot.innerHTML = '';
+                if (cards) cards.innerHTML = '';
+                if (empty) empty.classList.remove('hidden');
+                return;
+            } else if (empty) {
+                empty.classList.add('hidden');
+            }
+
+            let html = '';
+            let cardsHtml = '';
+            expenseList.forEach((item, index) => {
+                html += `
+                <tr class="hover:bg-amber-50/40 transition border-b border-gray-100">
+                    <td class="py-3 px-3 text-center text-xs text-gray-400 font-mono">${index + 1}</td>
+                    <td class="py-3 px-4 font-bold text-gray-900">${escHtml(item.item)}</td>
+                    <td class="py-3 px-4 text-center font-bold text-firdous-teal">${fmt(item.amount)} <span class="text-[10px] text-gray-400 font-normal">ج.م</span></td>
+                    <td class="py-3 px-4 text-xs text-gray-600">${escHtml(item.notes) || '—'}</td>
+                    <td class="py-3 px-3 text-center no-print">
+                        <div class="flex items-center justify-center gap-1.5">
+                            <button onclick="openExpenseModal('edit', ${item.id})" class="w-8 h-8 rounded-lg bg-teal-50 text-firdous-teal hover:bg-firdous-teal hover:text-white transition flex items-center justify-center text-xs shadow-sm" title="تعديل">
+                                <i class="fa-solid fa-pen"></i>
+                            </button>
+                            <button onclick="promptDeleteExpense(${item.id})" class="w-8 h-8 rounded-lg bg-red-50 text-red-500 hover:bg-red-500 hover:text-white transition flex items-center justify-center text-xs shadow-sm" title="حذف">
+                                <i class="fa-solid fa-trash-can"></i>
+                            </button>
+                        </div>
+                    </td>
+                </tr>`;
+
+                cardsHtml += `
+                <div class="p-4">
+                    <div class="flex items-start justify-between gap-2">
+                        <div class="flex-1">
+                            <div class="font-bold text-gray-900 text-sm">${escHtml(item.item)}</div>
+                            <div class="text-sm font-bold text-firdous-teal mt-1">${fmt(item.amount)} ج.م</div>
+                            ${item.notes ? `<div class="text-xs text-gray-500 mt-1">${escHtml(item.notes)}</div>` : ''}
+                        </div>
+                        <div class="flex flex-col gap-1.5">
+                            <button onclick="openExpenseModal('edit', ${item.id})" class="w-9 h-9 rounded-lg bg-teal-50 text-firdous-teal shadow-sm flex items-center justify-center text-xs" title="تعديل"><i class="fa-solid fa-pen"></i></button>
+                            <button onclick="promptDeleteExpense(${item.id})" class="w-9 h-9 rounded-lg bg-red-50 text-red-500 shadow-sm flex items-center justify-center text-xs" title="حذف"><i class="fa-solid fa-trash-can"></i></button>
+                        </div>
+                    </div>
+                </div>`;
+            });
+
+            tbody.innerHTML = html;
+            if (cards) cards.innerHTML = cardsHtml;
+            if (foot) {
+                foot.innerHTML = `
+                    <tr>
+                        <td colspan="2" class="py-3.5 px-4 text-right text-amber-700">إجمالي المصروفات (${expenseList.length} بند)</td>
+                        <td class="py-3.5 px-4 text-center text-amber-700">${fmt(total)} <span class="text-[10px] font-normal text-gray-500">ج.م</span></td>
+                        <td colspan="2" class="py-3.5 px-4"></td>
+                    </tr>`;
+            }
+        }
+
+        function openExpenseModal(mode, expId = null) {
+            const form = document.getElementById('expenseForm');
+            const title = document.getElementById('expenseModalTitle');
+            const icon = document.getElementById('expenseModalIcon');
+            form.reset();
+
+            if (mode === 'add') {
+                document.getElementById('formExpenseId').value = '';
+                title.textContent = 'إضافة بند مصروف';
+                if (icon) icon.className = 'fa-solid fa-plus';
+            } else {
+                const exp = expenseList.find(x => x.id === expId);
+                if (!exp) return;
+                document.getElementById('formExpenseId').value = exp.id;
+                document.getElementById('formExpenseItem').value = exp.item;
+                document.getElementById('formExpenseAmount').value = exp.amount;
+                document.getElementById('formExpenseNotes').value = exp.notes;
+                title.textContent = 'تعديل بند مصروف';
+                if (icon) icon.className = 'fa-solid fa-pen';
+            }
+            document.getElementById('expenseModal').classList.remove('hidden');
+        }
+
+        function closeExpenseModal() {
+            document.getElementById('expenseModal').classList.add('hidden');
+        }
+
+        function saveExpense(e) {
+            e.preventDefault();
+            const id = document.getElementById('formExpenseId').value;
+            const obj = {
+                item: document.getElementById('formExpenseItem').value.trim(),
+                amount: Number(toWestern(document.getElementById('formExpenseAmount').value)) || 0,
+                notes: document.getElementById('formExpenseNotes').value.trim()
+            };
+            if (!obj.item) { showToast('اكتب اسم البند', 'error'); return; }
+
+            let added = false;
+            let saved = null;
+            if (id) {
+                const idx = expenseList.findIndex(x => x.id === Number(id));
+                if (idx !== -1) { expenseList[idx] = { ...expenseList[idx], ...obj }; saved = expenseList[idx]; }
+            } else {
+                const newId = expenseList.length > 0 ? Math.max(...expenseList.map(x => Number(x.id) || 0)) + 1 : 1;
+                saved = { id: newId, ...obj };
+                expenseList.push(saved);
+                added = true;
+            }
+
+            saveToLocalStorage();
+            renderExpenses();
+            closeExpenseModal();
+            showToast(added ? 'تمت إضافة البند بنجاح' : 'تم حفظ التعديل بنجاح', 'success');
+
+            if (remoteEnabled() && saved) {
+                apiWrite({ action: added ? 'add' : 'update', type: 'expenses', record: saved });
+                setTimeout(function () { refreshFromRemote(); }, 1500);
+            }
+        }
+
+        function promptDeleteExpense(id) {
+            const exp = expenseList.find(x => x.id === Number(id));
+            if (!exp) return;
+            expenseToDeleteId = Number(id);
+            document.getElementById('expenseDeletePrompt').textContent = `هل أنت متأكد من رغبتك في حذف البند "${exp.item}"؟`;
+            document.getElementById('expenseDeleteModal').classList.remove('hidden');
+        }
+
+        function closeExpenseDeleteModal() {
+            expenseToDeleteId = null;
+            document.getElementById('expenseDeleteModal').classList.add('hidden');
+        }
+
+        function confirmDeleteExpense() {
+            if (expenseToDeleteId) {
+                const delId = expenseToDeleteId;
+                expenseList = expenseList.filter(x => x.id !== delId);
+                saveToLocalStorage();
+                renderExpenses();
+                closeExpenseDeleteModal();
+                if (remoteEnabled()) {
+                    apiWrite({ action: 'delete', type: 'expenses', id: delId });
                     setTimeout(function () { refreshFromRemote(); }, 1500);
                 }
             }
@@ -1308,7 +1624,7 @@
         // 8. Backup / Restore (JSON)
         // -------------------------------------------------------------
         function backupJSON() {
-            const payload = { app: 'al-firdous', version: 1, exportedAt: new Date().toISOString(), count: staffList.length, data: staffList };
+            const payload = { app: 'al-firdous', version: 2, exportedAt: new Date().toISOString(), count: staffList.length, data: staffList, expenses: expenseList };
             const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json;charset=utf-8;' });
             const link = document.createElement('a');
             const url = URL.createObjectURL(blob);
@@ -1331,9 +1647,11 @@
                     if (!Array.isArray(data) || data.length === 0) throw new Error('empty');
                     if (!confirm(`سيتم استبدال البيانات الحالية بـ ${data.length} سجل من النسخة الاحتياطية. متابعة؟`)) return;
                     staffList = data;
+                    if (Array.isArray(parsed.expenses)) expenseList = parsed.expenses;
                     saveToLocalStorage();
                     updateKPIs();
                     applyFilters();
+                    renderExpenses();
                     showToast('تمت استعادة النسخة الاحتياطية', 'success');
                 } catch (err) {
                     showToast('تعذّر قراءة الملف. تأكد أنه ملف نسخة احتياطية صالح', 'error');

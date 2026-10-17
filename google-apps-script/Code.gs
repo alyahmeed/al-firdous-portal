@@ -8,70 +8,87 @@
  *  --------------------------------------------------------------------------
  *  1) افتح https://sheets.new وأنشئ جدولاً جديداً وسمّه مثلاً "الفردوس - العاملين".
  *  2) من القائمة: Extensions (الإضافات) -> Apps Script.
+ *     (أو من https://script.google.com كسكربت مستقل + ضع معرّف الجدول في SHEET_ID)
  *  3) امسح الكود الموجود، والصق هذا الملف بالكامل، واحفظ (Ctrl+S).
  *  4) اضغط Deploy (نشر) -> New deployment (نشر جديد).
  *       - اختر النوع: Web app.
- *       - Description: أي وصف.
  *       - Execute as (تنفيذ بصفة): Me (أنا).
  *       - Who has access (من يمكنه الوصول): Anyone (أي شخص).
  *     ثم Deploy ووافق على الأذونات (Authorize access).
- *  5) انسخ الرابط (Web app URL) — سيكون بالشكل:
+ *  5) انسخ الرابط (Web app URL) بالشكل:
  *       https://script.google.com/macros/s/XXXXXXXX/exec
- *  6) الصقه في ملف index.html داخل:
+ *  6) ضعه في ملف index.html داخل:
  *       const REMOTE = { url: 'ضع الرابط هنا', secret: 'نفس القيمة السحرية' };
  *
- *  ملاحظة أمان:
- *  - غيّر SECRET أدناه لأي كلمة سر تعرفها، وضع نفس القيمة في REMOTE.secret
- *    داخل index.html. (حماية بسيطة تمنع أي شخص لا يعرف الكلمة من الكتابة.)
- *  - التعديل من داخل الموقع يظهر للجميع فوراً بعد المزامنة.
+ *  أوراق العمل (تُنشأ تلقائياً):
+ *    - staff    : بيانات العاملين
+ *    - expenses : بنود المصروفات الشهرية
+ *
+ *  ملاحظة أمان: غيّر SECRET لأي كلمة سر، وضع نفس القيمة في REMOTE.secret.
  * ============================================================================
  */
-
-// اسم ورقة العمل داخل الجدول
-var SHEET_NAME = 'staff';
-
-// (اختياري) إذا استخدمت السكربت المستقل (Standalone) من script.google.com
-// ضع هنا معرّف الجدول (الجزء الطويل في رابط الشيت بين /d/ و /edit).
-// إذا أنشأت السكربت من داخل الجدول (Extensions > Apps Script) اتركه فارغاً.
-var SHEET_ID = '';
 
 // كلمة سر مشتركة (غيّرها، وضع نفس القيمة في index.html)
 var SECRET = 'CHANGE_ME_123';
 
-// أعمدة الجدول بالترتيب
-var HEADERS = ['id', 'name', 'job', 'category', 'period', 'branch', 'salary', 'phone', 'nationalId'];
+// (اختياري) معرّف الجدول عند استخدام السكربت المستقل من script.google.com
+var SHEET_ID = '';
+
+// تعريف الأوراق والأعمدة
+var CONFIG = {
+  staff: {
+    sheetName: 'staff',
+    headers: ['id', 'name', 'job', 'category', 'period', 'branch', 'salary', 'phone', 'nationalId'],
+    textCols: [8, 9] // H (الهاتف) و I (الرقم القومي) كنص
+  },
+  expenses: {
+    sheetName: 'expenses',
+    headers: ['id', 'item', 'amount', 'notes'],
+    textCols: []
+  }
+};
 
 /**
- * HTTP GET — لقراءة كل البيانات (يدعم JSONP للقراءة عبر المتصفح).
+ * HTTP GET — قراءة البيانات (يدعم JSONP).
+ *   بدون type  => كل الأوراق: { ok, staff:[...], expenses:[...] }
+ *   مع type     => { ok, data:[...] }
  */
 function doGet(e) {
   try {
     var secret = (e && e.parameter && e.parameter.secret) || '';
     if (SECRET && secret !== SECRET) return respond({ ok: false, error: 'unauthorized' }, e);
-    var data = readAll();
-    return respond({ ok: true, data: data, count: data.length }, e);
+
+    var type = e && e.parameter && e.parameter.type;
+    if (type) return respond({ ok: true, data: readAll(type), count: readAll(type).length }, e);
+
+    var out = { ok: true };
+    for (var key in CONFIG) out[key] = readAll(key);
+    return respond(out, e);
   } catch (err) {
     return respond({ ok: false, error: String(err) }, e);
   }
 }
 
 /**
- * HTTP POST — للكتابة (إضافة / تعديل / حذف / استبدال الكل).
- * body = { action, secret, record, id, data }
+ * HTTP POST — الكتابة (إضافة / تعديل / حذف / استبدال).
+ * body = { action, type, secret, record, id, data }
  */
 function doPost(e) {
   try {
     var body = JSON.parse((e && e.postData && e.postData.contents) || '{}');
     if (SECRET && body.secret !== SECRET) return jsonOut({ ok: false, error: 'unauthorized' });
 
+    var type = body.type || 'staff';
+    if (!CONFIG[type]) return jsonOut({ ok: false, error: 'unknown type: ' + type });
+
     var action = body.action;
-    if (action === 'add') addRow(body.record);
-    else if (action === 'update') updateRow(body.record);
-    else if (action === 'delete') deleteRow(body.id);
-    else if (action === 'replace') replaceAll(body.data || []);
+    if (action === 'add') addRow(type, body.record);
+    else if (action === 'update') updateRow(type, body.record);
+    else if (action === 'delete') deleteRow(type, body.id);
+    else if (action === 'replace') replaceAll(type, body.data || []);
     else return jsonOut({ ok: false, error: 'unknown action: ' + action });
 
-    return jsonOut({ ok: true, count: readAll().length });
+    return jsonOut({ ok: true, type: type, count: readAll(type).length });
   } catch (err) {
     return jsonOut({ ok: false, error: String(err) });
   }
@@ -83,28 +100,32 @@ function getSpreadsheet() {
   return SpreadsheetApp.getActiveSpreadsheet();
 }
 
-/** يفتح/ينشئ ورقة العمل ويضمن وجود صف العناوين. */
-function sheet() {
+function cfg(type) {
+  var c = CONFIG[type];
+  if (!c) throw new Error('unknown type: ' + type);
+  return c;
+}
+
+/** يفتح/ينشئ ورقة العمل ويضمن العناوين وتنسيق النص. */
+function sheet(type) {
+  var c = cfg(type);
   var ss = getSpreadsheet();
-  var sh = ss.getSheetByName(SHEET_NAME);
-  if (!sh) sh = ss.insertSheet(SHEET_NAME);
+  var sh = ss.getSheetByName(c.sheetName);
+  if (!sh) sh = ss.insertSheet(c.sheetName);
   if (sh.getLastRow() === 0) {
-    sh.appendRow(HEADERS);
+    sh.appendRow(c.headers);
     sh.setFrozenRows(1);
   }
-  // أعمدة الهاتف (H) والرقم القومي (I) كنص للحفاظ على الصفر الأول
-  sh.getRange('H:I').setNumberFormat('@');
+  for (var i = 0; i < c.textCols.length; i++) {
+    sh.getRange(1, c.textCols[i], Math.max(sh.getMaxRows(), 2), 1).setNumberFormat('@');
+  }
   return sh;
 }
 
-/** يضبط تنسيق أعمدة النص لصفوف محددة قبل الكتابة. */
-function setTextFormat(sh, startRow, numRows) {
-  if (numRows > 0) sh.getRange(startRow, 8, numRows, 2).setNumberFormat('@');
-}
-
 /** قراءة كل السجلات ككائنات. */
-function readAll() {
-  var sh = sheet();
+function readAll(type) {
+  var c = cfg(type);
+  var sh = sheet(type);
   var values = sh.getDataRange().getValues();
   if (values.length < 2) return [];
   var head = values[0].map(function (h) { return String(h); });
@@ -112,78 +133,87 @@ function readAll() {
   for (var i = 1; i < values.length; i++) {
     var row = values[i], obj = {};
     for (var j = 0; j < head.length; j++) obj[head[j]] = row[j];
-    if (obj.name !== '' && obj.name != null) {
+    var keyVal = obj[c.headers[1]]; // أول عمود بيانات بعد id
+    if (keyVal !== '' && keyVal != null) {
       obj.id = Number(obj.id) || 0;
-      obj.salary = Number(obj.salary) || 0;
+      if ('salary' in obj) obj.salary = Number(obj.salary) || 0;
+      if ('amount' in obj) obj.amount = Number(obj.amount) || 0;
       out.push(obj);
     }
   }
   return out;
 }
 
-/** إيجاد رقم الصف حسب الـ id (1-based ليتوافق مع Sheets). */
-function findRowIndexById(id) {
-  var sh = sheet();
-  var ids = sh.getRange(2, 1, Math.max(sh.getLastRow() - 1, 0), 1).getValues();
+function findRowIndexById(type, id) {
+  var sh = sheet(type);
+  var last = sh.getLastRow();
+  if (last < 2) return -1;
+  var ids = sh.getRange(2, 1, last - 1, 1).getValues();
   for (var i = 0; i < ids.length; i++) {
     if (Number(ids[i][0]) === Number(id)) return i + 2;
   }
   return -1;
 }
 
-/** توليد id جديد = أكبر id + 1. */
-function nextId() {
-  var all = readAll();
+function nextId(type) {
+  var all = readAll(type);
   var max = 0;
   for (var i = 0; i < all.length; i++) if (all[i].id > max) max = all[i].id;
   return max + 1;
 }
 
-function toRow(rec, id) {
-  return [
-    Number(id) || Number(rec.id) || 0,
-    rec.name || '',
-    rec.job || '',
-    rec.category || '',
-    rec.period || '',
-    rec.branch || '',
-    Number(rec.salary) || 0,
-    rec.phone == null ? '' : String(rec.phone),
-    rec.nationalId == null ? '' : String(rec.nationalId)
-  ];
+function toRow(type, rec, id) {
+  var c = cfg(type);
+  var out = [];
+  for (var i = 0; i < c.headers.length; i++) {
+    var key = c.headers[i], val;
+    if (key === 'id') val = Number(id) || Number(rec.id) || 0;
+    else if (key === 'salary' || key === 'amount') val = Number(rec[key]) || 0;
+    else val = rec[key] == null ? '' : String(rec[key]);
+    out.push(val);
+  }
+  return out;
 }
 
-function addRow(rec) {
+function setTextFormat(type, sh, startRow, numRows) {
+  var c = cfg(type);
+  if (!c.textCols.length || numRows <= 0) return;
+  for (var i = 0; i < c.textCols.length; i++) {
+    sh.getRange(startRow, c.textCols[i], numRows, 1).setNumberFormat('@');
+  }
+}
+
+function addRow(type, rec) {
   if (!rec) return;
-  var sh = sheet();
+  var sh = sheet(type);
   var rowIndex = sh.getLastRow() + 1;
-  setTextFormat(sh, rowIndex, 1);
-  sh.getRange(rowIndex, 1, 1, HEADERS.length).setValues([toRow(rec, nextId())]);
+  setTextFormat(type, sh, rowIndex, 1);
+  sh.getRange(rowIndex, 1, 1, cfg(type).headers.length).setValues([toRow(type, rec, nextId(type))]);
 }
 
-function updateRow(rec) {
+function updateRow(type, rec) {
   if (!rec) return;
-  var rowIndex = findRowIndexById(rec.id);
-  if (rowIndex === -1) { addRow(rec); return; }
-  var sh = sheet();
-  setTextFormat(sh, rowIndex, 1);
-  sh.getRange(rowIndex, 1, 1, HEADERS.length).setValues([toRow(rec)]);
+  var rowIndex = findRowIndexById(type, rec.id);
+  if (rowIndex === -1) { addRow(type, rec); return; }
+  var sh = sheet(type);
+  setTextFormat(type, sh, rowIndex, 1);
+  sh.getRange(rowIndex, 1, 1, cfg(type).headers.length).setValues([toRow(type, rec)]);
 }
 
-function deleteRow(id) {
-  var rowIndex = findRowIndexById(id);
-  if (rowIndex !== -1) sheet().deleteRow(rowIndex);
+function deleteRow(type, id) {
+  var rowIndex = findRowIndexById(type, id);
+  if (rowIndex !== -1) sheet(type).deleteRow(rowIndex);
 }
 
-function replaceAll(data) {
-  var sh = sheet();
+function replaceAll(type, data) {
+  var sh = sheet(type);
   if (sh.getLastRow() > 1) {
-    sh.getRange(2, 1, sh.getLastRow() - 1, HEADERS.length).clearContent();
+    sh.getRange(2, 1, sh.getLastRow() - 1, cfg(type).headers.length).clearContent();
   }
   if (data.length === 0) return;
-  var rows = data.map(function (r) { return toRow(r, r.id); });
-  setTextFormat(sh, 2, rows.length);
-  sh.getRange(2, 1, rows.length, HEADERS.length).setValues(rows);
+  var rows = data.map(function (r) { return toRow(type, r, r.id); });
+  setTextFormat(type, sh, 2, rows.length);
+  sh.getRange(2, 1, rows.length, cfg(type).headers.length).setValues(rows);
 }
 
 /** إخراج JSON، ويدعم JSONP عند وجود callback. */
