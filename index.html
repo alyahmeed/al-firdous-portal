@@ -44,6 +44,7 @@
         @media print {
             .no-print { display: none !important; }
             .print-only { display: block !important; }
+            .section-content { display: block !important; }
             body { background: white; font-size: 11pt; }
             .shadow-sm, .shadow-md, .shadow-lg { box-shadow: none !important; }
             table { width: 100% !important; border-collapse: collapse !important; }
@@ -111,6 +112,41 @@
     <!-- Main Content Container -->
     <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex-1 w-full">
 
+        <!-- Grand Financial Summary (always visible) -->
+        <div class="mb-6 bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+            <div class="p-4 border-b border-gray-100 bg-gradient-to-l from-firdous-teal-dark to-firdous-teal text-white flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center text-firdous-gold text-lg">
+                    <i class="fa-solid fa-chart-pie"></i>
+                </div>
+                <div>
+                    <h2 class="text-base font-black">الملخص المالي العام</h2>
+                    <p class="text-xs text-teal-100">إجمالي كل الأقسام معاً (رواتب الموظفين + المصروفات + كفالة اليتيم)</p>
+                </div>
+            </div>
+            <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 p-4">
+                <div class="bg-gray-50 rounded-xl border border-gray-100 p-4 text-center">
+                    <div class="flex items-center justify-center gap-1.5 text-gray-500 text-xs font-bold mb-1"><i class="fa-solid fa-users"></i> رواتب الموظفين</div>
+                    <div class="text-lg sm:text-xl font-black text-firdous-teal"><span id="grandStaff">0</span> <span class="text-[10px] font-normal text-gray-400">ج.م</span></div>
+                    <div class="text-[10px] text-gray-400 mt-0.5" id="grandStaffCount">0 موظف</div>
+                </div>
+                <div class="bg-gray-50 rounded-xl border border-gray-100 p-4 text-center">
+                    <div class="flex items-center justify-center gap-1.5 text-gray-500 text-xs font-bold mb-1"><i class="fa-solid fa-receipt"></i> المصروفات الشهرية</div>
+                    <div class="text-lg sm:text-xl font-black text-amber-600"><span id="grandExpenses">0</span> <span class="text-[10px] font-normal text-gray-400">ج.م</span></div>
+                    <div class="text-[10px] text-gray-400 mt-0.5" id="grandExpensesCount">0 بند</div>
+                </div>
+                <div class="bg-gray-50 rounded-xl border border-gray-100 p-4 text-center">
+                    <div class="flex items-center justify-center gap-1.5 text-gray-500 text-xs font-bold mb-1"><i class="fa-solid fa-hand-holding-heart"></i> كفالة اليتيم</div>
+                    <div class="text-lg sm:text-xl font-black text-emerald-600"><span id="grandKafala">0</span> <span class="text-[10px] font-normal text-gray-400">ج.م</span></div>
+                    <div class="text-[10px] text-gray-400 mt-0.5" id="grandKafalaCount">0 مستفيد</div>
+                </div>
+                <div class="bg-gradient-to-l from-firdous-teal-dark to-firdous-teal text-white rounded-xl p-4 text-center">
+                    <div class="flex items-center justify-center gap-1.5 text-teal-100 text-xs font-bold mb-1"><i class="fa-solid fa-sack-dollar"></i> الإجمالي الكلي</div>
+                    <div class="text-xl sm:text-2xl font-black text-firdous-gold"><span id="grandTotal">0</span> <span class="text-[10px] font-normal text-teal-100">ج.م</span></div>
+                    <div class="text-[10px] text-teal-100 mt-0.5">جميع الأقسام</div>
+                </div>
+            </div>
+        </div>
+
         <!-- Expenses Section -->
         <div class="mb-6 bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
             <div class="p-4 border-b border-gray-100 flex flex-wrap items-center justify-between gap-3 bg-amber-50/40">
@@ -123,11 +159,17 @@
                         <p class="text-xs text-gray-500">إجمالي المصروفات: <span id="expenseTotal" class="font-bold text-firdous-teal">0</span> ج.م • <span id="expenseCount">0</span> بند</p>
                     </div>
                 </div>
-                <button onclick="openExpenseModal('add')" class="bg-firdous-teal hover:bg-firdous-teal-dark text-white px-4 py-2 rounded-xl text-sm font-bold shadow transition flex items-center gap-2">
-                    <i class="fa-solid fa-plus"></i> إضافة بند مصروف
-                </button>
+                <div class="flex items-center gap-2">
+                    <button id="expToggleBtn" onclick="toggleSection('expensesContent','expToggleBtn','إظهار التفاصيل','إخفاء التفاصيل')" class="px-3 py-2 rounded-xl text-sm font-bold shadow-sm transition flex items-center gap-2 bg-white border border-amber-200 text-amber-700 hover:bg-amber-50">
+                        <span class="toggle-label">إظهار التفاصيل</span> <i class="fa-solid fa-chevron-down text-xs"></i>
+                    </button>
+                    <button onclick="openExpenseModal('add')" class="bg-firdous-teal hover:bg-firdous-teal-dark text-white px-4 py-2 rounded-xl text-sm font-bold shadow transition flex items-center gap-2">
+                        <i class="fa-solid fa-plus"></i> إضافة بند مصروف
+                    </button>
+                </div>
             </div>
 
+            <div id="expensesContent" class="section-content hidden">
             <div class="overflow-x-auto hidden md:block">
                 <table class="w-full text-right border-collapse">
                     <thead>
@@ -153,7 +195,27 @@
                 <h3 class="text-sm font-bold text-gray-700">لا توجد بنود مصروفات</h3>
                 <p class="text-xs text-gray-500 mt-1">اضغط «إضافة بند مصروف» لإضافة بند جديد</p>
             </div>
+            </div>
         </div>
+
+        <!-- Employees Section (collapsible) -->
+        <div class="mb-6 bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+            <div class="p-4 border-b border-gray-100 flex flex-wrap items-center justify-between gap-3 bg-teal-50/50">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-teal-100 text-firdous-teal flex items-center justify-center text-lg">
+                        <i class="fa-solid fa-users"></i>
+                    </div>
+                    <div>
+                        <h2 class="text-base font-black text-gray-800">قسم الموظفين</h2>
+                        <p class="text-xs text-gray-500">إجمالي الرواتب: <span id="empSectionTotal" class="font-bold text-firdous-teal">0</span> ج.م • <span id="empSectionCount">0</span> موظف</p>
+                    </div>
+                </div>
+                <button id="empToggleBtn" onclick="toggleSection('employeesContent','empToggleBtn','إظهار جميع الموظفين','إخفاء قائمة الموظفين')" class="bg-firdous-teal hover:bg-firdous-teal-dark text-white px-4 py-2 rounded-xl text-sm font-bold shadow transition flex items-center gap-2">
+                    <span class="toggle-label">إظهار جميع الموظفين</span> <i class="fa-solid fa-chevron-down text-xs"></i>
+                </button>
+            </div>
+
+            <div id="employeesContent" class="section-content hidden p-4">
 
         <!-- KPI Summary Cards -->
         <div class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-5 gap-3 mb-6 no-print">
@@ -349,8 +411,11 @@
             </div>
         </div>
 
+            </div>
+        </div>
+
         <!-- Kafala Section (كفالة اليتيم) -->
-        <div class="mt-6 bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+        <div class="mb-6 bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
             <div class="p-4 border-b border-gray-100 flex flex-wrap items-center justify-between gap-3 bg-emerald-50/40">
                 <div class="flex items-center gap-3">
                     <div class="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center text-lg">
@@ -361,11 +426,17 @@
                         <p class="text-xs text-gray-500">مشروع الكفالة التربوية الشاملة (مؤسسة ثواب للتنمية) • الإجمالي: <span id="kafalaTotal" class="font-bold text-emerald-700">0</span> ج.م • <span id="kafalaCount">0</span> مستفيد</p>
                     </div>
                 </div>
-                <button onclick="openKafalaModal('add')" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-xl text-sm font-bold shadow transition flex items-center gap-2">
-                    <i class="fa-solid fa-plus"></i> إضافة مستفيد
-                </button>
+                <div class="flex items-center gap-2">
+                    <button id="kafToggleBtn" onclick="toggleSection('kafalaContent','kafToggleBtn','إظهار التفاصيل','إخفاء التفاصيل')" class="px-3 py-2 rounded-xl text-sm font-bold shadow-sm transition flex items-center gap-2 bg-white border border-emerald-200 text-emerald-700 hover:bg-emerald-50">
+                        <span class="toggle-label">إظهار التفاصيل</span> <i class="fa-solid fa-chevron-down text-xs"></i>
+                    </button>
+                    <button onclick="openKafalaModal('add')" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-xl text-sm font-bold shadow transition flex items-center gap-2">
+                        <i class="fa-solid fa-plus"></i> إضافة مستفيد
+                    </button>
+                </div>
             </div>
 
+            <div id="kafalaContent" class="section-content hidden">
             <div class="overflow-x-auto hidden md:block">
                 <table class="w-full text-right border-collapse">
                     <thead>
@@ -392,6 +463,7 @@
                 </div>
                 <h3 class="text-sm font-bold text-gray-700">لا توجد سجلات كفالة</h3>
                 <p class="text-xs text-gray-500 mt-1">اضغط «إضافة مستفيد» لإضافة مستفيد جديد</p>
+            </div>
             </div>
         </div>
 
@@ -1514,6 +1586,39 @@
             document.getElementById('kpiEveningCount').textContent = eveningCount + " موظف";
             document.getElementById('kpiEveningSum').textContent = fmt(eveningSum) + " ج.م";
             document.getElementById('kpiBranchCount').textContent = branchCount;
+            updateGrandTotals();
+        }
+
+        // -------------------------------------------------------------
+        // 4b. Grand Totals & Collapsible Sections
+        // -------------------------------------------------------------
+        function updateGrandTotals() {
+            const staffTotal = staffList.reduce((a, c) => a + (Number(c.salary) || 0), 0);
+            const expTotal = expenseList.reduce((a, c) => a + (Number(c.amount) || 0), 0);
+            const kafTotal = kafalaList.reduce((a, c) => a + (Number(c.amount) || 0), 0);
+            const set = function (id, v) { const el = document.getElementById(id); if (el) el.textContent = v; };
+            set('grandStaff', fmt(staffTotal));
+            set('grandExpenses', fmt(expTotal));
+            set('grandKafala', fmt(kafTotal));
+            set('grandTotal', fmt(staffTotal + expTotal + kafTotal));
+            set('grandStaffCount', staffList.length + ' موظف');
+            set('grandExpensesCount', expenseList.length + ' بند');
+            set('grandKafalaCount', kafalaList.length + ' مستفيد');
+            set('empSectionTotal', fmt(staffTotal));
+            set('empSectionCount', staffList.length);
+        }
+
+        function toggleSection(contentId, btnId, showLabel, hideLabel) {
+            const el = document.getElementById(contentId);
+            if (!el) return;
+            const collapsed = el.classList.toggle('hidden');
+            const btn = document.getElementById(btnId);
+            if (btn) {
+                const label = btn.querySelector('.toggle-label');
+                const ic = btn.querySelector('i');
+                if (label) label.textContent = collapsed ? showLabel : hideLabel;
+                if (ic) ic.className = collapsed ? 'fa-solid fa-chevron-down text-xs' : 'fa-solid fa-chevron-up text-xs';
+            }
         }
 
         // -------------------------------------------------------------
@@ -1663,6 +1768,7 @@
             if (totalEl) totalEl.textContent = fmt(total);
             const countEl = document.getElementById('expenseCount');
             if (countEl) countEl.textContent = expenseList.length;
+            updateGrandTotals();
 
             if (expenseList.length === 0) {
                 tbody.innerHTML = '';
@@ -1825,6 +1931,7 @@
             if (totalEl) totalEl.textContent = fmt(total);
             const countEl = document.getElementById('kafalaCount');
             if (countEl) countEl.textContent = kafalaList.length;
+            updateGrandTotals();
 
             if (kafalaList.length === 0) {
                 tbody.innerHTML = '';
