@@ -71,7 +71,7 @@
                             <span class="text-xs bg-firdous-gold text-white font-bold px-2 py-0.5 rounded-full shadow">أسوان</span>
                         </h1>
                         <p class="text-xs text-teal-100 font-medium mt-0.5">
-                            منظومة رواتب وبيانات العاملين • الحضانة (صباحي) والكُتّاب لتحفيظ القرآن (مسائي)
+                            منظومة رواتب وبيانات العاملين • التعليم الصباحي والكُتّاب لتحفيظ القرآن (مسائي)
                         </p>
                     </div>
                 </div>
@@ -266,7 +266,7 @@
                     <i class="fa-solid fa-sun"></i>
                 </div>
                 <div>
-                    <span class="text-xs text-gray-500 font-semibold block">الحضانة (صباحي)</span>
+                    <span class="text-xs text-gray-500 font-semibold block">التعليم الصباحي</span>
                     <span class="text-xl font-bold text-gray-800" id="kpiMorningCount">0</span>
                     <span class="text-[10px] text-amber-700 block" id="kpiMorningSum">0 ج.م</span>
                 </div>
@@ -307,7 +307,7 @@
                         <i class="fa-solid fa-layer-group ml-1"></i> كافة الفترات (الكل)
                     </button>
                     <button id="tabMorning" onclick="setShiftFilter('morning')" class="px-4 py-2 rounded-xl transition bg-gray-100 text-gray-600 hover:bg-gray-200">
-                        <i class="fa-solid fa-sun text-amber-500 ml-1"></i> الفترة الصباحية (الحضانة)
+                        <i class="fa-solid fa-sun text-amber-500 ml-1"></i> التعليم الصباحي
                     </button>
                     <button id="tabEvening" onclick="setShiftFilter('evening')" class="px-4 py-2 rounded-xl transition bg-gray-100 text-gray-600 hover:bg-gray-200">
                         <i class="fa-solid fa-moon text-teal-600 ml-1"></i> الفترة المسائية (تحفيظ القرآن)
@@ -505,7 +505,7 @@
                     <div>
                         <label class="block text-xs font-bold text-gray-700 mb-1">الفترة *</label>
                         <select id="formPeriod" required class="w-full px-3 py-2 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-firdous-teal">
-                            <option value="morning">الفترة الصباحية (الحضانة)</option>
+                            <option value="morning">التعليم الصباحي</option>
                             <option value="evening">الفترة المسائية (الكُتّاب)</option>
                         </select>
                     </div>
@@ -760,7 +760,7 @@
         // 1. Initial Dataset (Extracted exactly from provided PDFs)
         // -------------------------------------------------------------
         const initialStaffData = [
-// ========== حضانة الفردوس الإسلامية (الفترة الصباحية) ==========
+// ========== التعليم الصباحي (الفترة الصباحية) ==========
             { id: 1, name: "أسماء سلطان احمد", salary: 3800, job: "مشرفة عام", branch: "الفرع الرئيسي", period: "morning", category: "مشرفين", nationalId: "28006212800523", phone: "01119827167" },
             { id: 2, name: "ماجدة حسن عبدالله", salary: 3150, job: "مشرفة", branch: "الفرع الرئيسي", period: "morning", category: "مشرفين", nationalId: "27505142701843", phone: "01112899184" },
             { id: 3, name: "إيمان سلطان احمد", salary: 3150, job: "مشرفة", branch: "فرع ابوشوك", period: "morning", category: "مشرفين", nationalId: "28609132800545", phone: "01153311545" },
@@ -1468,7 +1468,7 @@
             data.forEach((item, index) => {
                 const isMorning = item.period === 'morning';
                 const periodBadge = isMorning
-                    ? `<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-50 text-amber-700 border border-amber-200"><i class="fa-solid fa-sun text-[10px]"></i> حضانة (صباحي)</span>`
+                    ? `<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-50 text-amber-700 border border-amber-200"><i class="fa-solid fa-sun text-[10px]"></i> التعليم الصباحي</span>`
                     : `<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-teal-50 text-firdous-teal-dark border border-teal-200"><i class="fa-solid fa-moon text-[10px]"></i> كُتّاب (مسائي)</span>`;
 
                 let catBadge = '';
@@ -2098,7 +2098,7 @@
                 `"${String(item.name).replace(/"/g, '""')}"`,
                 `"${String(item.job).replace(/"/g, '""')}"`,
                 `"${item.category}"`,
-                item.period === 'morning' ? 'صباحي (حضانة)' : 'مسائي (كتاب)',
+                item.period === 'morning' ? 'التعليم الصباحي' : 'مسائي (كتاب)',
                 `"${item.branch}"`,
                 item.salary,
                 `"${item.phone || ''}"`,
