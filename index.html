@@ -147,6 +147,23 @@
             </div>
         </div>
 
+        <!-- Sync Status Banner (always visible) -->
+        <div class="mb-6 p-4 bg-white rounded-2xl border border-gray-200 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-gray-600 no-print">
+            <div class="flex flex-col sm:flex-row sm:items-center gap-3">
+                <div class="flex items-center gap-2">
+                    <span id="syncDot" class="inline-block w-2.5 h-2.5 rounded-full bg-gray-400"></span>
+                    <span id="syncStatusText">الحفظ المحلي مفعّل: التعديلات تُحفظ في متصفحك فقط.</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <button id="syncNowBtn" onclick="refreshFromRemote(function(ok){ if(ok) showToast('تم تحديث البيانات من الشيت','success'); })" class="hidden px-3 py-1 rounded-lg bg-gray-100 hover:bg-gray-200 font-bold text-gray-700">تحديث من الشيت</button>
+                    <button id="seedSheetBtn" onclick="seedSheetToRemote()" class="hidden px-3 py-1 rounded-lg bg-firdous-teal text-white hover:opacity-90 font-bold">رفع البيانات الحالية للشيت</button>
+                </div>
+            </div>
+            <div class="flex items-center gap-4 font-bold text-gray-800">
+                <span>مجموع رواتب القائمة الحالية: <span id="currentTableSalariesSum" class="text-firdous-teal font-black text-sm">0</span> ج.م</span>
+            </div>
+        </div>
+
         <!-- Expenses Section -->
         <div class="mb-6 bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
             <div class="p-4 border-b border-gray-100 flex flex-wrap items-center justify-between gap-3 bg-amber-50/40">
@@ -391,23 +408,6 @@
                 <button onclick="clearAllFilters()" class="mt-4 px-4 py-2 bg-firdous-teal text-white rounded-xl text-xs font-bold shadow hover:bg-firdous-teal-dark transition">
                     إعادة ضبط الفلاتر
                 </button>
-            </div>
-        </div>
-
-        <!-- Footer Stats Banner inside table view -->
-        <div class="mt-4 p-4 bg-white rounded-2xl border border-gray-200 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-gray-600 no-print">
-            <div class="flex flex-col sm:flex-row sm:items-center gap-3">
-                <div class="flex items-center gap-2">
-                    <span id="syncDot" class="inline-block w-2.5 h-2.5 rounded-full bg-gray-400"></span>
-                    <span id="syncStatusText">الحفظ المحلي مفعّل: التعديلات تُحفظ في متصفحك فقط.</span>
-                </div>
-                <div class="flex items-center gap-2">
-                    <button id="syncNowBtn" onclick="refreshFromRemote(function(ok){ if(ok) showToast('تم تحديث البيانات من الشيت','success'); })" class="hidden px-3 py-1 rounded-lg bg-gray-100 hover:bg-gray-200 font-bold text-gray-700">تحديث من الشيت</button>
-                    <button id="seedSheetBtn" onclick="seedSheetToRemote()" class="hidden px-3 py-1 rounded-lg bg-firdous-teal text-white hover:opacity-90 font-bold">رفع البيانات الحالية للشيت</button>
-                </div>
-            </div>
-            <div class="flex items-center gap-4 font-bold text-gray-800">
-                <span>مجموع رواتب القائمة الحالية: <span id="currentTableSalariesSum" class="text-firdous-teal font-black text-sm">0</span> ج.م</span>
             </div>
         </div>
 
