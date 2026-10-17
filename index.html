@@ -111,6 +111,50 @@
     <!-- Main Content Container -->
     <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex-1 w-full">
 
+        <!-- Expenses Section -->
+        <div class="mb-6 bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+            <div class="p-4 border-b border-gray-100 flex flex-wrap items-center justify-between gap-3 bg-amber-50/40">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center text-lg">
+                        <i class="fa-solid fa-receipt"></i>
+                    </div>
+                    <div>
+                        <h2 class="text-base font-black text-gray-800">المصروفات الشهرية</h2>
+                        <p class="text-xs text-gray-500">إجمالي المصروفات: <span id="expenseTotal" class="font-bold text-firdous-teal">0</span> ج.م • <span id="expenseCount">0</span> بند</p>
+                    </div>
+                </div>
+                <button onclick="openExpenseModal('add')" class="bg-firdous-teal hover:bg-firdous-teal-dark text-white px-4 py-2 rounded-xl text-sm font-bold shadow transition flex items-center gap-2">
+                    <i class="fa-solid fa-plus"></i> إضافة بند مصروف
+                </button>
+            </div>
+
+            <div class="overflow-x-auto hidden md:block">
+                <table class="w-full text-right border-collapse">
+                    <thead>
+                        <tr class="bg-gray-50/90 text-gray-700 text-xs font-bold uppercase tracking-wider border-b border-gray-200">
+                            <th class="py-3.5 px-3 text-center w-12">#</th>
+                            <th class="py-3.5 px-4">البند</th>
+                            <th class="py-3.5 px-4 text-center">المبلغ</th>
+                            <th class="py-3.5 px-4">ملاحظات</th>
+                            <th class="py-3.5 px-3 text-center no-print">إجراءات</th>
+                        </tr>
+                    </thead>
+                    <tbody id="expenseTableBody" class="divide-y divide-gray-100 text-sm"></tbody>
+                    <tfoot id="expenseTableFoot" class="bg-amber-50/70 font-bold text-gray-800 border-t-2 border-amber-400 text-sm"></tfoot>
+                </table>
+            </div>
+
+            <div id="expenseCards" class="md:hidden divide-y divide-gray-100"></div>
+
+            <div id="expenseEmptyState" class="hidden p-10 text-center">
+                <div class="w-14 h-14 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3 text-gray-400 text-xl">
+                    <i class="fa-solid fa-receipt"></i>
+                </div>
+                <h3 class="text-sm font-bold text-gray-700">لا توجد بنود مصروفات</h3>
+                <p class="text-xs text-gray-500 mt-1">اضغط «إضافة بند مصروف» لإضافة بند جديد</p>
+            </div>
+        </div>
+
         <!-- KPI Summary Cards -->
         <div class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-5 gap-3 mb-6 no-print">
             <!-- Total Staff -->
@@ -305,20 +349,20 @@
             </div>
         </div>
 
-        <!-- Expenses Section -->
+        <!-- Kafala Section (كفالة اليتيم) -->
         <div class="mt-6 bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
-            <div class="p-4 border-b border-gray-100 flex flex-wrap items-center justify-between gap-3 bg-amber-50/40">
+            <div class="p-4 border-b border-gray-100 flex flex-wrap items-center justify-between gap-3 bg-emerald-50/40">
                 <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center text-lg">
-                        <i class="fa-solid fa-receipt"></i>
+                    <div class="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center text-lg">
+                        <i class="fa-solid fa-hand-holding-heart"></i>
                     </div>
                     <div>
-                        <h2 class="text-base font-black text-gray-800">المصروفات الشهرية</h2>
-                        <p class="text-xs text-gray-500">إجمالي المصروفات: <span id="expenseTotal" class="font-bold text-firdous-teal">0</span> ج.م • <span id="expenseCount">0</span> بند</p>
+                        <h2 class="text-base font-black text-gray-800">كفالة اليتيم — أكتوبر 2026</h2>
+                        <p class="text-xs text-gray-500">مشروع الكفالة التربوية الشاملة (مؤسسة ثواب للتنمية) • الإجمالي: <span id="kafalaTotal" class="font-bold text-emerald-700">0</span> ج.م • <span id="kafalaCount">0</span> مستفيد</p>
                     </div>
                 </div>
-                <button onclick="openExpenseModal('add')" class="bg-firdous-teal hover:bg-firdous-teal-dark text-white px-4 py-2 rounded-xl text-sm font-bold shadow transition flex items-center gap-2">
-                    <i class="fa-solid fa-plus"></i> إضافة بند مصروف
+                <button onclick="openKafalaModal('add')" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-xl text-sm font-bold shadow transition flex items-center gap-2">
+                    <i class="fa-solid fa-plus"></i> إضافة مستفيد
                 </button>
             </div>
 
@@ -326,26 +370,28 @@
                 <table class="w-full text-right border-collapse">
                     <thead>
                         <tr class="bg-gray-50/90 text-gray-700 text-xs font-bold uppercase tracking-wider border-b border-gray-200">
-                            <th class="py-3.5 px-3 text-center w-12">#</th>
-                            <th class="py-3.5 px-4">البند</th>
+                            <th class="py-3.5 px-3 text-center w-12">م</th>
+                            <th class="py-3.5 px-4">الاسم</th>
+                            <th class="py-3.5 px-4 text-center">الرقم القومي</th>
+                            <th class="py-3.5 px-4 text-center">الموبايل</th>
                             <th class="py-3.5 px-4 text-center">المبلغ</th>
-                            <th class="py-3.5 px-4">ملاحظات</th>
+                            <th class="py-3.5 px-4">اسم الزوج</th>
                             <th class="py-3.5 px-3 text-center no-print">إجراءات</th>
                         </tr>
                     </thead>
-                    <tbody id="expenseTableBody" class="divide-y divide-gray-100 text-sm"></tbody>
-                    <tfoot id="expenseTableFoot" class="bg-amber-50/70 font-bold text-gray-800 border-t-2 border-amber-400 text-sm"></tfoot>
+                    <tbody id="kafalaTableBody" class="divide-y divide-gray-100 text-sm"></tbody>
+                    <tfoot id="kafalaTableFoot" class="bg-emerald-50/70 font-bold text-gray-800 border-t-2 border-emerald-400 text-sm"></tfoot>
                 </table>
             </div>
 
-            <div id="expenseCards" class="md:hidden divide-y divide-gray-100"></div>
+            <div id="kafalaCards" class="md:hidden divide-y divide-gray-100"></div>
 
-            <div id="expenseEmptyState" class="hidden p-10 text-center">
+            <div id="kafalaEmptyState" class="hidden p-10 text-center">
                 <div class="w-14 h-14 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3 text-gray-400 text-xl">
-                    <i class="fa-solid fa-receipt"></i>
+                    <i class="fa-solid fa-hand-holding-heart"></i>
                 </div>
-                <h3 class="text-sm font-bold text-gray-700">لا توجد بنود مصروفات</h3>
-                <p class="text-xs text-gray-500 mt-1">اضغط «إضافة بند مصروف» لإضافة بند جديد</p>
+                <h3 class="text-sm font-bold text-gray-700">لا توجد سجلات كفالة</h3>
+                <p class="text-xs text-gray-500 mt-1">اضغط «إضافة مستفيد» لإضافة مستفيد جديد</p>
             </div>
         </div>
 
@@ -546,6 +592,90 @@
                     إلغاء
                 </button>
                 <button onclick="confirmDeleteExpense()" class="px-5 py-2 bg-red-600 text-white rounded-xl text-xs font-bold hover:bg-red-700 shadow">
+                    نعم، حذف
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal for Adding / Editing Kafala -->
+    <div id="kafalaModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl max-w-lg w-full shadow-2xl overflow-hidden border border-gray-100">
+            <div class="bg-gradient-to-l from-emerald-700 to-emerald-500 p-5 text-white flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center text-white text-lg">
+                        <i id="kafalaModalIcon" class="fa-solid fa-plus"></i>
+                    </div>
+                    <div>
+                        <h3 id="kafalaModalTitle" class="text-lg font-bold">إضافة مستفيد</h3>
+                        <p class="text-xs text-emerald-100">أدخل بيانات مستفيد الكفالة</p>
+                    </div>
+                </div>
+                <button onclick="closeKafalaModal()" class="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <form id="kafalaForm" onsubmit="saveKafala(event)" class="p-6 space-y-4">
+                <input type="hidden" id="formKafalaId">
+
+                <div>
+                    <label class="block text-xs font-bold text-gray-700 mb-1">الاسم *</label>
+                    <input type="text" id="formKafalaName" required placeholder="اسم المستفيد"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500">
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold text-gray-700 mb-1">الرقم القومي</label>
+                        <input type="text" id="formKafalaNationalId" inputmode="numeric" placeholder="14 رقم" dir="ltr"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-xl text-sm font-mono focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-700 mb-1">الموبايل</label>
+                        <input type="text" id="formKafalaPhone" inputmode="tel" placeholder="01xxxxxxxxx" dir="ltr"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-xl text-sm font-mono focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold text-gray-700 mb-1">المبلغ (ج.م) *</label>
+                        <input type="number" id="formKafalaAmount" required min="0" step="1" placeholder="مثال: 3000"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-xl text-sm font-bold text-emerald-700 focus:ring-2 focus:ring-emerald-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-700 mb-1">اسم الزوج</label>
+                        <input type="text" id="formKafalaSpouse" placeholder="اسم الزوج"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500">
+                    </div>
+                </div>
+
+                <div class="flex items-center justify-end gap-3 pt-4 border-t border-gray-100">
+                    <button type="button" onclick="closeKafalaModal()" class="px-4 py-2 border border-gray-200 text-gray-600 rounded-xl text-sm font-bold hover:bg-gray-50">
+                        إلغاء
+                    </button>
+                    <button type="submit" class="px-5 py-2 bg-emerald-600 text-white rounded-xl text-sm font-bold hover:bg-emerald-700 shadow flex items-center gap-2">
+                        <i class="fa-solid fa-floppy-disk"></i> حفظ
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Delete Confirmation Modal (Kafala) -->
+    <div id="kafalaDeleteModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl max-w-sm w-full p-6 text-center shadow-2xl border border-gray-100">
+            <div class="w-14 h-14 bg-red-50 text-red-500 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+            </div>
+            <h3 class="text-base font-bold text-gray-800 mb-2">تأكيد حذف المستفيد</h3>
+            <p class="text-xs text-gray-500 mb-6" id="kafalaDeletePrompt">هل أنت متأكد من رغبتك في حذف هذا المستفيد؟</p>
+            <div class="flex gap-2 justify-center">
+                <button onclick="closeKafalaDeleteModal()" class="px-4 py-2 border border-gray-200 text-gray-600 rounded-xl text-xs font-bold hover:bg-gray-50">
+                    إلغاء
+                </button>
+                <button onclick="confirmDeleteKafala()" class="px-5 py-2 bg-red-600 text-white rounded-xl text-xs font-bold hover:bg-red-700 shadow">
                     نعم، حذف
                 </button>
             </div>
@@ -835,6 +965,53 @@
             { id: 4, item: "مكافآت المتميزين", amount: 15000, notes: "في جميع الفروع" }
         ];
 
+        // بيانات كفالة أكتوبر 2026 — مشروع الكفالة التربوية الشاملة (مؤسسة ثواب للتنمية)
+        const initialKafalaData = [
+            { id: 1, name: "أم إسماعيل محمد", nationalId: "24508250610026", phone: "01127331726", amount: 3000, spouse: "كمال عبدالرحيم مصطفى" },
+            { id: 2, name: "تهاني محمد جلال", nationalId: "", phone: "01146146233", amount: 3000, spouse: "مصطفى عبدالمعطي" },
+            { id: 3, name: "إيمان عمر الطاهر", nationalId: "28811272700901", phone: "01159883574", amount: 3000, spouse: "منصور مصطفى" },
+            { id: 4, name: "نورا نوفي محمد", nationalId: "2910720000850", phone: "01150469790", amount: 3000, spouse: "درديري أحمد" },
+            { id: 5, name: "آية معلا حسين", nationalId: "2970822800862", phone: "01111176480", amount: 3000, spouse: "الحسن حامد محمود" },
+            { id: 6, name: "عفاف عبدالراضي عبدالجواد", nationalId: "28601122800889", phone: "01145023260", amount: 3000, spouse: "إبراهيم زين العابدين" },
+            { id: 7, name: "زمزم حجاج يوسف", nationalId: "2760232701468", phone: "0110889437", amount: 3000, spouse: "سيد أحمد جمعة" },
+            { id: 8, name: "الشيماء صلاح الصغير", nationalId: "28503152800607", phone: "01148833193", amount: 3000, spouse: "محمد بدري يونس" },
+            { id: 9, name: "فاطمة حسن محمد", nationalId: "28605012801003", phone: "01142730381", amount: 3000, spouse: "محمود عبدالمجيد" },
+            { id: 10, name: "نصره سعد علي", nationalId: "27607042800361", phone: "01142730381", amount: 3000, spouse: "مبارك محمد علي" },
+            { id: 11, name: "نعمة حامد أحمد", nationalId: "28203142702022", phone: "01112129464", amount: 3000, spouse: "خالد عبدالستار" },
+            { id: 12, name: "منى رجب شحات", nationalId: "28709012800121", phone: "01150401149", amount: 3000, spouse: "الحسين ياسين" },
+            { id: 13, name: "مرفت ثابت محمود", nationalId: "28306032800341", phone: "0112291939", amount: 3000, spouse: "أحمد جمعة" },
+            { id: 14, name: "أسماء عبدالفتاح عباس", nationalId: "28207122701084", phone: "01123097461", amount: 3000, spouse: "أشرف سعد" },
+            { id: 15, name: "ريهام عماد حنفي", nationalId: "28804182800748", phone: "011104695017", amount: 3000, spouse: "وجدي عويس" },
+            { id: 16, name: "هبة عبدالجليل صالح", nationalId: "2780701280140", phone: "01110567313", amount: 3000, spouse: "أحمد عبدالرحمن" },
+            { id: 17, name: "رحمة محمود إسماعيل", nationalId: "28303022702503", phone: "011461877724", amount: 3000, spouse: "عبدالكريم عطيتو" },
+            { id: 18, name: "هويدا خضري عبدالله", nationalId: "280112801208", phone: "0110569868", amount: 3000, spouse: "العرب زين" },
+            { id: 19, name: "أمال الضبع عثمان", nationalId: "2811212603521", phone: "0111994339", amount: 3000, spouse: "علاء عبدالراضي" },
+            { id: 20, name: "فاطمة محمد حفني", nationalId: "26502122701626", phone: "01104877689", amount: 3000, spouse: "رمضان عبدالسميع عبدالفراج" },
+            { id: 21, name: "فتحية إبراهيم حسين", nationalId: "26212132800583", phone: "01144789989", amount: 3000, spouse: "زكريا محمد العالم" },
+            { id: 22, name: "فاطمة عبدالحميد أحمد", nationalId: "2990922801044", phone: "01121158056", amount: 3000, spouse: "عبدالحميد أحمد" },
+            { id: 23, name: "تيسير حسن محمد", nationalId: "28401052800081", phone: "01140501991", amount: 3000, spouse: "محمد" },
+            { id: 24, name: "شيماء محمد علي", nationalId: "2810113280924", phone: "011469370957", amount: 3000, spouse: "محمد سيد نهامي" },
+            { id: 25, name: "صابرين علي سليمان", nationalId: "3000302800261", phone: "01218277", amount: 3000, spouse: "حسن علي أحمد" },
+            { id: 26, name: "أمال بسطاوي حامد", nationalId: "28407012802003", phone: "01129156973", amount: 3000, spouse: "محمد وجدي سيد" },
+            { id: 27, name: "عفاف عبدالراضي أمين", nationalId: "29006032800901", phone: "0103203385", amount: 3000, spouse: "أيمن عبدالعزيز سعد" },
+            { id: 28, name: "رحاب سيد الصغير", nationalId: "28080228006585", phone: "011105409361", amount: 3000, spouse: "حاتم عبدالنبي فرج" },
+            { id: 29, name: "زينب زناتي سالم", nationalId: "2611052800743", phone: "011046998440", amount: 3000, spouse: "كرم زكي أبو الحجاج" },
+            { id: 30, name: "أمال نادي عبدالعزيز", nationalId: "28701042808868", phone: "0109538158", amount: 3000, spouse: "عاطف زين العابدين" },
+            { id: 31, name: "نوبية حجاج إسماعيل", nationalId: "28208022800165", phone: "011498750772", amount: 3000, spouse: "خالد عبدالعاطي طه" },
+            { id: 32, name: "منى رمضان عثمان", nationalId: "29106052801305", phone: "01146716054", amount: 3000, spouse: "عمرو أسعد عكاشة" },
+            { id: 33, name: "إسراء علاء الدين مهدي", nationalId: "30002122800587", phone: "01140716054", amount: 3000, spouse: "علاء الدين مهدي" },
+            { id: 34, name: "أسماء عبدالمنعم محمد", nationalId: "28911012801881", phone: "01124946148", amount: 3000, spouse: "هشام حمدي نوفل" },
+            { id: 35, name: "حياة محمد أبو المجد", nationalId: "2690421280567", phone: "01105561849", amount: 3000, spouse: "" },
+            { id: 36, name: "رضا رمضان حسن", nationalId: "2690421280056", phone: "01103413346", amount: 3000, spouse: "" },
+            { id: 37, name: "أماني عبدالعاطي حامد", nationalId: "28410172010587", phone: "01147052822", amount: 3000, spouse: "" },
+            { id: 38, name: "صباح سعد عبدالمنعم أحمد", nationalId: "27710092601306", phone: "01144073341", amount: 3000, spouse: "إسماعيل أو أحمد محمد" },
+            { id: 39, name: "ليلى عبدالوهاب أحمد", nationalId: "27505242701441", phone: "01103334288", amount: 3000, spouse: "نصر علي يوسف" },
+            { id: 40, name: "مسعدة عبده", nationalId: "", phone: "01140146096", amount: 3000, spouse: "" },
+            { id: 41, name: "اسراء ربيع عبد الظاهر", nationalId: "", phone: "01280723220", amount: 3000, spouse: "" },
+            { id: 42, name: "ثناء حمادة حامد سليم", nationalId: "", phone: "0111429406", amount: 3000, spouse: "" },
+            { id: 43, name: "نجلاء", nationalId: "", phone: "0111543459", amount: 3000, spouse: "" }
+        ];
+
         // -------------------------------------------------------------
         // 2. Application State Management
         // -------------------------------------------------------------
@@ -845,6 +1022,8 @@
         let staffToDeleteId = null;
         let expenseList = [];
         let expenseToDeleteId = null;
+        let kafalaList = [];
+        let kafalaToDeleteId = null;
 
         // ---------------- Utilities ----------------
         function fmt(n) { return (Number(n) || 0).toLocaleString('en-US'); }
@@ -887,6 +1066,7 @@
         // ---------------- Google Sheets Sync (اختياري) ----------------
         const LS_KEY = 'al_firdous_staff_records';
         const LS_KEY_EXP = 'al_firdous_expenses_records';
+        const LS_KEY_KAF = 'al_firdous_kafala_records';
         // ⚠️ بعد نشر Apps Script: الصق رابط الـ Web app هنا، وضع نفس SECRET
         const REMOTE = { url: 'https://script.google.com/macros/s/AKfycbxJQEwJODWgXlvx1MYoXHWxluL4B01orZqV_5jNLI_nkJLzLxlEhBhkpfbpEuvSGepCWg/exec', secret: 'CHANGE_ME_123' };
         function remoteEnabled() { return REMOTE.url && REMOTE.url.indexOf('http') === 0; }
@@ -959,15 +1139,27 @@
             };
         }
 
+        function normalizeKafala(r) {
+            return {
+                id: Number(r.id) || 0,
+                name: (r.name || '').toString().trim(),
+                nationalId: toWestern((r.nationalId || '').toString().trim()),
+                phone: toWestern((r.phone || '').toString().trim()),
+                amount: Number(r.amount) || 0,
+                spouse: (r.spouse || '').toString().trim()
+            };
+        }
+
         function refreshFromRemote(cb) {
             setSyncBadge('loading');
             jsonpGet({}, function (res) {
                 if (res && res.ok) {
                     var staff = Array.isArray(res.staff) ? res.staff : (Array.isArray(res.data) ? res.data : []);
                     var expenses = Array.isArray(res.expenses) ? res.expenses : [];
-                    if (staff.length === 0 && expenses.length === 0) {
+                    var kaf = Array.isArray(res.kafala) ? res.kafala : [];
+                    if (staff.length === 0 && expenses.length === 0 && kaf.length === 0) {
                         loadLocalData();
-                        setSyncBadge('online', 'الشيت متصل لكنه فارغ — اضغط «رفع البيانات الحالية للشيت» لرفع ' + staffList.length + ' موظف و' + expenseList.length + ' بند مصروف.');
+                        setSyncBadge('online', 'الشيت متصل لكنه فارغ — اضغط «رفع البيانات الحالية للشيت» لرفع ' + staffList.length + ' موظف و' + expenseList.length + ' بند مصروف و' + kafalaList.length + ' سجل كفالة.');
                         if (cb) cb(true);
                         return;
                     }
@@ -978,10 +1170,17 @@
                         // ورقة المصروفات لم تُهيّأ بعد — استخدم الافتراضي حتى تُرفع
                         expenseList = [...initialExpensesData];
                     }
+                    if (kaf.length > 0) {
+                        kafalaList = kaf.map(normalizeKafala);
+                    } else {
+                        // ورقة الكفالة لم تُهيّأ بعد — استخدم الافتراضي حتى تُرفع
+                        kafalaList = [...initialKafalaData];
+                    }
                     saveToLocalStorage();
                     updateKPIs();
                     applyFilters();
                     renderExpenses();
+                    renderKafala();
                     setSyncBadge('online');
                     if (cb) cb(true);
                 } else {
@@ -993,9 +1192,10 @@
 
         function seedSheetToRemote() {
             if (!remoteEnabled()) { showToast('لم يتم ضبط رابط Google Sheets بعد', 'error'); return; }
-            if (!confirm('سيتم رفع البيانات الحالية إلى Google Sheets:\n• ' + staffList.length + ' موظف\n• ' + expenseList.length + ' بند مصروف\n(سيتم استبدال بيانات الشيت الحالية). متابعة؟')) return;
+            if (!confirm('سيتم رفع البيانات الحالية إلى Google Sheets:\n• ' + staffList.length + ' موظف\n• ' + expenseList.length + ' بند مصروف\n• ' + kafalaList.length + ' سجل كفالة\n(سيتم استبدال بيانات الشيت الحالية). متابعة؟')) return;
             apiWrite({ action: 'replace', type: 'staff', data: staffList });
             apiWrite({ action: 'replace', type: 'expenses', data: expenseList });
+            apiWrite({ action: 'replace', type: 'kafala', data: kafalaList });
             showToast('جارٍ رفع البيانات إلى Google Sheets...', 'info');
             setTimeout(function () { refreshFromRemote(function () { showToast('تمت مزامنة الشيت بنجاح', 'success'); }); }, 3000);
         }
@@ -1007,7 +1207,7 @@
             });
 
             document.addEventListener('keydown', function (e) {
-                if (e.key === 'Escape') { closeModal(); closeDeleteModal(); closeExpenseModal(); closeExpenseDeleteModal(); }
+                if (e.key === 'Escape') { closeModal(); closeDeleteModal(); closeExpenseModal(); closeExpenseDeleteModal(); closeKafalaModal(); closeKafalaDeleteModal(); }
             });
 
             if (remoteEnabled()) {
@@ -1038,23 +1238,36 @@
             } else {
                 expenseList = [...initialExpensesData];
             }
+            const savedKaf = localStorage.getItem(LS_KEY_KAF);
+            if (savedKaf) {
+                try {
+                    kafalaList = JSON.parse(savedKaf);
+                } catch (e) {
+                    kafalaList = [...initialKafalaData];
+                }
+            } else {
+                kafalaList = [...initialKafalaData];
+            }
             saveToLocalStorage();
             updateKPIs();
             applyFilters();
             renderExpenses();
+            renderKafala();
             setSyncBadge('local');
         }
 
         function saveToLocalStorage() {
             localStorage.setItem(LS_KEY, JSON.stringify(staffList));
             localStorage.setItem(LS_KEY_EXP, JSON.stringify(expenseList));
+            localStorage.setItem(LS_KEY_KAF, JSON.stringify(kafalaList));
         }
 
         function resetData() {
             if (remoteEnabled()) {
-                if (confirm("إعادة تعيين البيانات: سيتم رفع النسخة الأصلية (" + initialStaffData.length + " موظف و" + initialExpensesData.length + " بند مصروف) إلى Google Sheets واستبدال البيانات الحالية. متابعة؟")) {
+                if (confirm("إعادة تعيين البيانات: سيتم رفع النسخة الأصلية (" + initialStaffData.length + " موظف و" + initialExpensesData.length + " بند مصروف و" + initialKafalaData.length + " سجل كفالة) إلى Google Sheets واستبدال البيانات الحالية. متابعة؟")) {
                     apiWrite({ action: 'replace', type: 'staff', data: initialStaffData });
                     apiWrite({ action: 'replace', type: 'expenses', data: initialExpensesData });
+                    apiWrite({ action: 'replace', type: 'kafala', data: initialKafalaData });
                     showToast('جارٍ إعادة التعيين من النسخة الأصلية...', 'info');
                     setTimeout(function () { refreshFromRemote(function () { showToast('تمت إعادة التعيين بنجاح', 'success'); }); }, 3000);
                 }
@@ -1063,10 +1276,12 @@
             if (confirm("هل تريد استعادة البيانات الأصلية لمؤسسة الفردوس وإلغاء أي تعديلات محلية؟")) {
                 staffList = [...initialStaffData];
                 expenseList = [...initialExpensesData];
+                kafalaList = [...initialKafalaData];
                 saveToLocalStorage();
                 updateKPIs();
                 applyFilters();
                 renderExpenses();
+                renderKafala();
             }
         }
 
@@ -1596,6 +1811,176 @@
         }
 
         // -------------------------------------------------------------
+        // 6c. Kafala Operations
+        // -------------------------------------------------------------
+        function renderKafala() {
+            const tbody = document.getElementById('kafalaTableBody');
+            if (!tbody) return;
+            const foot = document.getElementById('kafalaTableFoot');
+            const cards = document.getElementById('kafalaCards');
+            const empty = document.getElementById('kafalaEmptyState');
+
+            const total = kafalaList.reduce((a, c) => a + (Number(c.amount) || 0), 0);
+            const totalEl = document.getElementById('kafalaTotal');
+            if (totalEl) totalEl.textContent = fmt(total);
+            const countEl = document.getElementById('kafalaCount');
+            if (countEl) countEl.textContent = kafalaList.length;
+
+            if (kafalaList.length === 0) {
+                tbody.innerHTML = '';
+                if (foot) foot.innerHTML = '';
+                if (cards) cards.innerHTML = '';
+                if (empty) empty.classList.remove('hidden');
+                return;
+            } else if (empty) {
+                empty.classList.add('hidden');
+            }
+
+            let html = '';
+            let cardsHtml = '';
+            kafalaList.forEach((item, index) => {
+                html += `
+                <tr class="hover:bg-emerald-50/40 transition border-b border-gray-100">
+                    <td class="py-3 px-3 text-center text-xs text-gray-400 font-mono">${index + 1}</td>
+                    <td class="py-3 px-4 font-bold text-gray-900">${escHtml(item.name)}</td>
+                    <td class="py-3 px-4 text-center font-mono text-xs text-gray-600">${escHtml(item.nationalId) || '—'}</td>
+                    <td class="py-3 px-4 text-center font-mono text-xs text-gray-600" dir="ltr">${escHtml(item.phone) || '—'}</td>
+                    <td class="py-3 px-4 text-center font-bold text-emerald-700">${fmt(item.amount)} <span class="text-[10px] text-gray-400 font-normal">ج.م</span></td>
+                    <td class="py-3 px-4 text-xs text-gray-600">${escHtml(item.spouse) || '—'}</td>
+                    <td class="py-3 px-3 text-center no-print">
+                        <div class="flex items-center justify-center gap-1.5">
+                            <button onclick="openKafalaModal('edit', ${item.id})" class="w-8 h-8 rounded-lg bg-teal-50 text-firdous-teal hover:bg-firdous-teal hover:text-white transition flex items-center justify-center text-xs shadow-sm" title="تعديل">
+                                <i class="fa-solid fa-pen"></i>
+                            </button>
+                            <button onclick="promptDeleteKafala(${item.id})" class="w-8 h-8 rounded-lg bg-red-50 text-red-500 hover:bg-red-500 hover:text-white transition flex items-center justify-center text-xs shadow-sm" title="حذف">
+                                <i class="fa-solid fa-trash-can"></i>
+                            </button>
+                        </div>
+                    </td>
+                </tr>`;
+
+                cardsHtml += `
+                <div class="p-4">
+                    <div class="flex items-start justify-between gap-2">
+                        <div class="flex-1">
+                            <div class="font-bold text-gray-900 text-sm">${escHtml(item.name)}</div>
+                            <div class="text-xs text-gray-500 mt-1 font-mono" dir="ltr">${escHtml(item.phone) || '—'}</div>
+                            ${item.nationalId ? `<div class="text-xs text-gray-500 mt-0.5 font-mono">${escHtml(item.nationalId)}</div>` : ''}
+                            ${item.spouse ? `<div class="text-xs text-gray-500 mt-1">الزوج: ${escHtml(item.spouse)}</div>` : ''}
+                            <div class="text-sm font-bold text-emerald-700 mt-1">${fmt(item.amount)} ج.م</div>
+                        </div>
+                        <div class="flex flex-col gap-1.5">
+                            <button onclick="openKafalaModal('edit', ${item.id})" class="w-9 h-9 rounded-lg bg-teal-50 text-firdous-teal shadow-sm flex items-center justify-center text-xs" title="تعديل"><i class="fa-solid fa-pen"></i></button>
+                            <button onclick="promptDeleteKafala(${item.id})" class="w-9 h-9 rounded-lg bg-red-50 text-red-500 shadow-sm flex items-center justify-center text-xs" title="حذف"><i class="fa-solid fa-trash-can"></i></button>
+                        </div>
+                    </div>
+                </div>`;
+            });
+
+            tbody.innerHTML = html;
+            if (cards) cards.innerHTML = cardsHtml;
+            if (foot) {
+                foot.innerHTML = `
+                    <tr>
+                        <td colspan="4" class="py-3.5 px-4 text-right text-emerald-700">إجمالي الكفالة (${kafalaList.length} مستفيد)</td>
+                        <td class="py-3.5 px-4 text-center text-emerald-700">${fmt(total)} <span class="text-[10px] font-normal text-gray-500">ج.م</span></td>
+                        <td colspan="2" class="py-3.5 px-4"></td>
+                    </tr>`;
+            }
+        }
+
+        function openKafalaModal(mode, kafId = null) {
+            const form = document.getElementById('kafalaForm');
+            const title = document.getElementById('kafalaModalTitle');
+            const icon = document.getElementById('kafalaModalIcon');
+            form.reset();
+
+            if (mode === 'add') {
+                document.getElementById('formKafalaId').value = '';
+                title.textContent = 'إضافة مستفيد كفالة';
+                if (icon) icon.className = 'fa-solid fa-plus';
+            } else {
+                const rec = kafalaList.find(x => x.id === kafId);
+                if (!rec) return;
+                document.getElementById('formKafalaId').value = rec.id;
+                document.getElementById('formKafalaName').value = rec.name;
+                document.getElementById('formKafalaNationalId').value = rec.nationalId;
+                document.getElementById('formKafalaPhone').value = rec.phone;
+                document.getElementById('formKafalaAmount').value = rec.amount;
+                document.getElementById('formKafalaSpouse').value = rec.spouse;
+                title.textContent = 'تعديل مستفيد كفالة';
+                if (icon) icon.className = 'fa-solid fa-pen';
+            }
+            document.getElementById('kafalaModal').classList.remove('hidden');
+        }
+
+        function closeKafalaModal() {
+            document.getElementById('kafalaModal').classList.add('hidden');
+        }
+
+        function saveKafala(e) {
+            e.preventDefault();
+            const id = document.getElementById('formKafalaId').value;
+            const obj = {
+                name: document.getElementById('formKafalaName').value.trim(),
+                nationalId: toWestern(document.getElementById('formKafalaNationalId').value.trim()),
+                phone: toWestern(document.getElementById('formKafalaPhone').value.trim()),
+                amount: Number(toWestern(document.getElementById('formKafalaAmount').value)) || 0,
+                spouse: document.getElementById('formKafalaSpouse').value.trim()
+            };
+            if (!obj.name) { showToast('اكتب اسم المستفيد', 'error'); return; }
+
+            let added = false;
+            let saved = null;
+            if (id) {
+                const idx = kafalaList.findIndex(x => x.id === Number(id));
+                if (idx !== -1) { kafalaList[idx] = { ...kafalaList[idx], ...obj }; saved = kafalaList[idx]; }
+            } else {
+                const newId = kafalaList.length > 0 ? Math.max(...kafalaList.map(x => Number(x.id) || 0)) + 1 : 1;
+                saved = { id: newId, ...obj };
+                kafalaList.push(saved);
+                added = true;
+            }
+
+            saveToLocalStorage();
+            renderKafala();
+            closeKafalaModal();
+            showToast(added ? 'تمت إضافة المستفيد بنجاح' : 'تم حفظ التعديل بنجاح', 'success');
+
+            if (remoteEnabled() && saved) {
+                apiWrite({ action: added ? 'add' : 'update', type: 'kafala', record: saved });
+                setTimeout(function () { refreshFromRemote(); }, 1500);
+            }
+        }
+
+        function promptDeleteKafala(id) {
+            const rec = kafalaList.find(x => x.id === Number(id));
+            if (!rec) return;
+            kafalaToDeleteId = Number(id);
+            document.getElementById('kafalaDeletePrompt').textContent = `هل أنت متأكد من رغبتك في حذف المستفيد "${rec.name}"؟`;
+            document.getElementById('kafalaDeleteModal').classList.remove('hidden');
+        }
+
+        function closeKafalaDeleteModal() {
+            kafalaToDeleteId = null;
+            document.getElementById('kafalaDeleteModal').classList.add('hidden');
+        }
+
+        function confirmDeleteKafala() {
+            if (kafalaToDeleteId) {
+                const delId = kafalaToDeleteId;
+                kafalaList = kafalaList.filter(x => x.id !== delId);
+                saveToLocalStorage();
+                renderKafala();
+                closeKafalaDeleteModal();
+                if (remoteEnabled()) {
+                    apiWrite({ action: 'delete', type: 'kafala', id: delId });
+                    setTimeout(function () { refreshFromRemote(); }, 1500);
+                }
+            }
+        }
+
+        // -------------------------------------------------------------
         // 7. Export to Excel (CSV format supporting Arabic UTF-8 BOM)
         // -------------------------------------------------------------
         function exportToCSV() {
@@ -1629,7 +2014,7 @@
         // 8. Backup / Restore (JSON)
         // -------------------------------------------------------------
         function backupJSON() {
-            const payload = { app: 'al-firdous', version: 2, exportedAt: new Date().toISOString(), count: staffList.length, data: staffList, expenses: expenseList };
+            const payload = { app: 'al-firdous', version: 3, exportedAt: new Date().toISOString(), count: staffList.length, data: staffList, expenses: expenseList, kafala: kafalaList };
             const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json;charset=utf-8;' });
             const link = document.createElement('a');
             const url = URL.createObjectURL(blob);
@@ -1651,12 +2036,14 @@
                     const data = Array.isArray(parsed) ? parsed : parsed.data;
                     if (!Array.isArray(data) || data.length === 0) throw new Error('empty');
                     if (!confirm(`سيتم استبدال البيانات الحالية بـ ${data.length} سجل من النسخة الاحتياطية. متابعة؟`)) return;
-                    staffList = data;
-                    if (Array.isArray(parsed.expenses)) expenseList = parsed.expenses;
+                    staffList = data.map(normalizeRecord);
+                    if (Array.isArray(parsed.expenses)) expenseList = parsed.expenses.map(normalizeExpense);
+                    if (Array.isArray(parsed.kafala)) kafalaList = parsed.kafala.map(normalizeKafala);
                     saveToLocalStorage();
                     updateKPIs();
                     applyFilters();
                     renderExpenses();
+                    renderKafala();
                     showToast('تمت استعادة النسخة الاحتياطية', 'success');
                 } catch (err) {
                     showToast('تعذّر قراءة الملف. تأكد أنه ملف نسخة احتياطية صالح', 'error');

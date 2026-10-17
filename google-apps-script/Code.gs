@@ -23,6 +23,7 @@
  *  أوراق العمل (تُنشأ تلقائياً):
  *    - staff    : بيانات العاملين
  *    - expenses : بنود المصروفات الشهرية
+ *    - kafala   : سجلات كفالة اليتيم (كفالة أكتوبر 2026)
  *
  *  ملاحظة أمان: غيّر SECRET لأي كلمة سر، وضع نفس القيمة في REMOTE.secret.
  * ============================================================================
@@ -45,12 +46,17 @@ var CONFIG = {
     sheetName: 'expenses',
     headers: ['id', 'item', 'amount', 'notes'],
     textCols: []
+  },
+  kafala: {
+    sheetName: 'kafala',
+    headers: ['id', 'name', 'nationalId', 'phone', 'amount', 'spouse'],
+    textCols: [3, 4] // C (الرقم القومي) و D (الموبايل) كنص
   }
 };
 
 /**
  * HTTP GET — قراءة البيانات (يدعم JSONP).
- *   بدون type  => كل الأوراق: { ok, staff:[...], expenses:[...] }
+ *   بدون type  => كل الأوراق: { ok, staff:[...], expenses:[...], kafala:[...] }
  *   مع type     => { ok, data:[...] }
  */
 function doGet(e) {
