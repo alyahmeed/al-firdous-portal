@@ -123,7 +123,7 @@
                     <p class="text-xs text-teal-100">إجمالي كل الأقسام معاً (رواتب الموظفين + المصروفات + كفالة اليتيم)</p>
                 </div>
             </div>
-            <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 p-4">
+            <div class="grid grid-cols-2 lg:grid-cols-5 gap-3 p-4">
                 <div class="bg-gray-50 rounded-xl border border-gray-100 p-4 text-center">
                     <div class="flex items-center justify-center gap-1.5 text-gray-500 text-xs font-bold mb-1"><i class="fa-solid fa-users"></i> رواتب الموظفين</div>
                     <div class="text-lg sm:text-xl font-black text-firdous-teal"><span id="grandStaff">0</span> <span class="text-[10px] font-normal text-gray-400">ج.م</span></div>
@@ -138,6 +138,11 @@
                     <div class="flex items-center justify-center gap-1.5 text-gray-500 text-xs font-bold mb-1"><i class="fa-solid fa-hand-holding-heart"></i> كفالة اليتيم</div>
                     <div class="text-lg sm:text-xl font-black text-emerald-600"><span id="grandKafala">0</span> <span class="text-[10px] font-normal text-gray-400">ج.م</span></div>
                     <div class="text-[10px] text-gray-400 mt-0.5" id="grandKafalaCount">0 مستفيد</div>
+                </div>
+                <div class="bg-gray-50 rounded-xl border border-gray-100 p-4 text-center">
+                    <div class="flex items-center justify-center gap-1.5 text-gray-500 text-xs font-bold mb-1"><i class="fa-solid fa-book-open-reader"></i> الفتح المبين</div>
+                    <div class="text-lg sm:text-xl font-black text-indigo-600"><span id="grandFath">0</span> <span class="text-[10px] font-normal text-gray-400">ج.م</span></div>
+                    <div class="text-[10px] text-gray-400 mt-0.5" id="grandFathCount">0 سيدة</div>
                 </div>
                 <div class="bg-gradient-to-l from-firdous-teal-dark to-firdous-teal text-white rounded-xl p-4 text-center">
                     <div class="flex items-center justify-center gap-1.5 text-teal-100 text-xs font-bold mb-1"><i class="fa-solid fa-sack-dollar"></i> الإجمالي الكلي</div>
@@ -467,6 +472,59 @@
             </div>
         </div>
 
+        <!-- Fath Mobin Section (مركز الفتح المبين) -->
+        <div class="mb-6 bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+            <div class="p-4 border-b border-gray-100 flex flex-wrap items-center justify-between gap-3 bg-indigo-50/40">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-indigo-100 text-indigo-700 flex items-center justify-center text-lg">
+                        <i class="fa-solid fa-book-open-reader"></i>
+                    </div>
+                    <div>
+                        <h2 class="text-base font-black text-gray-800">مركز الفتح المبين — حلقات النساء</h2>
+                        <p class="text-xs text-gray-500">كشف مشرفات ومعلمات حلقات النساء • الإجمالي: <span id="fathTotal" class="font-bold text-indigo-700">0</span> ج.م • <span id="fathCount">0</span> سيدة</p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-2">
+                    <button id="fathToggleBtn" onclick="toggleSection('fathContent','fathToggleBtn','إظهار التفاصيل','إخفاء التفاصيل')" class="px-3 py-2 rounded-xl text-sm font-bold shadow-sm transition flex items-center gap-2 bg-white border border-indigo-200 text-indigo-700 hover:bg-indigo-50">
+                        <span class="toggle-label">إظهار التفاصيل</span> <i class="fa-solid fa-chevron-down text-xs"></i>
+                    </button>
+                    <button onclick="openFathModal('add')" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-xl text-sm font-bold shadow transition flex items-center gap-2">
+                        <i class="fa-solid fa-plus"></i> إضافة سيدة
+                    </button>
+                </div>
+            </div>
+
+            <div id="fathContent" class="section-content hidden">
+            <div class="overflow-x-auto hidden md:block">
+                <table class="w-full text-right border-collapse">
+                    <thead>
+                        <tr class="bg-gray-50/90 text-gray-700 text-xs font-bold uppercase tracking-wider border-b border-gray-200">
+                            <th class="py-3.5 px-3 text-center w-12">م</th>
+                            <th class="py-3.5 px-4">الاسم</th>
+                            <th class="py-3.5 px-4">الوظيفة</th>
+                            <th class="py-3.5 px-4 text-center">الرقم القومي</th>
+                            <th class="py-3.5 px-4 text-center">التليفون</th>
+                            <th class="py-3.5 px-4 text-center">الراتب</th>
+                            <th class="py-3.5 px-3 text-center no-print">إجراءات</th>
+                        </tr>
+                    </thead>
+                    <tbody id="fathTableBody" class="divide-y divide-gray-100 text-sm"></tbody>
+                    <tfoot id="fathTableFoot" class="bg-indigo-50/70 font-bold text-gray-800 border-t-2 border-indigo-400 text-sm"></tfoot>
+                </table>
+            </div>
+
+            <div id="fathCards" class="md:hidden divide-y divide-gray-100"></div>
+
+            <div id="fathEmptyState" class="hidden p-10 text-center">
+                <div class="w-14 h-14 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3 text-gray-400 text-xl">
+                    <i class="fa-solid fa-book-open-reader"></i>
+                </div>
+                <h3 class="text-sm font-bold text-gray-700">لا توجد سجلات فتح مبين</h3>
+                <p class="text-xs text-gray-500 mt-1">اضغط «إضافة سيدة» لإضافة سيدة جديدة</p>
+            </div>
+            </div>
+        </div>
+
     </main>
 
     <!-- Modal for Adding / Editing Staff Member -->
@@ -748,6 +806,90 @@
                     إلغاء
                 </button>
                 <button onclick="confirmDeleteKafala()" class="px-5 py-2 bg-red-600 text-white rounded-xl text-xs font-bold hover:bg-red-700 shadow">
+                    نعم، حذف
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal for Adding / Editing Fath Mobin -->
+    <div id="fathModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl max-w-lg w-full shadow-2xl overflow-hidden border border-gray-100">
+            <div class="bg-gradient-to-l from-indigo-700 to-indigo-500 p-5 text-white flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center text-white text-lg">
+                        <i id="fathModalIcon" class="fa-solid fa-plus"></i>
+                    </div>
+                    <div>
+                        <h3 id="fathModalTitle" class="text-lg font-bold">إضافة سيدة</h3>
+                        <p class="text-xs text-indigo-100">بيانات مشرفات ومعلمات الفتح المبين</p>
+                    </div>
+                </div>
+                <button onclick="closeFathModal()" class="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <form id="fathForm" onsubmit="saveFath(event)" class="p-6 space-y-4">
+                <input type="hidden" id="formFathId">
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold text-gray-700 mb-1">الاسم *</label>
+                        <input type="text" id="formFathName" required placeholder="الاسم"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-700 mb-1">الوظيفة</label>
+                        <input type="text" id="formFathJob" placeholder="مشرفة / معلمة"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold text-gray-700 mb-1">الرقم القومي</label>
+                        <input type="text" id="formFathNationalId" inputmode="numeric" placeholder="14 رقم" dir="ltr"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-xl text-sm font-mono focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-700 mb-1">التليفون</label>
+                        <input type="text" id="formFathPhone" inputmode="tel" placeholder="01xxxxxxxxx" dir="ltr"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-xl text-sm font-mono focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-gray-700 mb-1">الراتب (ج.م) *</label>
+                    <input type="number" id="formFathSalary" required min="0" step="1" placeholder="مثال: 1000"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-xl text-sm font-bold text-indigo-700 focus:ring-2 focus:ring-indigo-500">
+                </div>
+
+                <div class="flex items-center justify-end gap-3 pt-4 border-t border-gray-100">
+                    <button type="button" onclick="closeFathModal()" class="px-4 py-2 border border-gray-200 text-gray-600 rounded-xl text-sm font-bold hover:bg-gray-50">
+                        إلغاء
+                    </button>
+                    <button type="submit" class="px-5 py-2 bg-indigo-600 text-white rounded-xl text-sm font-bold hover:bg-indigo-700 shadow flex items-center gap-2">
+                        <i class="fa-solid fa-floppy-disk"></i> حفظ
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Delete Confirmation Modal (Fath Mobin) -->
+    <div id="fathDeleteModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl max-w-sm w-full p-6 text-center shadow-2xl border border-gray-100">
+            <div class="w-14 h-14 bg-red-50 text-red-500 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+            </div>
+            <h3 class="text-base font-bold text-gray-800 mb-2">تأكيد الحذف</h3>
+            <p class="text-xs text-gray-500 mb-6" id="fathDeletePrompt">هل أنت متأكد من رغبتك في حذف هذا السجل؟</p>
+            <div class="flex gap-2 justify-center">
+                <button onclick="closeFathDeleteModal()" class="px-4 py-2 border border-gray-200 text-gray-600 rounded-xl text-xs font-bold hover:bg-gray-50">
+                    إلغاء
+                </button>
+                <button onclick="confirmDeleteFath()" class="px-5 py-2 bg-red-600 text-white rounded-xl text-xs font-bold hover:bg-red-700 shadow">
                     نعم، حذف
                 </button>
             </div>
@@ -1084,6 +1226,28 @@
             { id: 43, name: "نجلاء", nationalId: "", phone: "0111543459", amount: 3000, spouse: "" }
         ];
 
+        // بيانات مركز الفتح المبين — كشف مشرفات ومعلمات حلقات النساء
+        const initialFathData = [
+            { id: 1, name: "عزة سيد حسن", nationalId: "28006140105027", phone: "01158600644", job: "مشرفة", salary: 2000 },
+            { id: 2, name: "ايمان حسين مصطفي", nationalId: "28705062601565", phone: "01145626768", job: "مشرف عام (نور بيان)", salary: 2000 },
+            { id: 3, name: "ليلي عبداللطيف عبدالحكيم", nationalId: "27512292800161", phone: "01115524175", job: "مشرفة", salary: 1000 },
+            { id: 4, name: "سامية محمد مغازي", nationalId: "27912082700448", phone: "01114049934", job: "معلمة", salary: 1000 },
+            { id: 5, name: "زينب محمود عباس", nationalId: "28211202801621", phone: "01119975425", job: "مشرفة", salary: 1000 },
+            { id: 6, name: "شرين حجاجي حسين", nationalId: "28312122800795", phone: "01116375288", job: "مشرف عام قران", salary: 1000 },
+            { id: 7, name: "ساره حجاج عبدالرحيم", nationalId: "30703012801322", phone: "01108650609", job: "معلمة", salary: 1000 },
+            { id: 8, name: "هاله عبدالستار محمود", nationalId: "2840827200405", phone: "01144496994", job: "معلمة", salary: 1000 },
+            { id: 9, name: "الاء محمد عبدالرحيم", nationalId: "3205142800565", phone: "01159237973", job: "معلمة", salary: 1000 },
+            { id: 10, name: "اسماء محمد مرسي", nationalId: "27611202801065", phone: "01128687030", job: "معلمة", salary: 1000 },
+            { id: 11, name: "زينب احمد علام", nationalId: "28712012803325", phone: "01064344266", job: "معلمة", salary: 1000 },
+            { id: 12, name: "شيماء محمد خميس", nationalId: "28710292800561", phone: "01152697860", job: "معلمة", salary: 1000 },
+            { id: 13, name: "سعيده رمضان عبرنا", nationalId: "30712012800163", phone: "01112367225", job: "معلمة", salary: 1000 },
+            { id: 14, name: "عبير سيد عبدالرحيم", nationalId: "30106272800127", phone: "01126492779", job: "معلمة", salary: 1000 },
+            { id: 15, name: "امال حسن حسين", nationalId: "27605012800887", phone: "01152697860", job: "معلمة", salary: 1000 },
+            { id: 16, name: "حنين محمد وهيب", nationalId: "30303152800085", phone: "01147053808", job: "معلمة", salary: 1000 },
+            { id: 17, name: "ايات ابراهيم محمد", nationalId: "27907182800164", phone: "01110472089", job: "معلمة", salary: 1000 },
+            { id: 18, name: "تقوي السيد محمد", nationalId: "30412012802545", phone: "01103920741", job: "معلم", salary: 1000 }
+        ];
+
         // -------------------------------------------------------------
         // 2. Application State Management
         // -------------------------------------------------------------
@@ -1096,6 +1260,8 @@
         let expenseToDeleteId = null;
         let kafalaList = [];
         let kafalaToDeleteId = null;
+        let fathList = [];
+        let fathToDeleteId = null;
 
         // ---------------- Utilities ----------------
         function fmt(n) { return (Number(n) || 0).toLocaleString('en-US'); }
@@ -1139,6 +1305,7 @@
         const LS_KEY = 'al_firdous_staff_records';
         const LS_KEY_EXP = 'al_firdous_expenses_records';
         const LS_KEY_KAF = 'al_firdous_kafala_records';
+        const LS_KEY_FATH = 'al_firdous_fath_records';
         // ⚠️ بعد نشر Apps Script: الصق رابط الـ Web app هنا، وضع نفس SECRET
         const REMOTE = { url: 'https://script.google.com/macros/s/AKfycbxJQEwJODWgXlvx1MYoXHWxluL4B01orZqV_5jNLI_nkJLzLxlEhBhkpfbpEuvSGepCWg/exec', secret: 'CHANGE_ME_123' };
         function remoteEnabled() { return REMOTE.url && REMOTE.url.indexOf('http') === 0; }
@@ -1222,6 +1389,17 @@
             };
         }
 
+        function normalizeFath(r) {
+            return {
+                id: Number(r.id) || 0,
+                name: (r.name || '').toString().trim(),
+                nationalId: toWestern((r.nationalId || '').toString().trim()),
+                phone: toWestern((r.phone || '').toString().trim()),
+                job: (r.job || '').toString().trim(),
+                salary: Number(r.salary) || 0
+            };
+        }
+
         function refreshFromRemote(cb) {
             setSyncBadge('loading');
             jsonpGet({}, function (res) {
@@ -1229,9 +1407,10 @@
                     var staff = Array.isArray(res.staff) ? res.staff : (Array.isArray(res.data) ? res.data : []);
                     var expenses = Array.isArray(res.expenses) ? res.expenses : [];
                     var kaf = Array.isArray(res.kafala) ? res.kafala : [];
-                    if (staff.length === 0 && expenses.length === 0 && kaf.length === 0) {
+                    var fath = Array.isArray(res.fath) ? res.fath : [];
+                    if (staff.length === 0 && expenses.length === 0 && kaf.length === 0 && fath.length === 0) {
                         loadLocalData();
-                        setSyncBadge('online', 'الشيت متصل لكنه فارغ — اضغط «رفع البيانات الحالية للشيت» لرفع ' + staffList.length + ' موظف و' + expenseList.length + ' بند مصروف و' + kafalaList.length + ' سجل كفالة.');
+                        setSyncBadge('online', 'الشيت متصل لكنه فارغ — اضغط «رفع البيانات الحالية للشيت» لرفع ' + staffList.length + ' موظف و' + expenseList.length + ' بند مصروف و' + kafalaList.length + ' سجل كفالة و' + fathList.length + ' سجل فتح مبين.');
                         if (cb) cb(true);
                         return;
                     }
@@ -1248,11 +1427,18 @@
                         // ورقة الكفالة لم تُهيّأ بعد — استخدم الافتراضي حتى تُرفع
                         kafalaList = [...initialKafalaData];
                     }
+                    if (fath.length > 0) {
+                        fathList = fath.map(normalizeFath);
+                    } else {
+                        // ورقة الفتح المبين لم تُهيّأ بعد — استخدم الافتراضي حتى تُرفع
+                        fathList = [...initialFathData];
+                    }
                     saveToLocalStorage();
                     updateKPIs();
                     applyFilters();
                     renderExpenses();
                     renderKafala();
+                    renderFath();
                     setSyncBadge('online');
                     if (cb) cb(true);
                 } else {
@@ -1264,10 +1450,11 @@
 
         function seedSheetToRemote() {
             if (!remoteEnabled()) { showToast('لم يتم ضبط رابط Google Sheets بعد', 'error'); return; }
-            if (!confirm('سيتم رفع البيانات الحالية إلى Google Sheets:\n• ' + staffList.length + ' موظف\n• ' + expenseList.length + ' بند مصروف\n• ' + kafalaList.length + ' سجل كفالة\n(سيتم استبدال بيانات الشيت الحالية). متابعة؟')) return;
+            if (!confirm('سيتم رفع البيانات الحالية إلى Google Sheets:\n• ' + staffList.length + ' موظف\n• ' + expenseList.length + ' بند مصروف\n• ' + kafalaList.length + ' سجل كفالة\n• ' + fathList.length + ' سجل فتح مبين\n(سيتم استبدال بيانات الشيت الحالية). متابعة؟')) return;
             apiWrite({ action: 'replace', type: 'staff', data: staffList });
             apiWrite({ action: 'replace', type: 'expenses', data: expenseList });
             apiWrite({ action: 'replace', type: 'kafala', data: kafalaList });
+            apiWrite({ action: 'replace', type: 'fath', data: fathList });
             showToast('جارٍ رفع البيانات إلى Google Sheets...', 'info');
             setTimeout(function () { refreshFromRemote(function () { showToast('تمت مزامنة الشيت بنجاح', 'success'); }); }, 3000);
         }
@@ -1279,7 +1466,7 @@
             });
 
             document.addEventListener('keydown', function (e) {
-                if (e.key === 'Escape') { closeModal(); closeDeleteModal(); closeExpenseModal(); closeExpenseDeleteModal(); closeKafalaModal(); closeKafalaDeleteModal(); }
+                if (e.key === 'Escape') { closeModal(); closeDeleteModal(); closeExpenseModal(); closeExpenseDeleteModal(); closeKafalaModal(); closeKafalaDeleteModal(); closeFathModal(); closeFathDeleteModal(); }
             });
 
             if (remoteEnabled()) {
@@ -1320,11 +1507,22 @@
             } else {
                 kafalaList = [...initialKafalaData];
             }
+            const savedFath = localStorage.getItem(LS_KEY_FATH);
+            if (savedFath) {
+                try {
+                    fathList = JSON.parse(savedFath);
+                } catch (e) {
+                    fathList = [...initialFathData];
+                }
+            } else {
+                fathList = [...initialFathData];
+            }
             saveToLocalStorage();
             updateKPIs();
             applyFilters();
             renderExpenses();
             renderKafala();
+            renderFath();
             setSyncBadge('local');
         }
 
@@ -1332,14 +1530,16 @@
             localStorage.setItem(LS_KEY, JSON.stringify(staffList));
             localStorage.setItem(LS_KEY_EXP, JSON.stringify(expenseList));
             localStorage.setItem(LS_KEY_KAF, JSON.stringify(kafalaList));
+            localStorage.setItem(LS_KEY_FATH, JSON.stringify(fathList));
         }
 
         function resetData() {
             if (remoteEnabled()) {
-                if (confirm("إعادة تعيين البيانات: سيتم رفع النسخة الأصلية (" + initialStaffData.length + " موظف و" + initialExpensesData.length + " بند مصروف و" + initialKafalaData.length + " سجل كفالة) إلى Google Sheets واستبدال البيانات الحالية. متابعة؟")) {
+                if (confirm("إعادة تعيين البيانات: سيتم رفع النسخة الأصلية (" + initialStaffData.length + " موظف و" + initialExpensesData.length + " بند مصروف و" + initialKafalaData.length + " سجل كفالة و" + initialFathData.length + " سجل فتح مبين) إلى Google Sheets واستبدال البيانات الحالية. متابعة؟")) {
                     apiWrite({ action: 'replace', type: 'staff', data: initialStaffData });
                     apiWrite({ action: 'replace', type: 'expenses', data: initialExpensesData });
                     apiWrite({ action: 'replace', type: 'kafala', data: initialKafalaData });
+                    apiWrite({ action: 'replace', type: 'fath', data: initialFathData });
                     showToast('جارٍ إعادة التعيين من النسخة الأصلية...', 'info');
                     setTimeout(function () { refreshFromRemote(function () { showToast('تمت إعادة التعيين بنجاح', 'success'); }); }, 3000);
                 }
@@ -1349,11 +1549,13 @@
                 staffList = [...initialStaffData];
                 expenseList = [...initialExpensesData];
                 kafalaList = [...initialKafalaData];
+                fathList = [...initialFathData];
                 saveToLocalStorage();
                 updateKPIs();
                 applyFilters();
                 renderExpenses();
                 renderKafala();
+                renderFath();
             }
         }
 
@@ -1596,14 +1798,17 @@
             const staffTotal = staffList.reduce((a, c) => a + (Number(c.salary) || 0), 0);
             const expTotal = expenseList.reduce((a, c) => a + (Number(c.amount) || 0), 0);
             const kafTotal = kafalaList.reduce((a, c) => a + (Number(c.amount) || 0), 0);
+            const fathTotal = fathList.reduce((a, c) => a + (Number(c.salary) || 0), 0);
             const set = function (id, v) { const el = document.getElementById(id); if (el) el.textContent = v; };
             set('grandStaff', fmt(staffTotal));
             set('grandExpenses', fmt(expTotal));
             set('grandKafala', fmt(kafTotal));
-            set('grandTotal', fmt(staffTotal + expTotal + kafTotal));
+            set('grandFath', fmt(fathTotal));
+            set('grandTotal', fmt(staffTotal + expTotal + kafTotal + fathTotal));
             set('grandStaffCount', staffList.length + ' موظف');
             set('grandExpensesCount', expenseList.length + ' بند');
             set('grandKafalaCount', kafalaList.length + ' مستفيد');
+            set('grandFathCount', fathList.length + ' سيدة');
             set('empSectionTotal', fmt(staffTotal));
             set('empSectionCount', staffList.length);
         }
@@ -2088,6 +2293,176 @@
         }
 
         // -------------------------------------------------------------
+        // 6d. Fath Mobin Operations
+        // -------------------------------------------------------------
+        function renderFath() {
+            const tbody = document.getElementById('fathTableBody');
+            if (!tbody) return;
+            const foot = document.getElementById('fathTableFoot');
+            const cards = document.getElementById('fathCards');
+            const empty = document.getElementById('fathEmptyState');
+
+            const total = fathList.reduce((a, c) => a + (Number(c.salary) || 0), 0);
+            const totalEl = document.getElementById('fathTotal');
+            if (totalEl) totalEl.textContent = fmt(total);
+            const countEl = document.getElementById('fathCount');
+            if (countEl) countEl.textContent = fathList.length;
+            updateGrandTotals();
+
+            if (fathList.length === 0) {
+                tbody.innerHTML = '';
+                if (foot) foot.innerHTML = '';
+                if (cards) cards.innerHTML = '';
+                if (empty) empty.classList.remove('hidden');
+                return;
+            } else if (empty) {
+                empty.classList.add('hidden');
+            }
+
+            let html = '';
+            let cardsHtml = '';
+            fathList.forEach((item, index) => {
+                html += `
+                <tr class="hover:bg-indigo-50/40 transition border-b border-gray-100">
+                    <td class="py-3 px-3 text-center text-xs text-gray-400 font-mono">${index + 1}</td>
+                    <td class="py-3 px-4 font-bold text-gray-900">${escHtml(item.name)}</td>
+                    <td class="py-3 px-4 text-xs text-gray-600">${escHtml(item.job) || '—'}</td>
+                    <td class="py-3 px-4 text-center font-mono text-xs text-gray-600">${escHtml(item.nationalId) || '—'}</td>
+                    <td class="py-3 px-4 text-center font-mono text-xs text-gray-600" dir="ltr">${escHtml(item.phone) || '—'}</td>
+                    <td class="py-3 px-4 text-center font-bold text-indigo-700">${fmt(item.salary)} <span class="text-[10px] text-gray-400 font-normal">ج.م</span></td>
+                    <td class="py-3 px-3 text-center no-print">
+                        <div class="flex items-center justify-center gap-1.5">
+                            <button onclick="openFathModal('edit', ${item.id})" class="w-8 h-8 rounded-lg bg-teal-50 text-firdous-teal hover:bg-firdous-teal hover:text-white transition flex items-center justify-center text-xs shadow-sm" title="تعديل">
+                                <i class="fa-solid fa-pen"></i>
+                            </button>
+                            <button onclick="promptDeleteFath(${item.id})" class="w-8 h-8 rounded-lg bg-red-50 text-red-500 hover:bg-red-500 hover:text-white transition flex items-center justify-center text-xs shadow-sm" title="حذف">
+                                <i class="fa-solid fa-trash-can"></i>
+                            </button>
+                        </div>
+                    </td>
+                </tr>`;
+
+                cardsHtml += `
+                <div class="p-4">
+                    <div class="flex items-start justify-between gap-2">
+                        <div class="flex-1">
+                            <div class="font-bold text-gray-900 text-sm">${escHtml(item.name)}</div>
+                            <div class="text-xs text-gray-500 mt-1">${escHtml(item.job) || '—'}</div>
+                            <div class="text-xs text-gray-500 mt-0.5 font-mono" dir="ltr">${escHtml(item.phone) || '—'}</div>
+                            <div class="text-sm font-bold text-indigo-700 mt-1">${fmt(item.salary)} ج.م</div>
+                        </div>
+                        <div class="flex flex-col gap-1.5">
+                            <button onclick="openFathModal('edit', ${item.id})" class="w-9 h-9 rounded-lg bg-teal-50 text-firdous-teal shadow-sm flex items-center justify-center text-xs" title="تعديل"><i class="fa-solid fa-pen"></i></button>
+                            <button onclick="promptDeleteFath(${item.id})" class="w-9 h-9 rounded-lg bg-red-50 text-red-500 shadow-sm flex items-center justify-center text-xs" title="حذف"><i class="fa-solid fa-trash-can"></i></button>
+                        </div>
+                    </div>
+                </div>`;
+            });
+
+            tbody.innerHTML = html;
+            if (cards) cards.innerHTML = cardsHtml;
+            if (foot) {
+                foot.innerHTML = `
+                    <tr>
+                        <td colspan="5" class="py-3.5 px-4 text-right text-indigo-700">إجمالي الرواتب (${fathList.length} سيدة)</td>
+                        <td class="py-3.5 px-4 text-center text-indigo-700">${fmt(total)} <span class="text-[10px] font-normal text-gray-500">ج.م</span></td>
+                        <td class="py-3.5 px-4"></td>
+                    </tr>`;
+            }
+        }
+
+        function openFathModal(mode, fathId = null) {
+            const form = document.getElementById('fathForm');
+            const title = document.getElementById('fathModalTitle');
+            const icon = document.getElementById('fathModalIcon');
+            form.reset();
+
+            if (mode === 'add') {
+                document.getElementById('formFathId').value = '';
+                title.textContent = 'إضافة سيدة';
+                if (icon) icon.className = 'fa-solid fa-plus';
+            } else {
+                const rec = fathList.find(x => x.id === fathId);
+                if (!rec) return;
+                document.getElementById('formFathId').value = rec.id;
+                document.getElementById('formFathName').value = rec.name;
+                document.getElementById('formFathJob').value = rec.job;
+                document.getElementById('formFathNationalId').value = rec.nationalId;
+                document.getElementById('formFathPhone').value = rec.phone;
+                document.getElementById('formFathSalary').value = rec.salary;
+                title.textContent = 'تعديل بيانات السيدة';
+                if (icon) icon.className = 'fa-solid fa-pen';
+            }
+            document.getElementById('fathModal').classList.remove('hidden');
+        }
+
+        function closeFathModal() {
+            document.getElementById('fathModal').classList.add('hidden');
+        }
+
+        function saveFath(e) {
+            e.preventDefault();
+            const id = document.getElementById('formFathId').value;
+            const obj = {
+                name: document.getElementById('formFathName').value.trim(),
+                job: document.getElementById('formFathJob').value.trim(),
+                nationalId: toWestern(document.getElementById('formFathNationalId').value.trim()),
+                phone: toWestern(document.getElementById('formFathPhone').value.trim()),
+                salary: Number(toWestern(document.getElementById('formFathSalary').value)) || 0
+            };
+            if (!obj.name) { showToast('اكتب الاسم', 'error'); return; }
+
+            let added = false;
+            let saved = null;
+            if (id) {
+                const idx = fathList.findIndex(x => x.id === Number(id));
+                if (idx !== -1) { fathList[idx] = { ...fathList[idx], ...obj }; saved = fathList[idx]; }
+            } else {
+                const newId = fathList.length > 0 ? Math.max(...fathList.map(x => Number(x.id) || 0)) + 1 : 1;
+                saved = { id: newId, ...obj };
+                fathList.push(saved);
+                added = true;
+            }
+
+            saveToLocalStorage();
+            renderFath();
+            closeFathModal();
+            showToast(added ? 'تمت الإضافة بنجاح' : 'تم حفظ التعديل بنجاح', 'success');
+
+            if (remoteEnabled() && saved) {
+                apiWrite({ action: added ? 'add' : 'update', type: 'fath', record: saved });
+                setTimeout(function () { refreshFromRemote(); }, 1500);
+            }
+        }
+
+        function promptDeleteFath(id) {
+            const rec = fathList.find(x => x.id === Number(id));
+            if (!rec) return;
+            fathToDeleteId = Number(id);
+            document.getElementById('fathDeletePrompt').textContent = `هل أنت متأكد من رغبتك في حذف "${rec.name}"؟`;
+            document.getElementById('fathDeleteModal').classList.remove('hidden');
+        }
+
+        function closeFathDeleteModal() {
+            fathToDeleteId = null;
+            document.getElementById('fathDeleteModal').classList.add('hidden');
+        }
+
+        function confirmDeleteFath() {
+            if (fathToDeleteId) {
+                const delId = fathToDeleteId;
+                fathList = fathList.filter(x => x.id !== delId);
+                saveToLocalStorage();
+                renderFath();
+                closeFathDeleteModal();
+                if (remoteEnabled()) {
+                    apiWrite({ action: 'delete', type: 'fath', id: delId });
+                    setTimeout(function () { refreshFromRemote(); }, 1500);
+                }
+            }
+        }
+
+        // -------------------------------------------------------------
         // 7. Export to Excel (CSV format supporting Arabic UTF-8 BOM)
         // -------------------------------------------------------------
         function exportToCSV() {
@@ -2121,7 +2496,7 @@
         // 8. Backup / Restore (JSON)
         // -------------------------------------------------------------
         function backupJSON() {
-            const payload = { app: 'al-firdous', version: 3, exportedAt: new Date().toISOString(), count: staffList.length, data: staffList, expenses: expenseList, kafala: kafalaList };
+            const payload = { app: 'al-firdous', version: 4, exportedAt: new Date().toISOString(), count: staffList.length, data: staffList, expenses: expenseList, kafala: kafalaList, fath: fathList };
             const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json;charset=utf-8;' });
             const link = document.createElement('a');
             const url = URL.createObjectURL(blob);
@@ -2146,11 +2521,13 @@
                     staffList = data.map(normalizeRecord);
                     if (Array.isArray(parsed.expenses)) expenseList = parsed.expenses.map(normalizeExpense);
                     if (Array.isArray(parsed.kafala)) kafalaList = parsed.kafala.map(normalizeKafala);
+                    if (Array.isArray(parsed.fath)) fathList = parsed.fath.map(normalizeFath);
                     saveToLocalStorage();
                     updateKPIs();
                     applyFilters();
                     renderExpenses();
                     renderKafala();
+                    renderFath();
                     showToast('تمت استعادة النسخة الاحتياطية', 'success');
                 } catch (err) {
                     showToast('تعذّر قراءة الملف. تأكد أنه ملف نسخة احتياطية صالح', 'error');

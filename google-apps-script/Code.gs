@@ -24,6 +24,7 @@
  *    - staff    : بيانات العاملين
  *    - expenses : بنود المصروفات الشهرية
  *    - kafala   : سجلات كفالة اليتيم (كفالة أكتوبر 2026)
+ *    - fath     : سجلات مركز الفتح المبين (مشرفات ومعلمات حلقات النساء)
  *
  *  ملاحظة أمان: غيّر SECRET لأي كلمة سر، وضع نفس القيمة في REMOTE.secret.
  * ============================================================================
@@ -51,6 +52,11 @@ var CONFIG = {
     sheetName: 'kafala',
     headers: ['id', 'name', 'nationalId', 'phone', 'amount', 'spouse'],
     textCols: [3, 4] // C (الرقم القومي) و D (الموبايل) كنص
+  },
+  fath: {
+    sheetName: 'fath',
+    headers: ['id', 'name', 'nationalId', 'phone', 'job', 'salary'],
+    textCols: [3, 4] // C (الرقم القومي) و D (التليفون) كنص
   }
 };
 
