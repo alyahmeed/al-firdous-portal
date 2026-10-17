@@ -6,10 +6,19 @@
     <title>منظومة العاملين والرواتب - مؤسسة الفردوس الإسلامية</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Google Fonts Cairo -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;800;900&display=swap" rel="stylesheet">
+    <!-- Thmanyah Fonts (bundled locally) -->
+    <style>
+        @font-face { font-family: "Thmanyah Sans"; src: url("fonts/thmanyah-sans-Light.woff2") format("woff2"); font-weight: 300; font-style: normal; font-display: swap; }
+        @font-face { font-family: "Thmanyah Sans"; src: url("fonts/thmanyah-sans-Regular.woff2") format("woff2"); font-weight: 400; font-style: normal; font-display: swap; }
+        @font-face { font-family: "Thmanyah Sans"; src: url("fonts/thmanyah-sans-Medium.woff2") format("woff2"); font-weight: 500; font-style: normal; font-display: swap; }
+        @font-face { font-family: "Thmanyah Sans"; src: url("fonts/thmanyah-sans-Bold.woff2") format("woff2"); font-weight: 700; font-style: normal; font-display: swap; }
+        @font-face { font-family: "Thmanyah Sans"; src: url("fonts/thmanyah-sans-Black.woff2") format("woff2"); font-weight: 900; font-style: normal; font-display: swap; }
+        @font-face { font-family: "Thmanyah Serif Display"; src: url("fonts/thmanyah-serif-display-Light.woff2") format("woff2"); font-weight: 300; font-style: normal; font-display: swap; }
+        @font-face { font-family: "Thmanyah Serif Display"; src: url("fonts/thmanyah-serif-display-Regular.woff2") format("woff2"); font-weight: 400; font-style: normal; font-display: swap; }
+        @font-face { font-family: "Thmanyah Serif Display"; src: url("fonts/thmanyah-serif-display-Medium.woff2") format("woff2"); font-weight: 500; font-style: normal; font-display: swap; }
+        @font-face { font-family: "Thmanyah Serif Display"; src: url("fonts/thmanyah-serif-display-Bold.woff2") format("woff2"); font-weight: 700; font-style: normal; font-display: swap; }
+        @font-face { font-family: "Thmanyah Serif Display"; src: url("fonts/thmanyah-serif-display-Black.woff2") format("woff2"); font-weight: 900; font-style: normal; font-display: swap; }
+    </style>
     <!-- Font Awesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
@@ -29,7 +38,9 @@
                         }
                     },
                     fontFamily: {
-                        cairo: ['Cairo', 'sans-serif'],
+                        cairo: ['"Thmanyah Sans"', 'system-ui', 'sans-serif'],
+                        sans: ['"Thmanyah Sans"', 'system-ui', 'sans-serif'],
+                        display: ['"Thmanyah Serif Display"', '"Thmanyah Sans"', 'serif'],
                     }
                 }
             }
@@ -38,15 +49,29 @@
 
     <style>
         body {
-            font-family: 'Cairo', sans-serif;
+            font-family: 'Thmanyah Sans', system-ui, sans-serif;
             background-color: #f4f7f6;
         }
+        .font-display { font-family: 'Thmanyah Serif Display', 'Thmanyah Sans', serif; }
+        .bg-hero {
+            background-image:
+                linear-gradient(rgba(255,255,255,0.06) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255,255,255,0.06) 1px, transparent 1px),
+                linear-gradient(135deg, #135c52, #1b7a6d);
+            background-size: 28px 28px, 28px 28px, auto;
+        }
+        .shadow-soft { box-shadow: 0 12px 30px -14px rgba(19,92,82,0.35); }
+        .view { animation: fadeUp .25s ease; }
+        @keyframes fadeUp { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+        .nav-pill { white-space: nowrap; border-radius: 9999px; padding: .5rem 1rem; font-size: .875rem; font-weight: 600; color: #6b7280; transition: .2s; cursor: pointer; }
+        .nav-pill:hover { background: #e8f4f2; color: #135c52; }
+        .nav-pill.active { background: #1b7a6d; color: #fff; box-shadow: 0 12px 30px -14px rgba(19,92,82,.35); }
         @media print {
             .no-print { display: none !important; }
             .print-only { display: block !important; }
             .section-content { display: block !important; }
             body { background: white; font-size: 11pt; }
-            .shadow-sm, .shadow-md, .shadow-lg { box-shadow: none !important; }
+            .shadow-sm, .shadow-md, .shadow-lg, .shadow-soft { box-shadow: none !important; }
             table { width: 100% !important; border-collapse: collapse !important; }
             th, td { border: 1px solid #999 !important; padding: 4px 6px !important; }
         }
@@ -55,50 +80,24 @@
 </head>
 <body class="text-gray-800 antialiased min-h-screen flex flex-col">
 
-    <!-- Top Header with Institution Identity -->
-    <header class="bg-gradient-to-l from-firdous-teal-dark via-firdous-teal to-[#166b5e] text-white shadow-lg no-print">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-            <div class="flex flex-col md:flex-row items-center justify-between gap-4">
-                
-                <!-- Logo & Brand Title -->
-                <div class="flex items-center gap-4 text-center md:text-right">
-                    <div class="w-16 h-16 bg-white rounded-2xl flex items-center justify-center p-1.5 shadow-inner border-2 border-firdous-gold overflow-hidden">
-                        <img src="logo.png" alt="شعار مؤسسة الفردوس الإسلامية" class="w-full h-full object-contain" onerror="this.onerror=null; this.parentElement.innerHTML='<span class=\'text-firdous-teal font-black text-xl\'>الفردوس</span>';">
-                    </div>
-                    <div>
-                        <h1 class="text-2xl font-black tracking-wide text-white flex items-center gap-2 justify-center md:justify-start">
-                            مؤسسة الفردوس الإسلامية
-                            <span class="text-xs bg-firdous-gold text-white font-bold px-2 py-0.5 rounded-full shadow">أسوان</span>
-                        </h1>
-                        <p class="text-xs text-teal-100 font-medium mt-0.5">
-                            منظومة رواتب وبيانات العاملين • التعليم الصباحي والكُتّاب لتحفيظ القرآن (مسائي)
-                        </p>
-                    </div>
+    <!-- Sticky Top Bar -->
+    <header class="sticky top-0 z-30 border-b border-gray-200 bg-white/90 backdrop-blur no-print">
+        <div class="max-w-7xl mx-auto flex flex-wrap items-center gap-3 px-4 sm:px-6 lg:px-8 py-3">
+            <a href="#/" class="flex items-center gap-3 shrink-0">
+                <img src="logo.png" alt="شعار مؤسسة الفردوس الإسلامية" class="h-12 w-auto" onerror="this.style.display='none';">
+                <div class="leading-tight">
+                    <div class="font-black text-firdous-teal-dark text-lg">مؤسسة الفردوس</div>
+                    <div class="text-[11px] text-gray-400">منظومة الرواتب والأقسام • أسوان</div>
                 </div>
-
-                <!-- Global Action Buttons -->
-                <div class="flex flex-wrap items-center justify-center gap-2">
-                    <button onclick="openModal('add')" class="bg-firdous-gold hover:bg-firdous-gold-dark text-white px-4 py-2 rounded-xl text-sm font-bold shadow transition flex items-center gap-2">
-                        <i class="fa-solid fa-user-plus"></i> إضافة موظف جديد
-                    </button>
-                    <button onclick="exportToCSV()" class="bg-white/10 hover:bg-white/20 text-white px-3 py-2 rounded-xl text-sm font-semibold border border-white/20 transition flex items-center gap-1.5" title="تصدير إلى إكسيل">
-                        <i class="fa-solid fa-file-excel text-green-300"></i> تصدير Excel
-                    </button>
-                    <button onclick="backupJSON()" class="bg-white/10 hover:bg-white/20 text-white px-3 py-2 rounded-xl text-sm font-semibold border border-white/20 transition flex items-center gap-1.5" title="حفظ نسخة احتياطية من البيانات">
-                        <i class="fa-solid fa-download text-teal-200"></i> نسخة احتياطية
-                    </button>
-                    <button onclick="document.getElementById('restoreFileInput').click()" class="bg-white/10 hover:bg-white/20 text-white px-3 py-2 rounded-xl text-sm font-semibold border border-white/20 transition flex items-center gap-1.5" title="استعادة نسخة احتياطية">
-                        <i class="fa-solid fa-upload text-amber-200"></i> استعادة نسخة
-                    </button>
-                    <input type="file" id="restoreFileInput" accept="application/json,.json" class="hidden" onchange="restoreJSON(event)">
-                    <button onclick="window.print()" class="bg-white/10 hover:bg-white/20 text-white px-3 py-2 rounded-xl text-sm font-semibold border border-white/20 transition flex items-center gap-1.5" title="طباعة الكشف">
-                        <i class="fa-solid fa-print text-teal-200"></i> طباعة
-                    </button>
-                    <button onclick="resetData()" class="bg-red-500/80 hover:bg-red-600 text-white px-3 py-2 rounded-xl text-xs font-semibold transition" title="استعادة البيانات الأصلية">
-                        <i class="fa-solid fa-rotate-left"></i> استعادة الأصل
-                    </button>
-                </div>
-            </div>
+            </a>
+            <nav class="flex flex-1 gap-1 overflow-x-auto md:justify-end">
+                <a href="#/" data-nav="/" class="nav-pill">الرئيسية</a>
+                <a href="#/staff" data-nav="/staff" class="nav-pill">الموظفين</a>
+                <a href="#/expenses" data-nav="/expenses" class="nav-pill">المصروفات</a>
+                <a href="#/kafala" data-nav="/kafala" class="nav-pill">كفالة اليتيم</a>
+                <a href="#/fath" data-nav="/fath" class="nav-pill">الفتح المبين</a>
+                <input type="file" id="restoreFileInput" accept="application/json,.json" class="hidden" onchange="restoreJSON(event)">
+            </nav>
         </div>
     </header>
 
@@ -111,6 +110,26 @@
 
     <!-- Main Content Container -->
     <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex-1 w-full">
+
+    <div id="view-home" class="view">
+
+        <!-- Home Hero -->
+        <section class="bg-hero rounded-3xl px-6 py-10 text-white shadow-soft mb-6">
+            <div class="flex flex-wrap items-center justify-between gap-6">
+                <div>
+                    <p class="text-sm text-firdous-gold font-semibold">بسم الله الرحمن الرحيم</p>
+                    <h1 class="font-display mt-2 text-4xl font-bold">منظومة مؤسسة الفردوس</h1>
+                    <p class="mt-3 max-w-xl text-teal-100">ملخص شهر أكتوبر 2026 لكل الأقسام في مكان واحد</p>
+                    <div class="mt-5 flex flex-wrap gap-2 no-print">
+                        <button onclick="window.print()" class="rounded-xl border border-white/30 px-4 py-2 text-sm hover:bg-white/10 transition flex items-center gap-2"><i class="fa-solid fa-print"></i> طباعة</button>
+                        <button onclick="backupJSON()" class="rounded-xl border border-white/30 px-4 py-2 text-sm hover:bg-white/10 transition flex items-center gap-2"><i class="fa-solid fa-download"></i> نسخة احتياطية</button>
+                        <button onclick="document.getElementById('restoreFileInput').click()" class="rounded-xl border border-white/30 px-4 py-2 text-sm hover:bg-white/10 transition flex items-center gap-2"><i class="fa-solid fa-upload"></i> استعادة</button>
+                        <button onclick="resetData()" class="rounded-xl bg-red-500/80 hover:bg-red-600 px-4 py-2 text-sm transition flex items-center gap-2"><i class="fa-solid fa-rotate-left"></i> استعادة الأصل</button>
+                    </div>
+                </div>
+                <img src="logo.png" alt="شعار الفردوس" class="h-36 w-auto rounded-3xl shadow-soft bg-white/90 p-2" onerror="this.style.display='none';">
+            </div>
+        </section>
 
         <!-- Grand Financial Summary (always visible) -->
         <div class="mb-6 bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
@@ -169,6 +188,34 @@
             </div>
         </div>
 
+        <!-- Home Dashboard: group cards + charts -->
+        <div id="homeCards" class="grid gap-4 sm:grid-cols-2 xl:grid-cols-5 mb-6"></div>
+
+        <div class="grid gap-6 lg:grid-cols-5 mb-6">
+            <div class="rounded-2xl border border-gray-200 bg-white p-6 shadow-soft lg:col-span-2">
+                <h2 class="font-display text-2xl font-bold">توزيع المبالغ</h2>
+                <p class="text-xs text-gray-400">نسبة كل قسم من الإجمالي</p>
+                <div class="mt-6 flex flex-col items-center gap-6 sm:flex-row lg:flex-col xl:flex-row">
+                    <div id="homeDonut" class="relative h-44 w-44 shrink-0 rounded-full" style="background:#e5e7eb;">
+                        <div class="absolute inset-6 flex flex-col items-center justify-center rounded-full bg-white">
+                            <span class="text-xs text-gray-400">الإجمالي</span>
+                            <span class="text-lg font-extrabold text-firdous-teal" id="homeDonutTotal">0</span>
+                        </div>
+                    </div>
+                    <ul id="homeLegend" class="w-full space-y-3 text-sm"></ul>
+                </div>
+            </div>
+            <div class="rounded-2xl border border-gray-200 bg-white p-6 shadow-soft lg:col-span-3">
+                <h2 class="font-display text-2xl font-bold">مقارنة الأقسام</h2>
+                <p class="text-xs text-gray-400">المبالغ بالجنيه المصري</p>
+                <div id="homeBars" class="mt-6 flex h-56 items-end justify-around gap-4 border-b border-gray-200"></div>
+                <div id="homeBarLabels" class="mt-3 flex justify-around gap-4 text-center text-xs text-gray-400"></div>
+            </div>
+        </div>
+
+    </div><!-- /view-home -->
+
+    <div id="view-expenses" class="view hidden">
         <!-- Expenses Section -->
         <div class="mb-6 bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
             <div class="p-4 border-b border-gray-100 flex flex-wrap items-center justify-between gap-3 bg-amber-50/40">
@@ -182,16 +229,14 @@
                     </div>
                 </div>
                 <div class="flex items-center gap-2">
-                    <button id="expToggleBtn" onclick="toggleSection('expensesContent','expToggleBtn','إظهار التفاصيل','إخفاء التفاصيل')" class="px-3 py-2 rounded-xl text-sm font-bold shadow-sm transition flex items-center gap-2 bg-white border border-amber-200 text-amber-700 hover:bg-amber-50">
-                        <span class="toggle-label">إظهار التفاصيل</span> <i class="fa-solid fa-chevron-down text-xs"></i>
-                    </button>
+                    <button id="expToggleBtn" hidden onclick="toggleSection('expensesContent','expToggleBtn','إظهار التفاصيل','إخفاء التفاصيل')" class="hidden">
                     <button onclick="openExpenseModal('add')" class="bg-firdous-teal hover:bg-firdous-teal-dark text-white px-4 py-2 rounded-xl text-sm font-bold shadow transition flex items-center gap-2">
                         <i class="fa-solid fa-plus"></i> إضافة بند مصروف
                     </button>
                 </div>
             </div>
 
-            <div id="expensesContent" class="section-content hidden">
+            <div id="expensesContent" class="section-content">
             <div class="overflow-x-auto hidden md:block">
                 <table class="w-full text-right border-collapse">
                     <thead>
@@ -220,6 +265,9 @@
             </div>
         </div>
 
+    </div><!-- /view-expenses -->
+
+    <div id="view-staff" class="view hidden">
         <!-- Employees Section (collapsible) -->
         <div class="mb-6 bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
             <div class="p-4 border-b border-gray-100 flex flex-wrap items-center justify-between gap-3 bg-teal-50/50">
@@ -232,12 +280,15 @@
                         <p class="text-xs text-gray-500">إجمالي الرواتب: <span id="empSectionTotal" class="font-bold text-firdous-teal">0</span> ج.م • <span id="empSectionCount">0</span> موظف</p>
                     </div>
                 </div>
-                <button id="empToggleBtn" onclick="toggleSection('employeesContent','empToggleBtn','إظهار جميع الموظفين','إخفاء قائمة الموظفين')" class="bg-firdous-teal hover:bg-firdous-teal-dark text-white px-4 py-2 rounded-xl text-sm font-bold shadow transition flex items-center gap-2">
-                    <span class="toggle-label">إظهار جميع الموظفين</span> <i class="fa-solid fa-chevron-down text-xs"></i>
-                </button>
+                <div class="flex flex-wrap items-center gap-2 no-print">
+                    <button onclick="openModal('add')" class="bg-firdous-gold hover:bg-firdous-gold-dark text-white px-4 py-2 rounded-xl text-sm font-bold shadow transition flex items-center gap-2"><i class="fa-solid fa-user-plus"></i> إضافة موظف</button>
+                    <button onclick="exportToCSV()" class="bg-white border border-gray-200 text-gray-600 px-3 py-2 rounded-xl text-sm font-semibold hover:bg-gray-50 transition flex items-center gap-2"><i class="fa-solid fa-file-excel text-green-600"></i> Excel</button>
+                    <button onclick="window.print()" class="bg-white border border-gray-200 text-gray-600 px-3 py-2 rounded-xl text-sm font-semibold hover:bg-gray-50 transition flex items-center gap-2"><i class="fa-solid fa-print"></i> طباعة</button>
+                    <button id="empToggleBtn" class="hidden" onclick="toggleSection('employeesContent','empToggleBtn','إظهار جميع الموظفين','إخفاء قائمة الموظفين')"><span class="toggle-label">إظهار جميع الموظفين</span></button>
+                </div>
             </div>
 
-            <div id="employeesContent" class="section-content hidden p-4">
+            <div id="employeesContent" class="section-content p-4">
 
         <!-- KPI Summary Cards -->
         <div class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-5 gap-3 mb-6 no-print">
@@ -419,6 +470,9 @@
             </div>
         </div>
 
+    </div><!-- /view-staff -->
+
+    <div id="view-kafala" class="view hidden">
         <!-- Kafala Section (كفالة اليتيم) -->
         <div class="mb-6 bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
             <div class="p-4 border-b border-gray-100 flex flex-wrap items-center justify-between gap-3 bg-emerald-50/40">
@@ -432,16 +486,14 @@
                     </div>
                 </div>
                 <div class="flex items-center gap-2">
-                    <button id="kafToggleBtn" onclick="toggleSection('kafalaContent','kafToggleBtn','إظهار التفاصيل','إخفاء التفاصيل')" class="px-3 py-2 rounded-xl text-sm font-bold shadow-sm transition flex items-center gap-2 bg-white border border-emerald-200 text-emerald-700 hover:bg-emerald-50">
-                        <span class="toggle-label">إظهار التفاصيل</span> <i class="fa-solid fa-chevron-down text-xs"></i>
-                    </button>
+                    <button id="kafToggleBtn" hidden onclick="toggleSection('kafalaContent','kafToggleBtn','إظهار التفاصيل','إخفاء التفاصيل')" class="hidden">
                     <button onclick="openKafalaModal('add')" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-xl text-sm font-bold shadow transition flex items-center gap-2">
                         <i class="fa-solid fa-plus"></i> إضافة مستفيد
                     </button>
                 </div>
             </div>
 
-            <div id="kafalaContent" class="section-content hidden">
+            <div id="kafalaContent" class="section-content">
             <div class="overflow-x-auto hidden md:block">
                 <table class="w-full text-right border-collapse">
                     <thead>
@@ -472,6 +524,9 @@
             </div>
         </div>
 
+    </div><!-- /view-kafala -->
+
+    <div id="view-fath" class="view hidden">
         <!-- Fath Mobin Section (مركز الفتح المبين) -->
         <div class="mb-6 bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
             <div class="p-4 border-b border-gray-100 flex flex-wrap items-center justify-between gap-3 bg-indigo-50/40">
@@ -485,16 +540,14 @@
                     </div>
                 </div>
                 <div class="flex items-center gap-2">
-                    <button id="fathToggleBtn" onclick="toggleSection('fathContent','fathToggleBtn','إظهار التفاصيل','إخفاء التفاصيل')" class="px-3 py-2 rounded-xl text-sm font-bold shadow-sm transition flex items-center gap-2 bg-white border border-indigo-200 text-indigo-700 hover:bg-indigo-50">
-                        <span class="toggle-label">إظهار التفاصيل</span> <i class="fa-solid fa-chevron-down text-xs"></i>
-                    </button>
+                    <button id="fathToggleBtn" hidden onclick="toggleSection('fathContent','fathToggleBtn','إظهار التفاصيل','إخفاء التفاصيل')" class="hidden">
                     <button onclick="openFathModal('add')" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-xl text-sm font-bold shadow transition flex items-center gap-2">
                         <i class="fa-solid fa-plus"></i> إضافة سيدة
                     </button>
                 </div>
             </div>
 
-            <div id="fathContent" class="section-content hidden">
+            <div id="fathContent" class="section-content">
             <div class="overflow-x-auto hidden md:block">
                 <table class="w-full text-right border-collapse">
                     <thead>
@@ -524,6 +577,8 @@
             </div>
             </div>
         </div>
+
+    </div><!-- /view-fath -->
 
     </main>
 
@@ -1469,10 +1524,101 @@
                 if (e.key === 'Escape') { closeModal(); closeDeleteModal(); closeExpenseModal(); closeExpenseDeleteModal(); closeKafalaModal(); closeKafalaDeleteModal(); closeFathModal(); closeFathDeleteModal(); }
             });
 
+            window.addEventListener('hashchange', applyRoute);
+            applyRoute();
+
             if (remoteEnabled()) {
                 refreshFromRemote(function (ok) { if (!ok) loadLocalData(); });
             } else {
                 loadLocalData();
+            }
+        }
+
+        // -------------------------------------------------------------
+        // Hash Router (الرئيسية / الموظفين / المصروفات / الكفالة / الفتح المبين)
+        // -------------------------------------------------------------
+        const ROUTE_VIEWS = { '/': 'view-home', '/staff': 'view-staff', '/expenses': 'view-expenses', '/kafala': 'view-kafala', '/fath': 'view-fath' };
+
+        function currentRoute() {
+            var h = (location.hash || '').replace(/^#/, '');
+            return ROUTE_VIEWS[h] ? h : '/';
+        }
+
+        function applyRoute() {
+            var r = currentRoute();
+            Object.keys(ROUTE_VIEWS).forEach(function (k) {
+                var el = document.getElementById(ROUTE_VIEWS[k]);
+                if (el) el.classList.toggle('hidden', k !== r);
+            });
+            document.querySelectorAll('[data-nav]').forEach(function (a) {
+                a.classList.toggle('active', a.getAttribute('data-nav') === r);
+            });
+            if (r === '/') renderHome();
+            try { window.scrollTo(0, 0); } catch (e) { }
+        }
+
+        function renderHome() {
+            var cards = document.getElementById('homeCards');
+            if (!cards) return;
+            var staffTotal = staffList.reduce(function (a, c) { return a + (Number(c.salary) || 0); }, 0);
+            var expTotal = expenseList.reduce(function (a, c) { return a + (Number(c.amount) || 0); }, 0);
+            var kafTotal = kafalaList.reduce(function (a, c) { return a + (Number(c.amount) || 0); }, 0);
+            var fathTotal = fathList.reduce(function (a, c) { return a + (Number(c.salary) || 0); }, 0);
+            var grand = staffTotal + expTotal + kafTotal + fathTotal;
+
+            var groups = [
+                { label: 'الموظفين', unit: 'موظف', count: staffList.length, total: staffTotal, to: '#/staff', color: '#1b7a6d', icon: 'fa-users' },
+                { label: 'المصروفات الشهرية', unit: 'بند', count: expenseList.length, total: expTotal, to: '#/expenses', color: '#df9055', icon: 'fa-receipt' },
+                { label: 'كفالة اليتيم', unit: 'مستفيد', count: kafalaList.length, total: kafTotal, to: '#/kafala', color: '#135c52', icon: 'fa-hand-holding-heart' },
+                { label: 'الفتح المبين', unit: 'سيدة', count: fathList.length, total: fathTotal, to: '#/fath', color: '#4aa79a', icon: 'fa-book-open-reader' }
+            ];
+
+            cards.innerHTML = groups.map(function (g) {
+                return '<a href="' + g.to + '" class="group rounded-2xl border border-gray-200 bg-white p-5 shadow-soft transition hover:-translate-y-1">'
+                    + '<div class="flex items-center gap-2"><span class="h-3 w-3 rounded-full" style="background:' + g.color + '"></span>'
+                    + '<p class="text-sm text-gray-500">' + g.label + '</p></div>'
+                    + '<p class="mt-3 text-3xl font-extrabold text-firdous-teal-dark">' + fmt(g.total) + ' <span class="text-sm font-medium text-gray-400">ج.م</span></p>'
+                    + '<p class="mt-1 text-xs text-gray-400">' + fmt(g.count) + ' ' + g.unit + ' • <span class="text-firdous-teal group-hover:underline">افتح القسم ←</span></p>'
+                    + '</a>';
+            }).join('')
+            + '<div class="rounded-2xl bg-firdous-gold p-5 text-white shadow-soft">'
+            + '<p class="text-sm font-medium">الإجمالي الكلي</p>'
+            + '<p class="mt-3 text-3xl font-extrabold">' + fmt(grand) + ' <span class="text-sm font-medium">ج.م</span></p>'
+            + '<p class="mt-1 text-xs opacity-80">كل الأقسام</p></div>';
+
+            var dt = document.getElementById('homeDonutTotal');
+            if (dt) dt.textContent = fmt(grand);
+
+            var donut = document.getElementById('homeDonut');
+            if (donut && grand > 0) {
+                var acc = 0;
+                var stops = groups.map(function (g) {
+                    var from = (acc / grand) * 100; acc += g.total;
+                    return g.color + ' ' + from + '% ' + (acc / grand) * 100 + '%';
+                });
+                donut.style.background = 'conic-gradient(' + stops.join(',') + ')';
+            }
+
+            var legend = document.getElementById('homeLegend');
+            if (legend) {
+                legend.innerHTML = groups.map(function (g) {
+                    var pct = grand > 0 ? Math.round((g.total / grand) * 100) : 0;
+                    return '<li class="flex items-center justify-between gap-2"><span class="flex items-center gap-2"><span class="h-3 w-3 rounded-full" style="background:' + g.color + '"></span>' + g.label + '</span><span class="font-bold">' + pct + '%</span></li>';
+                }).join('');
+            }
+
+            var bars = document.getElementById('homeBars');
+            var barLabels = document.getElementById('homeBarLabels');
+            var max = Math.max.apply(null, groups.map(function (g) { return g.total; }).concat([1]));
+            if (bars) {
+                bars.innerHTML = groups.map(function (g) {
+                    return '<div class="flex h-full flex-1 flex-col items-center justify-end gap-2">'
+                        + '<span class="text-xs font-bold">' + fmt(g.total) + '</span>'
+                        + '<div class="w-full max-w-16 rounded-t-xl" style="height:' + ((g.total / max) * 85) + '%;background:' + g.color + '"></div></div>';
+                }).join('');
+            }
+            if (barLabels) {
+                barLabels.innerHTML = groups.map(function (g) { return '<span class="flex-1">' + g.label + '</span>'; }).join('');
             }
         }
 
@@ -1811,6 +1957,7 @@
             set('grandFathCount', fathList.length + ' سيدة');
             set('empSectionTotal', fmt(staffTotal));
             set('empSectionCount', staffList.length);
+            renderHome();
         }
 
         function toggleSection(contentId, btnId, showLabel, hideLabel) {
