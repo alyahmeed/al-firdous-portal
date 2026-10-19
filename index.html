@@ -66,6 +66,9 @@
         .nav-pill { white-space: nowrap; border-radius: 9999px; padding: .5rem 1rem; font-size: .875rem; font-weight: 600; color: #6b7280; transition: .2s; cursor: pointer; }
         .nav-pill:hover { background: #e8f4f2; color: #135c52; }
         .nav-pill.active { background: #1b7a6d; color: #fff; box-shadow: 0 12px 30px -14px rgba(19,92,82,.35); }
+        .side-link { display: block; text-align: right; border-radius: .8rem; padding: .85rem 1.1rem; font-weight: 700; color: #374151; transition: .2s; }
+        .side-link:hover { background: #eef6f4; }
+        .side-link.active { background: #1b7a6d; color: #fff; }
         @media print {
             .no-print { display: none !important; }
             .print-only { display: block !important; }
@@ -81,25 +84,56 @@
 <body class="text-gray-800 antialiased min-h-screen flex flex-col">
 
     <!-- Sticky Top Bar -->
-    <header class="sticky top-0 z-30 border-b border-gray-200 bg-white/90 backdrop-blur no-print">
-        <div class="max-w-7xl mx-auto flex flex-wrap items-center gap-3 px-4 sm:px-6 lg:px-8 py-3">
-            <a href="#/" class="flex items-center gap-3 shrink-0">
-                <img src="logo.png" alt="شعار مؤسسة الفردوس الإسلامية" class="h-12 w-auto" onerror="this.style.display='none';">
-                <div class="leading-tight">
-                    <div class="font-black text-firdous-teal-dark text-lg">مؤسسة الفردوس</div>
-                    <div class="text-[11px] text-gray-400">منظومة الرواتب والأقسام • أسوان</div>
+    <header class="sticky top-0 z-40 border-b border-gray-200 bg-white/90 backdrop-blur no-print">
+        <div class="max-w-7xl mx-auto flex items-center gap-3 px-4 sm:px-6 lg:px-8 py-2.5">
+            <a href="#/" class="flex items-center gap-2 md:gap-3 shrink-0 min-w-0">
+                <img src="logo.png" alt="شعار مؤسسة الفردوس الإسلامية" class="h-10 md:h-12 w-auto" onerror="this.style.display='none';">
+                <div class="leading-tight min-w-0 hidden xs:block sm:block">
+                    <div class="font-black text-firdous-teal-dark text-base md:text-lg truncate">مؤسسة الفردوس</div>
+                    <div class="text-[11px] text-gray-400 truncate hidden md:block">منظومة الرواتب والأقسام • أسوان</div>
                 </div>
             </a>
-            <nav class="flex flex-1 gap-1 overflow-x-auto md:justify-end">
+
+            <!-- Desktop nav -->
+            <nav class="hidden md:flex flex-1 gap-1 justify-end">
                 <a href="#/" data-nav="/" class="nav-pill">الرئيسية</a>
                 <a href="#/staff" data-nav="/staff" class="nav-pill">الموظفين</a>
                 <a href="#/expenses" data-nav="/expenses" class="nav-pill">المصروفات</a>
                 <a href="#/kafala" data-nav="/kafala" class="nav-pill">كفالة اليتيم</a>
                 <a href="#/fath" data-nav="/fath" class="nav-pill">الفتح المبين</a>
-                <input type="file" id="restoreFileInput" accept="application/json,.json" class="hidden" onchange="restoreJSON(event)">
             </nav>
+
+            <!-- Mobile menu button -->
+            <button onclick="toggleMenu()" class="md:hidden mr-auto w-10 h-10 rounded-xl border border-gray-200 bg-white flex items-center justify-center text-firdous-teal-dark text-lg active:scale-95 transition" aria-label="القائمة">
+                <i class="fa-solid fa-bars"></i>
+            </button>
         </div>
     </header>
+
+    <!-- Mobile Side Drawer -->
+    <div id="mobileMenu" class="fixed inset-0 z-[60] hidden md:hidden no-print">
+        <div class="absolute inset-0 bg-black/50" onclick="toggleMenu(false)"></div>
+        <aside class="absolute top-0 right-0 h-full w-72 max-w-[82%] bg-white shadow-2xl flex flex-col">
+            <div class="flex items-center justify-between px-4 py-4 border-b border-gray-100">
+                <div class="flex items-center gap-2">
+                    <img src="logo.png" alt="شعار" class="h-9 w-auto" onerror="this.style.display='none';">
+                    <span class="font-black text-firdous-teal-dark">القائمة</span>
+                </div>
+                <button onclick="toggleMenu(false)" class="w-9 h-9 rounded-lg bg-gray-100 flex items-center justify-center text-gray-500 active:scale-95 transition" aria-label="إغلاق">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <nav class="p-3 space-y-1 overflow-y-auto">
+                <a href="#/" data-nav="/" class="side-link" onclick="toggleMenu(false)">الرئيسية</a>
+                <a href="#/staff" data-nav="/staff" class="side-link" onclick="toggleMenu(false)">الموظفين</a>
+                <a href="#/expenses" data-nav="/expenses" class="side-link" onclick="toggleMenu(false)">المصروفات</a>
+                <a href="#/kafala" data-nav="/kafala" class="side-link" onclick="toggleMenu(false)">كفالة اليتيم</a>
+                <a href="#/fath" data-nav="/fath" class="side-link" onclick="toggleMenu(false)">الفتح المبين</a>
+            </nav>
+        </aside>
+    </div>
+
+    <input type="file" id="restoreFileInput" accept="application/json,.json" class="hidden" onchange="restoreJSON(event)">
 
     <!-- Printable Header for Reports -->
     <div class="print-only p-4 border-b-2 border-firdous-teal mb-4 text-center">
@@ -1521,7 +1555,7 @@
             });
 
             document.addEventListener('keydown', function (e) {
-                if (e.key === 'Escape') { closeModal(); closeDeleteModal(); closeExpenseModal(); closeExpenseDeleteModal(); closeKafalaModal(); closeKafalaDeleteModal(); closeFathModal(); closeFathDeleteModal(); }
+                if (e.key === 'Escape') { closeModal(); closeDeleteModal(); closeExpenseModal(); closeExpenseDeleteModal(); closeKafalaModal(); closeKafalaDeleteModal(); closeFathModal(); closeFathDeleteModal(); toggleMenu(false); }
             });
 
             window.addEventListener('hashchange', applyRoute);
@@ -1544,6 +1578,14 @@
             return ROUTE_VIEWS[h] ? h : '/';
         }
 
+        function toggleMenu(force) {
+            var m = document.getElementById('mobileMenu');
+            if (!m) return;
+            var open = (typeof force === 'boolean') ? force : m.classList.contains('hidden');
+            m.classList.toggle('hidden', !open);
+            document.body.style.overflow = open ? 'hidden' : '';
+        }
+
         function applyRoute() {
             var r = currentRoute();
             Object.keys(ROUTE_VIEWS).forEach(function (k) {
@@ -1553,6 +1595,7 @@
             document.querySelectorAll('[data-nav]').forEach(function (a) {
                 a.classList.toggle('active', a.getAttribute('data-nav') === r);
             });
+            toggleMenu(false);
             if (r === '/') renderHome();
             try { window.scrollTo(0, 0); } catch (e) { }
         }
