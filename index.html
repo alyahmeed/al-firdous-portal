@@ -1713,7 +1713,7 @@
                     '<td class="py-3 px-4 text-center font-bold text-firdous-teal text-sm">' + fmt(item.salary) + ' <span class="text-[10px] text-gray-400 font-normal">ج.م</span></td>' +
                     '<td class="py-3 px-4">' + phoneHtml + '</td>' +
                     '<td class="py-3 px-3 text-center no-print">' +
-                        '<button onclick="openModal(\'edit\',' + item.id + ')" class="w-8 h-8 rounded-lg bg-rose-50 text-rose-600 hover:bg-rose-600 hover:text-white transition inline-flex items-center justify-center text-xs shadow-sm" title="تعديل"><i class="fa-solid fa-pen"></i></button>' +
+                        '<button onclick="openModal(\'edit\',' + item.id + ')" class="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-rose-50 text-rose-600 hover:bg-rose-600 hover:text-white transition text-xs font-bold shadow-sm" title="تعديل"><i class="fa-solid fa-pen"></i> تعديل</button>' +
                     '</td>' +
                 '</tr>';
 
@@ -1728,6 +1728,9 @@
                     '<div class="mt-2 flex items-center justify-between gap-2">' +
                         '<div>' + periodBadge + '</div>' +
                         phoneHtml +
+                    '</div>' +
+                    '<div class="mt-3 flex items-center justify-end gap-2 no-print">' +
+                        '<button onclick="openModal(\'edit\',' + item.id + ')" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-rose-50 text-rose-600 hover:bg-rose-600 hover:text-white transition text-xs font-bold"><i class="fa-solid fa-pen"></i> تعديل</button>' +
                     '</div>' +
                 '</div>';
             });
