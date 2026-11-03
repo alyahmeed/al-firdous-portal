@@ -3,6 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
     <title>منظومة العاملين والرواتب - مؤسسة الفردوس الإسلامية</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -592,7 +595,7 @@
                             <th class="py-3.5 px-3 text-center">الفترة</th>
                             <th class="py-3.5 px-4 text-center">الراتب</th>
                             <th class="py-3.5 px-4">التليفون</th>
-                            <th class="py-3.5 px-3 text-center no-print">إجراءات</th>
+                            <th class="py-3.5 px-3 text-center no-print sticky left-0 z-20 bg-gray-50 shadow-[-8px_0_12px_-10px_rgba(0,0,0,0.35)]">إجراءات</th>
                         </tr>
                     </thead>
                     <tbody id="womenTableBody" class="divide-y divide-gray-100 text-sm"></tbody>
@@ -1712,7 +1715,7 @@
                     '<td class="py-3 px-3 text-center">' + periodBadge + '</td>' +
                     '<td class="py-3 px-4 text-center font-bold text-firdous-teal text-sm">' + fmt(item.salary) + ' <span class="text-[10px] text-gray-400 font-normal">ج.م</span></td>' +
                     '<td class="py-3 px-4">' + phoneHtml + '</td>' +
-                    '<td class="py-3 px-3 text-center no-print">' +
+                    '<td class="py-3 px-3 text-center no-print sticky left-0 z-10 bg-white shadow-[-8px_0_12px_-10px_rgba(0,0,0,0.25)]">' +
                         '<button onclick="openModal(\'edit\',' + item.id + ')" class="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-rose-50 text-rose-600 hover:bg-rose-600 hover:text-white transition text-xs font-bold shadow-sm" title="تعديل"><i class="fa-solid fa-pen"></i> تعديل</button>' +
                     '</td>' +
                 '</tr>';
