@@ -224,8 +224,8 @@
                     <span id="syncStatusText">الحفظ المحلي مفعّل: التعديلات تُحفظ في متصفحك فقط.</span>
                 </div>
                 <div class="flex items-center gap-2">
-                    <button id="syncNowBtn" onclick="refreshFromRemote(function(ok){ if(ok) showToast('تم تحديث البيانات من الشيت','success'); })" class="hidden px-3 py-1 rounded-lg bg-gray-100 hover:bg-gray-200 font-bold text-gray-700">تحديث من الشيت</button>
-                    <button id="seedSheetBtn" onclick="seedSheetToRemote()" class="hidden px-3 py-1 rounded-lg bg-firdous-teal text-white hover:opacity-90 font-bold">رفع البيانات الحالية للشيت</button>
+                    <button id="syncNowBtn" onclick="refreshFromRemote(function(ok){ if(ok) showToast('تم تحديث البيانات','success'); })" class="hidden px-3 py-1 rounded-lg bg-gray-100 hover:bg-gray-200 font-bold text-gray-700">تحديث الآن</button>
+                    <button id="seedSheetBtn" onclick="seedSheetToRemote()" class="hidden px-3 py-1 rounded-lg bg-firdous-teal text-white hover:opacity-90 font-bold">رفع البيانات الحالية</button>
                 </div>
             </div>
             <div class="flex items-center gap-4 font-bold text-gray-800">
@@ -1053,7 +1053,7 @@
         // -------------------------------------------------------------
         // Build identity — bump BUILD together with version.json on deploy
         // -------------------------------------------------------------
-        const BUILD = '2026-11-05-2';
+        const BUILD = '2026-11-05-3';
         (function tagBuild() {
             const setTag = function () {
                 ['buildTag', 'buildTagMobile'].forEach(function (id) {
@@ -1482,14 +1482,39 @@
             return issues;
         }
 
-        // ---------------- Google Sheets Sync (اختياري) ----------------
+        // ============================================================
+        //  طبقة البيانات (Data layer)
+        //  1) MongoDB API — الأساسي، تحديث تلقائي كل 10 ثوانٍ
+        //  2) Google Sheets — احتياطي (JSONP)
+        //  3) localStorage — بدون إنترنت
+        // ============================================================
         const LS_KEY = 'al_firdous_staff_records';
         const LS_KEY_EXP = 'al_firdous_expenses_records';
         const LS_KEY_KAF = 'al_firdous_kafala_records';
         const LS_KEY_FATH = 'al_firdous_fath_records';
-        // ⚠️ بعد نشر Apps Script: الصق رابط الـ Web app هنا، وضع نفس SECRET
+
+        // 🔗 بعد نشر الـ API على Vercel: الصق الرابط هنا بين علامتي التنصيص، مثال:
+        //    base: 'https://al-firdous-api.vercel.app/api'
+        // ولو حبيت تجرّبه قبل تعديل الملف افتح الصفحة مرة بالشكل: ?api=https://xxxx.vercel.app/api
+        const API = { base: '', secret: 'CHANGE_ME_123', pollMs: 10000 };
+
+        (function resolveApiBase() {
+            try {
+                var qs = new URLSearchParams(location.search);
+                var fromQuery = qs.get('api');
+                if (fromQuery) localStorage.setItem('al_firdous_api_base', fromQuery.trim().replace(/\/+$/, ''));
+                var saved = localStorage.getItem('al_firdous_api_base');
+                if (saved) API.base = saved.replace(/\/+$/, '');
+                else if (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || /\.vercel\.app$/.test(location.hostname)) API.base = location.origin + '/api';
+            } catch (e) { /* ignore */ }
+        })();
+
+        function apiEnabled() { return !!(API.base && /^https?:\/\//.test(API.base)); }
+        function backendName() { return apiEnabled() ? 'MongoDB' : 'Google Sheets'; }
+
+        // ⚠️ احتياطي: رابط Apps Script (يُستخدم فقط لو لم يتم ضبط API.base)
         const REMOTE = { url: 'https://script.google.com/macros/s/AKfycbxJQEwJODWgXlvx1MYoXHWxluL4B01orZqV_5jNLI_nkJLzLxlEhBhkpfbpEuvSGepCWg/exec', secret: 'CHANGE_ME_123' };
-        function remoteEnabled() { return REMOTE.url && REMOTE.url.indexOf('http') === 0; }
+        function remoteEnabled() { return !!(REMOTE.url && REMOTE.url.indexOf('http') === 0); }
 
         let _jsonpSeq = 0;
         function jsonpGet(params, cb) {
@@ -1506,25 +1531,82 @@
             setTimeout(function () { if (!done) { cleanup(); cb({ ok: false, error: 'timeout' }); } }, 15000);
         }
 
+        function apiFetch(payload, method) {
+            var ctrl = (typeof AbortController !== 'undefined') ? new AbortController() : null;
+            var timer = ctrl ? setTimeout(function () { ctrl.abort(); }, 12000) : null;
+            var url = API.base;
+            var opts = { method: method || 'GET', cache: 'no-store', headers: {} };
+            if (ctrl) opts.signal = ctrl.signal;
+            if ((method || 'GET') === 'POST') {
+                opts.headers['Content-Type'] = 'application/json;charset=utf-8';
+                opts.body = JSON.stringify(Object.assign({ secret: API.secret }, payload || {}));
+            } else {
+                url += (url.indexOf('?') === -1 ? '?' : '&') + 'secret=' + encodeURIComponent(API.secret) + '&_t=' + Date.now();
+            }
+            return fetch(url, opts).then(function (r) {
+                if (timer) clearTimeout(timer);
+                return r.text().then(function (text) {
+                    var json = null;
+                    try { json = JSON.parse(text); } catch (e) { /* ignore */ }
+                    if (!r.ok || !json) {
+                        return { ok: false, error: (json && json.error) || ('HTTP ' + r.status) };
+                    }
+                    return json;
+                });
+            }).catch(function (e) {
+                if (timer) clearTimeout(timer);
+                return { ok: false, error: (e && e.name === 'AbortError') ? 'timeout' : 'network' };
+            });
+        }
+
+        let _pendingWrites = 0;
+        let _lastWriteAt = 0;
+
         function apiWrite(payload) {
-            if (!remoteEnabled()) return;
+            if (apiEnabled()) {
+                _pendingWrites++;
+                return apiFetch(payload, 'POST').then(function (res) {
+                    _pendingWrites--;
+                    if (res && res.ok) {
+                        _lastWriteAt = Date.now();
+                        // اسحب النسخة الرسمية بعد الحفظ مباشرة (لتثبيت الـ id من السيرفر)
+                        if (!payload || payload.action !== 'replace') {
+                            setTimeout(function () { refreshFromRemote(); }, 350);
+                        }
+                    } else {
+                        showToast('تعذّر حفظ التعديل في قاعدة البيانات' + (res && res.error ? ' (' + res.error + ')' : '') + ' — التعديل محفوظ على هذا الجهاز فقط.', 'error');
+                    }
+                    return res || { ok: false };
+                }, function () {
+                    _pendingWrites--;
+                    return { ok: false };
+                });
+            }
+            if (!remoteEnabled()) return Promise.resolve({ ok: false, error: 'off' });
             payload = Object.assign({ secret: REMOTE.secret }, payload);
-            fetch(REMOTE.url, {
+            return fetch(REMOTE.url, {
                 method: 'POST', mode: 'no-cors',
                 headers: { 'Content-Type': 'text/plain;charset=utf-8' },
                 body: JSON.stringify(payload)
-            }).catch(function () {});
+            }).then(function () {
+                _lastWriteAt = Date.now();
+                setTimeout(function () { refreshFromRemote(); }, 3000);
+                return { ok: true };
+            }).catch(function () {
+                return { ok: false, error: 'network' };
+            });
         }
 
         function setSyncBadge(state, msg) {
             const dot = document.getElementById('syncDot');
             const txt = document.getElementById('syncStatusText');
             if (dot && txt) {
+                const name = backendName();
                 const map = {
                     local: ['bg-gray-400', 'الحفظ المحلي مفعّل: التعديلات تُحفظ في متصفحك فقط.'],
-                    loading: ['bg-amber-400', 'جارٍ الاتصال بقاعدة بيانات Google Sheets...'],
-                    online: ['bg-green-500', 'متصل بـ Google Sheets — التعديلات تظهر للجميع.'],
-                    error: ['bg-red-500', 'تعذّر الاتصال بـ Google Sheets — تم الرجوع للحفظ المحلي.']
+                    loading: ['bg-amber-400', 'جارٍ الاتصال بقاعدة بيانات ' + name + '...'],
+                    online: ['bg-green-500', 'متصل بقاعدة بيانات ' + name + ' — التعديلات تظهر على كل الأجهزة خلال 10 ثوانٍ.'],
+                    error: ['bg-red-500', 'تعذّر الاتصال بقاعدة بيانات ' + name + ' — تم الرجوع للحفظ المحلي.']
                 };
                 const v = map[state] || map.local;
                 dot.className = 'inline-block w-2.5 h-2.5 rounded-full ' + v[0];
@@ -1581,47 +1663,89 @@
             };
         }
 
-        function refreshFromRemote(cb) {
-            setSyncBadge('loading');
-            jsonpGet({}, function (res) {
-                if (res && res.ok) {
-                    var staff = Array.isArray(res.staff) ? res.staff : (Array.isArray(res.data) ? res.data : []);
-                    var expenses = Array.isArray(res.expenses) ? res.expenses : [];
-                    var kaf = Array.isArray(res.kafala) ? res.kafala : [];
-                    var fath = Array.isArray(res.fath) ? res.fath : [];
-                    if (staff.length === 0 && expenses.length === 0 && kaf.length === 0 && fath.length === 0) {
-                        loadLocalData();
-                        setSyncBadge('online', 'الشيت متصل لكنه فارغ — اضغط «رفع البيانات الحالية للشيت» لرفع ' + staffList.length + ' موظف و' + expenseList.length + ' بند مصروف و' + kafalaList.length + ' سجل كفالة و' + fathList.length + ' سجل فتح مبين.');
+        // يطبّق بيانات السيرفر على الصفحة (يُستخدم مع MongoDB ومع Google Sheets)
+        let _lastAppliedSig = '';
+
+        function applyRemoteData(res, cb) {
+            if (!res || !res.ok) { if (cb) cb(false); return; }
+
+            var staff = Array.isArray(res.staff) ? res.staff : (Array.isArray(res.data) ? res.data : []);
+            var expenses = Array.isArray(res.expenses) ? res.expenses : [];
+            var kaf = Array.isArray(res.kafala) ? res.kafala : [];
+            var fath = Array.isArray(res.fath) ? res.fath : [];
+
+            if (staff.length === 0 && expenses.length === 0 && kaf.length === 0 && fath.length === 0) {
+                setSyncBadge('online', 'قاعدة بيانات ' + backendName() + ' متصلة لكنها فارغة — اضغط «رفع البيانات الحالية» لرفع ' + staffList.length + ' موظف.');
+                if (cb) cb(true);
+                return;
+            }
+
+            // لا نعيد رسم الجداول لو البيانات نفسها (يمنع الوميض كل 10 ثوانٍ)
+            var sig = JSON.stringify([staff, expenses, kaf, fath]);
+            if (sig === _lastAppliedSig) {
+                setSyncBadge('online');
+                if (cb) cb(true);
+                return;
+            }
+            _lastAppliedSig = sig;
+
+            if (staff.length > 0) staffList = staff.map(normalizeRecord);
+            expenseList = expenses.length > 0 ? expenses.map(normalizeExpense) : [...initialExpensesData];
+            kafalaList = kaf.length > 0 ? kaf.map(normalizeKafala) : [...initialKafalaData];
+            fathList = fath.length > 0 ? fath.map(normalizeFath) : [...initialFathData];
+
+            saveToLocalStorage();
+            updateKPIs();
+            applyFilters();
+            renderExpenses();
+            renderKafala();
+            renderFath();
+            setSyncBadge('online');
+            if (cb) cb(true);
+        }
+
+        let _remoteRev = null;
+        let _refreshing = false;
+
+        function refreshFromRemote(cb, silent) {
+            if (_refreshing) { if (cb) cb(true); return; }
+            _refreshing = true;
+
+            // ---- 1) MongoDB API ----
+            if (apiEnabled()) {
+                if (!silent) setSyncBadge('loading');
+                apiFetch(null, 'GET').then(function (res) {
+                    _refreshing = false;
+                    if (!res || !res.ok) {
+                        setSyncBadge('error', 'تعذّر الاتصال بقاعدة بيانات MongoDB' + (res && res.error ? ' (' + res.error + ')' : '') + ' — البيانات المعروضة محفوظة على هذا الجهاز.');
+                        if (cb) cb(false);
+                        return;
+                    }
+                    // لا نعيد رسم الجداول لو لم يتغيّر شيء على السيرفر
+                    if (res.rev != null && _remoteRev !== null && Number(res.rev) === Number(_remoteRev)) {
+                        setSyncBadge('online');
                         if (cb) cb(true);
                         return;
                     }
-                    if (staff.length > 0) staffList = staff.map(normalizeRecord);
-                    if (expenses.length > 0) {
-                        expenseList = expenses.map(normalizeExpense);
-                    } else {
-                        // ورقة المصروفات لم تُهيّأ بعد — استخدم الافتراضي حتى تُرفع
-                        expenseList = [...initialExpensesData];
-                    }
-                    if (kaf.length > 0) {
-                        kafalaList = kaf.map(normalizeKafala);
-                    } else {
-                        // ورقة الكفالة لم تُهيّأ بعد — استخدم الافتراضي حتى تُرفع
-                        kafalaList = [...initialKafalaData];
-                    }
-                    if (fath.length > 0) {
-                        fathList = fath.map(normalizeFath);
-                    } else {
-                        // ورقة الفتح المبين لم تُهيّأ بعد — استخدم الافتراضي حتى تُرفع
-                        fathList = [...initialFathData];
-                    }
-                    saveToLocalStorage();
-                    updateKPIs();
-                    applyFilters();
-                    renderExpenses();
-                    renderKafala();
-                    renderFath();
-                    setSyncBadge('online');
-                    if (cb) cb(true);
+                    _remoteRev = res.rev != null ? Number(res.rev) : null;
+                    applyRemoteData(res, cb);
+                });
+                return;
+            }
+
+            // ---- 2) Google Sheets (احتياطي) ----
+            if (!remoteEnabled()) {
+                _refreshing = false;
+                setSyncBadge('local');
+                if (cb) cb(false);
+                return;
+            }
+
+            setSyncBadge('loading');
+            jsonpGet({}, function (res) {
+                _refreshing = false;
+                if (res && res.ok) {
+                    applyRemoteData(res, cb);
                 } else {
                     setSyncBadge('error', 'تعذّر الاتصال بالشيت' + (res && res.error ? ' (' + res.error + ')' : '') + ' — تم استخدام الحفظ المحلي.');
                     if (cb) cb(false);
@@ -1629,15 +1753,40 @@
             });
         }
 
+        // تحديث تلقائي (MongoDB كل 10 ثوانٍ، وGoogle Sheets كل 60 ثانية لتوفير الحصة)
+        function startAutoRefresh() {
+            if (!apiEnabled() && !remoteEnabled()) return;
+            if (startAutoRefresh._timer) clearInterval(startAutoRefresh._timer);
+            var every = apiEnabled() ? API.pollMs : 60000;
+            startAutoRefresh._timer = setInterval(function () {
+                if (document.hidden) return;
+                if (_pendingWrites > 0) return;
+                if (Date.now() - _lastWriteAt < 2500) return;
+                refreshFromRemote(null, true);
+            }, every);
+            document.addEventListener('visibilitychange', function () {
+                if (!document.hidden) refreshFromRemote(null, true);
+            });
+        }
+
         function seedSheetToRemote() {
-            if (!remoteEnabled()) { showToast('لم يتم ضبط رابط Google Sheets بعد', 'error'); return; }
-            if (!confirm('سيتم رفع البيانات الحالية إلى Google Sheets:\n• ' + staffList.length + ' موظف\n• ' + expenseList.length + ' بند مصروف\n• ' + kafalaList.length + ' سجل كفالة\n• ' + fathList.length + ' سجل فتح مبين\n(سيتم استبدال بيانات الشيت الحالية). متابعة؟')) return;
-            apiWrite({ action: 'replace', type: 'staff', data: staffList });
-            apiWrite({ action: 'replace', type: 'expenses', data: expenseList });
-            apiWrite({ action: 'replace', type: 'kafala', data: kafalaList });
-            apiWrite({ action: 'replace', type: 'fath', data: fathList });
-            showToast('جارٍ رفع البيانات إلى Google Sheets...', 'info');
-            setTimeout(function () { refreshFromRemote(function () { showToast('تمت مزامنة الشيت بنجاح', 'success'); }); }, 3000);
+            if (!apiEnabled() && !remoteEnabled()) { showToast('لم يتم ضبط قاعدة البيانات بعد', 'error'); return; }
+            if (!confirm('سيتم رفع البيانات الحالية إلى ' + backendName() + ':\n• ' + staffList.length + ' موظف\n• ' + expenseList.length + ' بند مصروف\n• ' + kafalaList.length + ' سجل كفالة\n• ' + fathList.length + ' سجل فتح مبين\n(سيتم استبدال البيانات الحالية). متابعة؟')) return;
+
+            showToast('جارٍ رفع البيانات إلى ' + backendName() + '...', 'info');
+            Promise.all([
+                apiWrite({ action: 'replace', type: 'staff', data: staffList }),
+                apiWrite({ action: 'replace', type: 'expenses', data: expenseList }),
+                apiWrite({ action: 'replace', type: 'kafala', data: kafalaList }),
+                apiWrite({ action: 'replace', type: 'fath', data: fathList })
+            ]).then(function (results) {
+                var failed = results.filter(function (r) { return !r || !r.ok; }).length;
+                if (failed) {
+                    showToast('تعذّر رفع ' + failed + ' من أقسام البيانات — راجع الاتصال.', 'error');
+                    return;
+                }
+                refreshFromRemote(function () { showToast('تمت مزامنة البيانات بنجاح', 'success'); });
+            });
         }
 
         // Initialize Data from localStorage or Default
@@ -1654,10 +1803,14 @@
             applyRoute();
 
             // Always paint from local cache/defaults first so the page is never
-            // blank while the Google Sheets request is in flight (it can take seconds).
+            // blank while the remote request is in flight (it can take seconds).
             loadLocalData();
-            if (remoteEnabled()) {
+            if (apiEnabled()) {
+                setSyncBadge('loading', 'جارٍ الاتصال بقاعدة بيانات MongoDB...');
+            }
+            if (remoteEnabled() || apiEnabled()) {
                 refreshFromRemote(function (ok) { if (!ok) loadLocalData(); });
+                startAutoRefresh();
             }
         }
 
@@ -1952,14 +2105,17 @@
         }
 
         function resetData() {
-            if (remoteEnabled()) {
-                if (confirm("إعادة تعيين البيانات: سيتم رفع النسخة الأصلية (" + initialStaffData.length + " موظف و" + initialExpensesData.length + " بند مصروف و" + initialKafalaData.length + " سجل كفالة و" + initialFathData.length + " سجل فتح مبين) إلى Google Sheets واستبدال البيانات الحالية. متابعة؟")) {
-                    apiWrite({ action: 'replace', type: 'staff', data: initialStaffData });
-                    apiWrite({ action: 'replace', type: 'expenses', data: initialExpensesData });
-                    apiWrite({ action: 'replace', type: 'kafala', data: initialKafalaData });
-                    apiWrite({ action: 'replace', type: 'fath', data: initialFathData });
-                    showToast('جارٍ إعادة التعيين من النسخة الأصلية...', 'info');
-                    setTimeout(function () { refreshFromRemote(function () { showToast('تمت إعادة التعيين بنجاح', 'success'); }); }, 3000);
+            if (apiEnabled() || remoteEnabled()) {
+                if (confirm("إعادة تعيين البيانات: سيتم رفع النسخة الأصلية (" + initialStaffData.length + " موظف و" + initialExpensesData.length + " بند مصروف و" + initialKafalaData.length + " سجل كفالة و" + initialFathData.length + " سجل فتح مبين) إلى " + backendName() + " واستبدال البيانات الحالية. متابعة؟")) {
+                    Promise.all([
+                        apiWrite({ action: 'replace', type: 'staff', data: initialStaffData }),
+                        apiWrite({ action: 'replace', type: 'expenses', data: initialExpensesData }),
+                        apiWrite({ action: 'replace', type: 'kafala', data: initialKafalaData }),
+                        apiWrite({ action: 'replace', type: 'fath', data: initialFathData })
+                    ]).then(function () {
+                        showToast('جارٍ إعادة التعيين من النسخة الأصلية...', 'info');
+                        setTimeout(function () { refreshFromRemote(function () { showToast('تمت إعادة التعيين بنجاح', 'success'); }); }, 1500);
+                    });
                 }
                 return;
             }
@@ -2341,7 +2497,7 @@
             closeModal();
             showToast(added ? 'تمت إضافة الموظف بنجاح' : 'تم حفظ التعديلات بنجاح', 'success');
 
-            if (remoteEnabled() && savedRecord) {
+            if ((apiEnabled() || remoteEnabled()) && savedRecord) {
                 apiWrite({ action: added ? 'add' : 'update', type: 'staff', record: savedRecord });
                 setTimeout(function () { refreshFromRemote(); }, 1500);
             }
@@ -2371,7 +2527,7 @@
                 updateKPIs();
                 applyFilters();
                 closeDeleteModal();
-                if (remoteEnabled()) {
+                if (apiEnabled() || remoteEnabled()) {
                     apiWrite({ action: 'delete', type: 'staff', id: delId });
                     setTimeout(function () { refreshFromRemote(); }, 1500);
                 }
@@ -2508,7 +2664,7 @@
             closeExpenseModal();
             showToast(added ? 'تمت إضافة البند بنجاح' : 'تم حفظ التعديل بنجاح', 'success');
 
-            if (remoteEnabled() && saved) {
+            if ((apiEnabled() || remoteEnabled()) && saved) {
                 apiWrite({ action: added ? 'add' : 'update', type: 'expenses', record: saved });
                 setTimeout(function () { refreshFromRemote(); }, 1500);
             }
@@ -2534,7 +2690,7 @@
                 saveToLocalStorage();
                 renderExpenses();
                 closeExpenseDeleteModal();
-                if (remoteEnabled()) {
+                if (apiEnabled() || remoteEnabled()) {
                     apiWrite({ action: 'delete', type: 'expenses', id: delId });
                     setTimeout(function () { refreshFromRemote(); }, 1500);
                 }
@@ -2679,7 +2835,7 @@
             closeKafalaModal();
             showToast(added ? 'تمت إضافة المستفيد بنجاح' : 'تم حفظ التعديل بنجاح', 'success');
 
-            if (remoteEnabled() && saved) {
+            if ((apiEnabled() || remoteEnabled()) && saved) {
                 apiWrite({ action: added ? 'add' : 'update', type: 'kafala', record: saved });
                 setTimeout(function () { refreshFromRemote(); }, 1500);
             }
@@ -2705,7 +2861,7 @@
                 saveToLocalStorage();
                 renderKafala();
                 closeKafalaDeleteModal();
-                if (remoteEnabled()) {
+                if (apiEnabled() || remoteEnabled()) {
                     apiWrite({ action: 'delete', type: 'kafala', id: delId });
                     setTimeout(function () { refreshFromRemote(); }, 1500);
                 }
@@ -2849,7 +3005,7 @@
             closeFathModal();
             showToast(added ? 'تمت الإضافة بنجاح' : 'تم حفظ التعديل بنجاح', 'success');
 
-            if (remoteEnabled() && saved) {
+            if ((apiEnabled() || remoteEnabled()) && saved) {
                 apiWrite({ action: added ? 'add' : 'update', type: 'fath', record: saved });
                 setTimeout(function () { refreshFromRemote(); }, 1500);
             }
@@ -2875,7 +3031,7 @@
                 saveToLocalStorage();
                 renderFath();
                 closeFathDeleteModal();
-                if (remoteEnabled()) {
+                if (apiEnabled() || remoteEnabled()) {
                     apiWrite({ action: 'delete', type: 'fath', id: delId });
                     setTimeout(function () { refreshFromRemote(); }, 1500);
                 }
