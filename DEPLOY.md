@@ -42,23 +42,33 @@ npm start                        # http://localhost:3000
 
 ---
 
-## 2) إنشاء قاعدة البيانات على MongoDB Atlas (مجاني)
+## 2) قاعدة البيانات على MongoDB Atlas (تمت بالفعل ✅)
 
-1. افتح <https://www.mongodb.com/cloud/atlas/register> وأنشئ حسابًا.
-2. اختر **Create a deployment** → **M0 Free** → اختر أقرب منطقة (Frankfurt أو Ireland).
-3. في **Security → Database Access** اضغط **Add New Database User**:
-   - Username: `alfirdous`
-   - Password: كلمة مرور قوية (احفظها)
-   - Role: `Read and write to any database`
-4. في **Security → Network Access** اضغط **Add IP Address** → **Allow Access from Anywhere** (`0.0.0.0/0`).
-   (ضروري لأن Vercel يتصل من عناوين متغيرة.)
-5. من **Database → Connect → Drivers** انسخ رابط الاتصال، شكله:
+استخدمنا العنقود المجاني الجاهز بدل إنشاء واحد جديد (الحساب المجاني يسمح بعنقود M0 واحد فقط لكل مشروع):
+
+| البند | القيمة |
+|---|---|
+| المشروع (Project) | `Project 0` |
+| العنقود (Cluster) | **AliAhmed** — M0 Free — AWS Singapore (`ap-southeast-1`) |
+| قاعدة البيانات (Database) | `al_firdous` |
+| المستخدم | `alfirdous` — صلاحية `Read and write to any database` |
+| الشبكة | `0.0.0.0/0` (Allow Access from Anywhere) + IP المالك |
+
+> ⚠️ العنقود يحتوي بالفعل على بيانات مشروع آخر (`sample_mflix` وغيرها) — **لا تحذف أي شيء**،
+> الموقع يستخدم قاعدة `al_firdous` فقط.
+
+### رابط الاتصال (`MONGODB_URI`)
 
 ```
-mongodb+srv://alfirdous:PASSWORD@cluster0.xxxxx.mongodb.net/?retryWrites=true&w=majority
+mongodb+srv://alfirdous:PASSWORD@aliahmed.1hjnoaw.mongodb.net/al_firdous?retryWrites=true&w=majority
 ```
 
-استبدل `PASSWORD` بكلمة المرور الحقيقية. هذا هو `MONGODB_URI`.
+كلمة المرور تحتوي على الرمز `@`، ولذلك **يجب ترميزه** إلى `%40` داخل الرابط، وإلا سيُقرأ الرابط بشكل خطأ.
+
+> 🔐 كلمة المرور الحقيقية محفوظة في ملف `.env` على جهاز المالك فقط (مستبعد من git) وفي إعدادات Vercel،
+> ولا تُكتب أبدًا في هذا الملف لأن المستودع عام.
+
+قاعدة الترميز للحروف الخاصة في كلمة المرور: `@` → `%40`، `:` → `%3A`، `/` → `%2F`، `?` → `%3F`، `#` → `%23`، `%` → `%25`.
 
 ---
 
@@ -70,9 +80,11 @@ mongodb+srv://alfirdous:PASSWORD@cluster0.xxxxx.mongodb.net/?retryWrites=true&w=
 
 | Name | Value |
 |---|---|
-| `MONGODB_URI` | رابط Atlas من الخطوة السابقة |
+| `MONGODB_URI` | رابط Atlas (نفس قيمة `.env` عندك، مع `%40` بدل `@` في كلمة المرور) |
 | `MONGODB_DB` | `al_firdous` |
-| `API_SECRET` | `CHANGE_ME_123` (أو أي قيمة سرية جديدة) |
+| `API_SECRET` | نفس القيمة الموجودة في `.env` وفي `index.html` |
+
+> ⚠️ **مهم**: ضع `MONGODB_URI` في Environment Variables فقط — لا تكتبه في أي ملف داخل المستودع.
 
 4. اضغط **Deploy** وانتظر دقيقة.
 5. جرّب الرابط (استبدل `USER` و`PROJECT`):
@@ -88,24 +100,26 @@ https://al-firdous-portal.vercel.app/api?secret=CHANGE_ME_123
 
 ---
 
-## 4) رفع البيانات الحالية إلى Atlas
-
-من جهازك (مرة واحدة):
+## 4) رفع البيانات الحالية إلى Atlas (تمت بالفعل ✅)
 
 ```powershell
 cd "C:\Users\Ali\Documents\Default Project\al-firdous-portal"
-$env:MONGODB_URI = "mongodb+srv://alfirdous:PASSWORD@cluster0.xxxxx.mongodb.net/"
+$env:MONGODB_URI = "mongodb+srv://alfirdous:PASSWORD_ENCODED@aliahmed.1hjnoaw.mongodb.net/al_firdous?retryWrites=true&w=majority"
+$env:MONGODB_DB  = "al_firdous"
 node scripts/migrate.js
 ```
 
-لازم تشوف:
+النتيجة المسجلة:
 
 ```
 ✅ staff: 252 سجل
 ✅ expenses: 4 سجل
 ✅ kafala: 30 سجل
 ✅ fath: 18 سجل
+rev = 1
 ```
+
+تم التحقق بعد الترحيل: 252 موظفًا، 34 معلمة نساء، إجمالي رواتب معلمات النساء 25,275 ج.م.
 
 ---
 

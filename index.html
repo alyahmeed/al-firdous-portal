@@ -1053,7 +1053,7 @@
         // -------------------------------------------------------------
         // Build identity — bump BUILD together with version.json on deploy
         // -------------------------------------------------------------
-        const BUILD = '2026-11-05-4';
+        const BUILD = '2026-11-05-5';
         (function tagBuild() {
             const setTag = function () {
                 ['buildTag', 'buildTagMobile'].forEach(function (id) {
@@ -1493,10 +1493,9 @@
         const LS_KEY_KAF = 'al_firdous_kafala_records';
         const LS_KEY_FATH = 'al_firdous_fath_records';
 
-        // 🔗 بعد نشر الـ API على Vercel: الصق الرابط هنا بين علامتي التنصيص، مثال:
-        //    base: 'https://al-firdous-api.vercel.app/api'
-        // ولو حبيت تجرّبه قبل تعديل الملف افتح الصفحة مرة بالشكل: ?api=https://xxxx.vercel.app/api
-        const API = { base: '', secret: 'CHANGE_ME_123', pollMs: 10000 };
+        // 🔗 API السحابي (Vercel + MongoDB Atlas) — هذا هو مصدر البيانات الرسمي.
+        //    للتجربة السريعة بدون تعديل الملف: ?api=https://xxxx.vercel.app/api
+        const API = { base: 'https://al-firdous-portal-4u82.vercel.app/api', secret: 'alfirdous-2026-LiveApi-7f3c9b', pollMs: 10000 };
 
         (function resolveApiBase() {
             try {
