@@ -1053,7 +1053,7 @@
         // -------------------------------------------------------------
         // Build identity — bump BUILD together with version.json on deploy
         // -------------------------------------------------------------
-        const BUILD = '2026-11-05-3';
+        const BUILD = '2026-11-05-4';
         (function tagBuild() {
             const setTag = function () {
                 ['buildTag', 'buildTagMobile'].forEach(function (id) {
@@ -1605,7 +1605,7 @@
                 const map = {
                     local: ['bg-gray-400', 'الحفظ المحلي مفعّل: التعديلات تُحفظ في متصفحك فقط.'],
                     loading: ['bg-amber-400', 'جارٍ الاتصال بقاعدة بيانات ' + name + '...'],
-                    online: ['bg-green-500', 'متصل بقاعدة بيانات ' + name + ' — التعديلات تظهر على كل الأجهزة خلال 10 ثوانٍ.'],
+                    online: ['bg-green-500', 'متصل بقاعدة بيانات ' + name + ' — ' + (apiEnabled() ? 'التعديلات تظهر على كل الأجهزة خلال 10 ثوانٍ.' : 'التعديلات تظهر على كل الأجهزة خلال دقيقة.')],
                     error: ['bg-red-500', 'تعذّر الاتصال بقاعدة بيانات ' + name + ' — تم الرجوع للحفظ المحلي.']
                 };
                 const v = map[state] || map.local;
