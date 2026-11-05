@@ -97,6 +97,8 @@
                 </div>
             </a>
 
+            <span id="buildTag" class="hidden lg:inline-flex items-center gap-1 text-[10px] font-bold text-gray-400 border border-gray-200 rounded-full px-2 py-0.5 shrink-0" title="نسخة الموقع">—</span>
+
             <!-- Desktop nav -->
             <nav class="hidden md:flex flex-1 gap-1 justify-end">
                 <a href="#/" data-nav="/" class="nav-pill">الرئيسية</a>
@@ -135,6 +137,10 @@
                 <a href="#/kafala" data-nav="/kafala" class="side-link" onclick="toggleMenu(false)">كفالة اليتيم</a>
                 <a href="#/fath" data-nav="/fath" class="side-link" onclick="toggleMenu(false)">الفتح المبين</a>
             </nav>
+            <div class="mt-auto p-4 border-t border-gray-100 text-[11px] text-gray-400 flex items-center justify-between gap-2">
+                <span>الإصدار</span>
+                <span id="buildTagMobile" class="font-mono font-bold text-gray-500">—</span>
+            </div>
         </aside>
     </div>
 
@@ -578,7 +584,8 @@
                         <p class="text-xs text-gray-500">كل من ترتبط وظيفتها بحلقات النساء • الإجمالي: <span id="womenTotal" class="font-bold text-rose-600">0</span> ج.م • <span id="womenCount">0</span> معلمة</p>
                     </div>
                 </div>
-                <div class="flex items-center gap-2 no-print">
+                <div class="flex flex-wrap items-center gap-2 no-print">
+                    <button onclick="openWomanModal()" class="bg-rose-600 hover:bg-rose-700 text-white px-3 py-2 rounded-xl text-sm font-bold shadow transition flex items-center gap-2"><i class="fa-solid fa-user-plus"></i> إضافة معلمة</button>
                     <button onclick="exportWomenCSV()" class="bg-white border border-gray-200 text-gray-600 px-3 py-2 rounded-xl text-sm font-semibold hover:bg-gray-50 transition flex items-center gap-2"><i class="fa-solid fa-file-excel text-green-600"></i> Excel</button>
                     <button onclick="window.print()" class="bg-white border border-gray-200 text-gray-600 px-3 py-2 rounded-xl text-sm font-semibold hover:bg-gray-50 transition flex items-center gap-2"><i class="fa-solid fa-print"></i> طباعة</button>
                 </div>
@@ -1043,6 +1050,35 @@
 
     <!-- Application Core Script with Complete Dataset Preloaded -->
     <script>
+        // -------------------------------------------------------------
+        // Build identity — bump BUILD together with version.json on deploy
+        // -------------------------------------------------------------
+        const BUILD = '2026-11-05-1';
+        (function tagBuild() {
+            const setTag = function () {
+                ['buildTag', 'buildTagMobile'].forEach(function (id) {
+                    const el = document.getElementById(id);
+                    if (el) el.textContent = 'v' + BUILD;
+                });
+            };
+            if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', setTag);
+            else setTag();
+        })();
+        (function checkForNewBuild() {
+            if (typeof fetch !== 'function') return;
+            fetch('version.json?_=' + Date.now(), { cache: 'no-store' })
+                .then(function (r) { return r.ok ? r.json() : null; })
+                .then(function (j) {
+                    if (!j || !j.v || j.v === BUILD) return;
+                    const u = new URL(location.href);
+                    // already redirected once for this build — avoid a reload loop
+                    if (u.searchParams.get('v') === j.v) return;
+                    u.searchParams.set('v', j.v);
+                    location.replace(u.toString());
+                })
+                .catch(function () {});
+        })();
+
         // -------------------------------------------------------------
         // 1. Initial Dataset (Extracted exactly from provided PDFs)
         // -------------------------------------------------------------
@@ -1666,6 +1702,19 @@
             });
         }
 
+        // Opens the staff modal pre-filled as a women-circles teacher
+        function openWomanModal() {
+            openModal('add');
+            var job = document.getElementById('formJob');
+            var cat = document.getElementById('formCategory');
+            var per = document.getElementById('formPeriod');
+            if (job) job.value = 'معلمة نساء';
+            if (cat) cat.value = 'معلمين';
+            if (per) per.value = 'evening';
+            var title = document.getElementById('modalTitle');
+            if (title) title.textContent = 'إضافة معلمة حلقات النساء';
+        }
+
         function renderWomen() {
             var tbody = document.getElementById('womenTableBody');
             if (!tbody) return;
@@ -1716,7 +1765,10 @@
                     '<td class="py-3 px-4 text-center font-bold text-firdous-teal text-sm">' + fmt(item.salary) + ' <span class="text-[10px] text-gray-400 font-normal">ج.م</span></td>' +
                     '<td class="py-3 px-4">' + phoneHtml + '</td>' +
                     '<td class="py-3 px-3 text-center no-print sticky left-0 z-10 bg-white shadow-[-8px_0_12px_-10px_rgba(0,0,0,0.25)]">' +
-                        '<button onclick="openModal(\'edit\',' + item.id + ')" class="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-rose-50 text-rose-600 hover:bg-rose-600 hover:text-white transition text-xs font-bold shadow-sm" title="تعديل"><i class="fa-solid fa-pen"></i> تعديل</button>' +
+                        '<div class="flex items-center justify-center gap-1.5">' +
+                            '<button onclick="openModal(\'edit\',' + item.id + ')" class="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-rose-50 text-rose-600 hover:bg-rose-600 hover:text-white transition text-xs font-bold shadow-sm" title="تعديل"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-3.5 h-3.5" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg><span>تعديل</span></button>' +
+                            '<button onclick="promptDelete(' + item.id + ')" class="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-gray-50 text-red-600 hover:bg-red-600 hover:text-white transition text-xs font-bold shadow-sm" title="حذف"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-3.5 h-3.5" aria-hidden="true"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/></svg><span>حذف</span></button>' +
+                        '</div>' +
                     '</td>' +
                 '</tr>';
 
@@ -1733,7 +1785,8 @@
                         phoneHtml +
                     '</div>' +
                     '<div class="mt-3 flex items-center justify-end gap-2 no-print">' +
-                        '<button onclick="openModal(\'edit\',' + item.id + ')" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-rose-50 text-rose-600 hover:bg-rose-600 hover:text-white transition text-xs font-bold"><i class="fa-solid fa-pen"></i> تعديل</button>' +
+                        '<button onclick="openModal(\'edit\',' + item.id + ')" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-rose-50 text-rose-600 hover:bg-rose-600 hover:text-white transition text-xs font-bold"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-3.5 h-3.5" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg><span>تعديل</span></button>' +
+                        '<button onclick="promptDelete(' + item.id + ')" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-gray-50 text-red-600 hover:bg-red-600 hover:text-white transition text-xs font-bold"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-3.5 h-3.5" aria-hidden="true"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/></svg><span>حذف</span></button>' +
                     '</div>' +
                 '</div>';
             });
